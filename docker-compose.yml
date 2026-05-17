@@ -1,0 +1,43 @@
+version: '3.8'
+services:
+  api:
+    build: .
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=Tro88;User Id=sa;Password=YourStrong@Password;TrustServerCertificate=True;MultipleActiveResultSets=True
+      - ConnectionStrings__Redis=redis:6379
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      SA_PASSWORD: "YourStrong@Password"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong@Password -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  sqlserver_data:
+  redis_data:

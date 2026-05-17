@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Tro88.Application\Tro88.Application.csproj" />
+    <ProjectReference Include="..\Tro88.Domain\Tro88.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.1.0" />
+    <PackageReference Include="CloudinaryDotNet" Version="1.28.0" />
+    <PackageReference Include="Google.Apis.Auth" Version="1.73.0" />
+    <PackageReference Include="MediatR" Version="12.4.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.8" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.0.1" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.2" />
+    <PackageReference Include="Serilog.Sinks.MSSqlServer" Version="6.0.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.7.33" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.1" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\Tro88.API.props" />
+</Project>

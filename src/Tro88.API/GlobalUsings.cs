@@ -1,0 +1,12 @@
+global using Microsoft.AspNetCore.Authorization;
+global using Microsoft.AspNetCore.Mvc;
+global using Tro88.Application.Common.Models;
+global using Tro88.Application.Features.Auth.DTOs;
+global using Tro88.Application.Features.Contracts.DTOs;
+global using Tro88.Application.Features.Houses.DTOs;
+global using Tro88.Application.Features.Invoices.DTOs;
+global using Tro88.Application.Features.Maintenance.DTOs;
+global using Tro88.Application.Features.Notifications.DTOs;
+global using Tro88.Application.Features.Rooms.DTOs;
+global using Tro88.Application.Features.ServiceFees.DTOs;
+global using Tro88.Application.Features.UtilityReadings.DTOs;
