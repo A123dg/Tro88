@@ -4,6 +4,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 using Tro88.Application.Common.Interfaces;
+using Tro88.Application.Features.AiAgent;
+using Tro88.Application.Features.AiAgent.Tools;
 using Tro88.Infrastructure.BackgroundServices;
 using Tro88.Infrastructure.Identity;
 using Tro88.Infrastructure.Persistence;
@@ -76,13 +78,46 @@ public static class DependencyInjection
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IPdfService, PdfService>();
 
-        // Gemini AI
         services.Configure<GeminiSettings>(configuration.GetSection("Gemini"));
+        services.PostConfigure<GeminiSettings>(options =>
+        {
+            options.ApiKey = FirstNonEmpty(
+                options.ApiKey,
+                Environment.GetEnvironmentVariable("GEMINI_API_KEY"))
+                ?? string.Empty;
+
+            options.Model = FirstNonEmpty(
+                options.Model,
+                Environment.GetEnvironmentVariable("GEMINI_MODEL"))
+                ?? "gemini-2.0-flash";
+
+            if (int.TryParse(
+                    Environment.GetEnvironmentVariable("GEMINI_MAX_TOKENS"),
+                    out var maxTokens) && maxTokens > 0)
+                options.MaxTokens = maxTokens;
+
+            options.BaseUrl = FirstNonEmpty(
+                options.BaseUrl,
+                Environment.GetEnvironmentVariable("GEMINI_BASE_URL"))
+                ?? "https://generativelanguage.googleapis.com";
+        });
         services.AddHttpClient("Gemini", client =>
         {
             client.Timeout = TimeSpan.FromSeconds(60);
             client.DefaultRequestHeaders.Add("Accept", "application/json");
         });
+
+        // AI Tools
+        services.AddScoped<IAiTool, GetAvailableRoomsTool>();
+        services.AddScoped<IAiTool, GetTenantBillsTool>();
+        services.AddScoped<IAiTool, GetContractsTool>();
+        services.AddScoped<IAiTool, GetRevenueSummaryTool>();
+        services.AddScoped<IAiTool, GetRoomDetailsTool>();
+        services.AddScoped<IAiTool, GetUnpaidInvoicesTool>();
+
+        // AI Tool Manager
+        services.AddScoped<IAiToolManager, AiToolManager>();
+
         services.AddScoped<IAiService, GeminiAiService>();
 
         // BackgroundService (PeriodicTimer, không Hangfire)
@@ -96,4 +131,7 @@ public static class DependencyInjection
 
         return services;
     }
+
+    private static string? FirstNonEmpty(params string?[] values)
+        => values.FirstOrDefault(v => !string.IsNullOrWhiteSpace(v));
 }

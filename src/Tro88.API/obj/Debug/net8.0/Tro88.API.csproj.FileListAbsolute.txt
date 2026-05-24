@@ -167,3 +167,4 @@ C:\Users\HP\Desktop\ttcs\tro88\src\Tro88.API\obj\Debug\net8.0\refint\Tro88.API.d
 C:\Users\HP\Desktop\ttcs\tro88\src\Tro88.API\obj\Debug\net8.0\Tro88.API.pdb
 C:\Users\HP\Desktop\ttcs\tro88\src\Tro88.API\obj\Debug\net8.0\Tro88.API.genruntimeconfig.cache
 C:\Users\HP\Desktop\ttcs\tro88\src\Tro88.API\obj\Debug\net8.0\ref\Tro88.API.dll
+C:\Users\HP\Desktop\ttcs\tro88\src\Tro88.API\obj\Debug\net8.0\Tro88.API.sourcelink.json

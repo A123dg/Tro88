@@ -17,3 +17,4 @@ C:\Users\HP\Desktop\ttcs\tro88\src\Tro88.Infrastructure\obj\Debug\net8.0\refint\
 C:\Users\HP\Desktop\ttcs\tro88\src\Tro88.Infrastructure\obj\Debug\net8.0\Tro88.Infrastructure.pdb
 C:\Users\HP\Desktop\ttcs\tro88\src\Tro88.Infrastructure\obj\Debug\net8.0\Tro88.Infrastructure.genruntimeconfig.cache
 C:\Users\HP\Desktop\ttcs\tro88\src\Tro88.Infrastructure\obj\Debug\net8.0\ref\Tro88.Infrastructure.dll
+C:\Users\HP\Desktop\ttcs\tro88\src\Tro88.Infrastructure\obj\Debug\net8.0\Tro88.Infrastructure.sourcelink.json

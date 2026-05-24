@@ -4,4 +4,6 @@ global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.Logging;
 global using Tro88.Application.Common.Interfaces;
+global using Tro88.Application.Common.Interfaces.AI;
+global using Tro88.Application.Common.Models.AI;
 global using Tro88.Domain.Entities.Common;

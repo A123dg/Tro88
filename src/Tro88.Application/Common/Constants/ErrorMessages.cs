@@ -47,6 +47,13 @@ public static class ErrorMessages
     public const string AI_CONVERSATION_NOT_FOUND = "AI_CONVERSATION_NOT_FOUND";
     public const string AI_TASK_NOT_FOUND = "AI_TASK_NOT_FOUND";
     public const string AI_SERVICE_ERROR = "AI_SERVICE_ERROR";
+
+    // AI Tool
+    public const string AI_TOOL_NOT_FOUND = "AI_TOOL_NOT_FOUND";
+    public const string AI_TOOL_EXECUTION_FAILED = "AI_TOOL_EXECUTION_FAILED";
+    public const string AI_TOOL_INVALID_PARAMS = "AI_TOOL_INVALID_PARAMS";
+    public const string AI_RATE_LIMIT_EXCEEDED = "AI_RATE_LIMIT_EXCEEDED";
+    public const string AI_PROMPT_INJECTION_DETECTED = "AI_PROMPT_INJECTION_DETECTED";
     public const string INVALID_FILE_TYPE = "INVALID_FILE_TYPE";
     public const string FILE_TOO_LARGE = "FILE_TOO_LARGE";
     public const string TENANT_ALREADY_IN_ROOM = "TENANT_ALREADY_IN_ROOM";

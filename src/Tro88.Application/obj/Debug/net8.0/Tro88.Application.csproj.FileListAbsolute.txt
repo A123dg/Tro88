@@ -13,3 +13,4 @@ C:\Users\HP\Desktop\ttcs\tro88\src\Tro88.Application\obj\Debug\net8.0\Tro88.Appl
 C:\Users\HP\Desktop\ttcs\tro88\src\Tro88.Application\obj\Debug\net8.0\refint\Tro88.Application.dll
 C:\Users\HP\Desktop\ttcs\tro88\src\Tro88.Application\obj\Debug\net8.0\Tro88.Application.pdb
 C:\Users\HP\Desktop\ttcs\tro88\src\Tro88.Application\obj\Debug\net8.0\ref\Tro88.Application.dll
+C:\Users\HP\Desktop\ttcs\tro88\src\Tro88.Application\obj\Debug\net8.0\Tro88.Application.sourcelink.json

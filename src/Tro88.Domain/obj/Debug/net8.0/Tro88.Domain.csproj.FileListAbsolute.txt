@@ -9,3 +9,4 @@ C:\Users\HP\Desktop\ttcs\tro88\src\Tro88.Domain\obj\Debug\net8.0\Tro88.Domain.dl
 C:\Users\HP\Desktop\ttcs\tro88\src\Tro88.Domain\obj\Debug\net8.0\refint\Tro88.Domain.dll
 C:\Users\HP\Desktop\ttcs\tro88\src\Tro88.Domain\obj\Debug\net8.0\Tro88.Domain.pdb
 C:\Users\HP\Desktop\ttcs\tro88\src\Tro88.Domain\obj\Debug\net8.0\ref\Tro88.Domain.dll
+C:\Users\HP\Desktop\ttcs\tro88\src\Tro88.Domain\obj\Debug\net8.0\Tro88.Domain.sourcelink.json
