@@ -27,8 +27,10 @@ public sealed class LoginCommandHandler
         LoginCommand request,
         CancellationToken ct)
     {
+        var username = request.Username.Trim().ToLowerInvariant();
         var user = await _db.Users.FirstOrDefaultAsync(
-            u => u.Email == request.Email.ToLowerInvariant(),
+            u => u.Email == username ||
+                 u.FullName.ToLower() == username,
             ct);
 
         if (user is null)

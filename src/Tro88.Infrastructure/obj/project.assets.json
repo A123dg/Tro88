@@ -7924,38 +7924,35 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\HP\\.nuget\\packages\\": {}
+    "C:\\Users\\An\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Infrastructure\\Tro88.Infrastructure.csproj",
+      "projectUniqueName": "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Infrastructure\\Tro88.Infrastructure.csproj",
       "projectName": "Tro88.Infrastructure",
-      "projectPath": "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Infrastructure\\Tro88.Infrastructure.csproj",
-      "packagesPath": "C:\\Users\\HP\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Infrastructure\\obj\\",
+      "projectPath": "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Infrastructure\\Tro88.Infrastructure.csproj",
+      "packagesPath": "C:\\Users\\An\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Infrastructure\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\HP\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "C:\\Users\\An\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Application\\Tro88.Application.csproj": {
-              "projectPath": "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Application\\Tro88.Application.csproj"
+            "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Application\\Tro88.Application.csproj": {
+              "projectPath": "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Application\\Tro88.Application.csproj"
             },
-            "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Domain\\Tro88.Domain.csproj": {
-              "projectPath": "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Domain\\Tro88.Domain.csproj"
+            "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Domain\\Tro88.Domain.csproj": {
+              "projectPath": "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Domain\\Tro88.Domain.csproj"
             }
           }
         }
@@ -8045,16 +8042,8 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.304/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.417/PortableRuntimeIdentifierGraph.json"
       }
     }
-  },
-  "logs": [
-    {
-      "code": "NU1900",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Error occurred while getting package vulnerability data: Unable to load the service index for source https://api.nuget.org/v3/index.json."
-    }
-  ]
+  }
 }

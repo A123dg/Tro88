@@ -11,6 +11,8 @@ public class ApplicationDbContextFactory
 {
     public ApplicationDbContext CreateDbContext(string[] args)
     {
+        LoadEnvFile(Directory.GetCurrentDirectory());
+
         var connectionString = args.FirstOrDefault()
             ?? BuildConfiguration().GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException(
@@ -41,6 +43,60 @@ public class ApplicationDbContextFactory
             .AddJsonFile("appsettings.Development.json", optional: true)
             .AddEnvironmentVariables()
             .Build();
+    }
+
+    private static void LoadEnvFile(string startPath)
+    {
+        var envPath = FindEnvFile(startPath);
+        if (envPath is null)
+            return;
+
+        foreach (var rawLine in File.ReadAllLines(envPath))
+        {
+            var line = rawLine.Trim();
+            if (string.IsNullOrWhiteSpace(line) || line.StartsWith('#'))
+                continue;
+
+            if (line.StartsWith("export ", StringComparison.OrdinalIgnoreCase))
+                line = line["export ".Length..].TrimStart();
+
+            var separatorIndex = line.IndexOf('=');
+            if (separatorIndex <= 0)
+                continue;
+
+            var key = line[..separatorIndex].Trim();
+            var value = line[(separatorIndex + 1)..].Trim();
+
+            if (value.Length >= 2 &&
+                ((value[0] == '"' && value[^1] == '"') ||
+                 (value[0] == '\'' && value[^1] == '\'')))
+            {
+                value = value[1..^1];
+            }
+
+            if (string.IsNullOrWhiteSpace(key) ||
+                Environment.GetEnvironmentVariable(key) is not null)
+            {
+                continue;
+            }
+
+            Environment.SetEnvironmentVariable(key, value);
+        }
+    }
+
+    private static string? FindEnvFile(string startPath)
+    {
+        var directory = new DirectoryInfo(startPath);
+        while (directory is not null)
+        {
+            var envPath = Path.Combine(directory.FullName, ".env");
+            if (File.Exists(envPath))
+                return envPath;
+
+            directory = directory.Parent;
+        }
+
+        return null;
     }
 
     private sealed class DesignTimeCurrentUserService : ICurrentUserService

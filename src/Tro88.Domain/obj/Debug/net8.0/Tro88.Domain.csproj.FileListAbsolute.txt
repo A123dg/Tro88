@@ -10,3 +10,15 @@ C:\Users\HP\Desktop\ttcs\tro88\src\Tro88.Domain\obj\Debug\net8.0\refint\Tro88.Do
 C:\Users\HP\Desktop\ttcs\tro88\src\Tro88.Domain\obj\Debug\net8.0\Tro88.Domain.pdb
 C:\Users\HP\Desktop\ttcs\tro88\src\Tro88.Domain\obj\Debug\net8.0\ref\Tro88.Domain.dll
 C:\Users\HP\Desktop\ttcs\tro88\src\Tro88.Domain\obj\Debug\net8.0\Tro88.Domain.sourcelink.json
+C:\Users\An\Desktop\ttcs\Tro88\src\Tro88.Domain\bin\Debug\net8.0\Tro88.Domain.deps.json
+C:\Users\An\Desktop\ttcs\Tro88\src\Tro88.Domain\bin\Debug\net8.0\Tro88.Domain.dll
+C:\Users\An\Desktop\ttcs\Tro88\src\Tro88.Domain\bin\Debug\net8.0\Tro88.Domain.pdb
+C:\Users\An\Desktop\ttcs\Tro88\src\Tro88.Domain\obj\Debug\net8.0\Tro88.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\An\Desktop\ttcs\Tro88\src\Tro88.Domain\obj\Debug\net8.0\Tro88.Domain.AssemblyInfoInputs.cache
+C:\Users\An\Desktop\ttcs\Tro88\src\Tro88.Domain\obj\Debug\net8.0\Tro88.Domain.AssemblyInfo.cs
+C:\Users\An\Desktop\ttcs\Tro88\src\Tro88.Domain\obj\Debug\net8.0\Tro88.Domain.csproj.CoreCompileInputs.cache
+C:\Users\An\Desktop\ttcs\Tro88\src\Tro88.Domain\obj\Debug\net8.0\Tro88.Domain.sourcelink.json
+C:\Users\An\Desktop\ttcs\Tro88\src\Tro88.Domain\obj\Debug\net8.0\Tro88.Domain.dll
+C:\Users\An\Desktop\ttcs\Tro88\src\Tro88.Domain\obj\Debug\net8.0\refint\Tro88.Domain.dll
+C:\Users\An\Desktop\ttcs\Tro88\src\Tro88.Domain\obj\Debug\net8.0\Tro88.Domain.pdb
+C:\Users\An\Desktop\ttcs\Tro88\src\Tro88.Domain\obj\Debug\net8.0\ref\Tro88.Domain.dll

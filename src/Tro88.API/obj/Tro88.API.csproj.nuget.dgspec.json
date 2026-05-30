@@ -1,42 +1,39 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.API\\Tro88.API.csproj": {}
+    "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.API\\Tro88.API.csproj": {}
   },
   "projects": {
-    "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.API\\Tro88.API.csproj": {
+    "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.API\\Tro88.API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.API\\Tro88.API.csproj",
+        "projectUniqueName": "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.API\\Tro88.API.csproj",
         "projectName": "Tro88.API",
-        "projectPath": "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.API\\Tro88.API.csproj",
-        "packagesPath": "C:\\Users\\HP\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.API\\obj\\",
+        "projectPath": "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.API\\Tro88.API.csproj",
+        "packagesPath": "C:\\Users\\An\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.API\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\HP\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\An\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Application\\Tro88.Application.csproj": {
-                "projectPath": "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Application\\Tro88.Application.csproj"
+              "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Application\\Tro88.Application.csproj": {
+                "projectPath": "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Application\\Tro88.Application.csproj"
               },
-              "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Domain\\Tro88.Domain.csproj": {
-                "projectPath": "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Domain\\Tro88.Domain.csproj"
+              "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Domain\\Tro88.Domain.csproj": {
+                "projectPath": "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Domain\\Tro88.Domain.csproj"
               },
-              "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Infrastructure\\Tro88.Infrastructure.csproj": {
-                "projectPath": "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Infrastructure\\Tro88.Infrastructure.csproj"
+              "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Infrastructure\\Tro88.Infrastructure.csproj": {
+                "projectPath": "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Infrastructure\\Tro88.Infrastructure.csproj"
               }
             }
           }
@@ -106,37 +103,34 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.304/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.417/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Application\\Tro88.Application.csproj": {
+    "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Application\\Tro88.Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Application\\Tro88.Application.csproj",
+        "projectUniqueName": "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Application\\Tro88.Application.csproj",
         "projectName": "Tro88.Application",
-        "projectPath": "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Application\\Tro88.Application.csproj",
-        "packagesPath": "C:\\Users\\HP\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Application\\obj\\",
+        "projectPath": "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Application\\Tro88.Application.csproj",
+        "packagesPath": "C:\\Users\\An\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Application\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\HP\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\An\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Domain\\Tro88.Domain.csproj": {
-                "projectPath": "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Domain\\Tro88.Domain.csproj"
+              "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Domain\\Tro88.Domain.csproj": {
+                "projectPath": "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Domain\\Tro88.Domain.csproj"
               }
             }
           }
@@ -185,29 +179,26 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.304/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.417/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Domain\\Tro88.Domain.csproj": {
+    "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Domain\\Tro88.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Domain\\Tro88.Domain.csproj",
+        "projectUniqueName": "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Domain\\Tro88.Domain.csproj",
         "projectName": "Tro88.Domain",
-        "projectPath": "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Domain\\Tro88.Domain.csproj",
-        "packagesPath": "C:\\Users\\HP\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Domain\\obj\\",
+        "projectPath": "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Domain\\Tro88.Domain.csproj",
+        "packagesPath": "C:\\Users\\An\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\HP\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\An\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -246,40 +237,37 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.304/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.417/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Infrastructure\\Tro88.Infrastructure.csproj": {
+    "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Infrastructure\\Tro88.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Infrastructure\\Tro88.Infrastructure.csproj",
+        "projectUniqueName": "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Infrastructure\\Tro88.Infrastructure.csproj",
         "projectName": "Tro88.Infrastructure",
-        "projectPath": "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Infrastructure\\Tro88.Infrastructure.csproj",
-        "packagesPath": "C:\\Users\\HP\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Infrastructure\\obj\\",
+        "projectPath": "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Infrastructure\\Tro88.Infrastructure.csproj",
+        "packagesPath": "C:\\Users\\An\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\HP\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\An\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Application\\Tro88.Application.csproj": {
-                "projectPath": "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Application\\Tro88.Application.csproj"
+              "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Application\\Tro88.Application.csproj": {
+                "projectPath": "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Application\\Tro88.Application.csproj"
               },
-              "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Domain\\Tro88.Domain.csproj": {
-                "projectPath": "C:\\Users\\HP\\Desktop\\ttcs\\tro88\\src\\Tro88.Domain\\Tro88.Domain.csproj"
+              "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Domain\\Tro88.Domain.csproj": {
+                "projectPath": "C:\\Users\\An\\Desktop\\ttcs\\Tro88\\src\\Tro88.Domain\\Tro88.Domain.csproj"
               }
             }
           }
@@ -369,7 +357,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.304/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.417/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

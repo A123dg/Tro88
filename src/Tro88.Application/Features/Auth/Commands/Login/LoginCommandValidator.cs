@@ -8,10 +8,8 @@ public sealed class LoginCommandValidator
 {
     public LoginCommandValidator()
     {
-        RuleFor(x => x.Email)
+        RuleFor(x => x.Username)
             .NotEmpty()
-            .WithMessage(ErrorMessages.COMMON_422)
-            .EmailAddress()
             .WithMessage(ErrorMessages.COMMON_422);
 
         RuleFor(x => x.Password)

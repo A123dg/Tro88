@@ -81,12 +81,9 @@ public static class ServiceCollectionExtensions
 
         services.AddAuthorization();
         services.AddCors(opt => opt.AddPolicy("Tro88Policy", policy => policy
+            .AllowAnyOrigin()
             .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials()
-            .WithOrigins(
-                configuration.GetSection("AllowedOrigins").Get<string[]>()
-                    ?? ["http://localhost:3000"])));
+            .AllowAnyMethod()));
 
         services.AddSignalR();
 

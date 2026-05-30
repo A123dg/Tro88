@@ -35,9 +35,9 @@ public class ExceptionHandlingMiddleware
         {
             await WriteResponseAsync(context, ErrorMessages.COMMON_401);
         }
-        catch (ForbiddenException)
+        catch (ForbiddenException ex)
         {
-            await WriteResponseAsync(context, ErrorMessages.COMMON_403);
+            await WriteResponseAsync(context, ex.Message);
         }
         catch (NotFoundException ex)
         {
