@@ -1,7 +1,7 @@
-import { useNavigate, useRouterState } from '@tanstack/react-router'
-import { FormEvent, useEffect, useRef, useState } from 'react'
+import { useRouterState } from '@tanstack/react-router'
+import { FormEvent, useState } from 'react'
 import { ROUTE_PATHS } from '../../../constant/routes'
-import { useGoogleLogin, useLogin } from './hooks'
+import { useLogin } from './hooks'
 import { LoginRole } from './service/types'
 
 interface LoginPageProps {
@@ -33,29 +33,35 @@ function getLoginErrorMessage(error: unknown) {
   return 'Không thể đăng nhập. Kiểm tra thông tin hoặc kết nối API.'
 }
 
-declare global {
-  interface Window {
-    google?: {
-      accounts: {
-        id: {
-          initialize: (options: { client_id: string; callback: (response: { credential: string }) => void }) => void
-          renderButton: (element: HTMLElement, options: { theme: string; size: string; width: number; text: string }) => void
-        }
-      }
-    }
-  }
-}
-
 function LoginForm({ role, title, subtitle, redirectTo, mode }: LoginPageProps) {
-  const navigate = useNavigate()
   const pathname = useRouterState({ select: (state) => state.location.pathname })
   const login = useLogin()
-  const googleLogin = useGoogleLogin()
-  const googleButtonRef = useRef<HTMLDivElement>(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [idToken, setIdToken] = useState('')
   const [roleError, setRoleError] = useState('')
+
+  const getRedirectTarget = () => {
+    const value = new URLSearchParams(window.location.search).get('redirect_uri')
+    if (!value) return redirectTo
+
+    try {
+      const url = new URL(value, window.location.origin)
+      if (url.origin !== window.location.origin) return redirectTo
+      return `${url.pathname}${url.search}${url.hash}`
+    } catch {
+      return value.startsWith('/') ? value : redirectTo
+    }
+  }
+
+  const handleGoogleRedirect = () => {
+    setRoleError('')
+    const frontendCallback = `${window.location.origin}/auth/google/callback`
+    const state = btoa(JSON.stringify({ role, redirectTo: getRedirectTarget(), frontendCallback }))
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5073/api/v1'
+    const backendRedirectUri = `${apiUrl}/Auth/google/redirect?state=${encodeURIComponent(state)}`
+
+    window.location.href = backendRedirectUri
+  }
 
   const handleAuthSuccess = (actualRole: LoginRole) => {
     if (actualRole !== role) {
@@ -63,64 +69,15 @@ function LoginForm({ role, title, subtitle, redirectTo, mode }: LoginPageProps) 
       return
     }
 
-    navigate({ to: redirectTo })
+    window.location.href = getRedirectTarget()
   }
-
-  useEffect(() => {
-    if (mode !== 'google') {
-      return
-    }
-
-    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined
-    if (!clientId || !googleButtonRef.current) {
-      return
-    }
-
-    const renderGoogleButton = () => {
-      if (!window.google || !googleButtonRef.current) {
-        return
-      }
-
-      window.google.accounts.id.initialize({
-        client_id: clientId,
-        callback: (response) => {
-          setRoleError('')
-          googleLogin.mutate(
-            { idToken: response.credential },
-            { onSuccess: (result) => handleAuthSuccess(result.data.role) },
-          )
-        },
-      })
-      window.google.accounts.id.renderButton(googleButtonRef.current, {
-        theme: 'outline',
-        size: 'large',
-        width: 360,
-        text: 'signin_with',
-      })
-    }
-
-    if (window.google) {
-      renderGoogleButton()
-      return
-    }
-
-    const script = document.createElement('script')
-    script.src = 'https://accounts.google.com/gsi/client'
-    script.async = true
-    script.defer = true
-    script.onload = renderGoogleButton
-    document.head.appendChild(script)
-  }, [mode])
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setRoleError('')
 
     if (mode === 'google') {
-      googleLogin.mutate(
-        { idToken },
-        { onSuccess: (response) => handleAuthSuccess(response.data.role) },
-      )
+      handleGoogleRedirect()
       return
     }
 
@@ -178,31 +135,18 @@ function LoginForm({ role, title, subtitle, redirectTo, mode }: LoginPageProps) 
               </label>
             </>
           ) : (
-            <>
-              <div className="google-login-box">
-                <div ref={googleButtonRef} />
-                <p>Người ở trọ và quản lý nhà trọ đăng nhập bằng Google.</p>
-              </div>
-              <label>
-                Google ID token
-                <input
-                  type="text"
-                  value={idToken}
-                  onChange={(event) => setIdToken(event.target.value)}
-                  placeholder="Dán ID token khi test local"
-                  required={!import.meta.env.VITE_GOOGLE_CLIENT_ID}
-                />
-              </label>
-            </>
+            <div className="google-login-box">
+              <p>Người ở trọ và quản lý nhà trọ đăng nhập bằng Google. Bạn sẽ được chuyển sang màn chọn tài khoản Google.</p>
+            </div>
           )}
 
-          {login.isError || googleLogin.isError ? (
-            <p className="login-error">{getLoginErrorMessage(login.error ?? googleLogin.error)}</p>
+          {login.isError ? (
+            <p className="login-error">{getLoginErrorMessage(login.error)}</p>
           ) : null}
           {roleError ? <p className="login-error">{roleError}</p> : null}
 
-          <button type="submit" className="app-button app-button--primary app-button--full" disabled={login.isLoading || googleLogin.isLoading}>
-            {login.isLoading || googleLogin.isLoading ? 'Đang đăng nhập...' : mode === 'google' ? 'Đăng nhập bằng Google token' : 'Đăng nhập'}
+          <button type="submit" className="app-button app-button--primary app-button--full" disabled={login.isLoading}>
+            {login.isLoading ? 'Đang đăng nhập...' : mode === 'google' ? 'Đăng nhập bằng Google' : 'Đăng nhập'}
           </button>
         </form>
 

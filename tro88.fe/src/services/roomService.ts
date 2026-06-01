@@ -1,6 +1,18 @@
 import { ApiResponse, RoomDto, RoomFilters, RoomStatus } from '../types/room.types'
 import { api } from './apiClient'
 
+export interface RoomPayload {
+  roomNumber: string
+  floor: number
+  area: number
+  maxOccupants: number
+  monthlyRent: number
+  depositAmount: number
+  electricityUnitPrice: number
+  waterUnitPrice: number
+  description?: string | null
+}
+
 export const fetchRooms = async (
   houseId: string,
   filters?: RoomFilters,
@@ -33,4 +45,22 @@ export const changeRoomStatus = async (
   status: RoomStatus,
 ): Promise<ApiResponse<RoomDto>> => {
   return api.patch<unknown, ApiResponse<RoomDto>>(`/Rooms/${id}/status`, { status })
+}
+
+export const createRoom = async (
+  houseId: string,
+  payload: RoomPayload,
+): Promise<ApiResponse<RoomDto>> => {
+  return api.post<unknown, ApiResponse<RoomDto>>(`/Rooms/house/${houseId}`, payload)
+}
+
+export const updateRoom = async (
+  id: string,
+  payload: RoomPayload,
+): Promise<ApiResponse<RoomDto>> => {
+  return api.put<unknown, ApiResponse<RoomDto>>(`/Rooms/${id}`, payload)
+}
+
+export const deleteRoom = async (id: string): Promise<ApiResponse<object>> => {
+  return api.delete<unknown, ApiResponse<object>>(`/Rooms/${id}`)
 }

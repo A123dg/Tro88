@@ -6,7 +6,7 @@ interface ApiEnvelope {
 }
 
 export const api = axios.create({
-  baseURL: 'http://localhost:5073/api/v1',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5073/api/v1',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

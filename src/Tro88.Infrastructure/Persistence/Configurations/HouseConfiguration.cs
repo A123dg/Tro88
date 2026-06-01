@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Tro88.Domain.Entities;
@@ -22,6 +23,15 @@ public class HouseConfiguration : IEntityTypeConfiguration<House>
             .HasMaxLength(100).HasColumnType("nvarchar(100)");
         b.Property(h => h.Description)
             .HasMaxLength(1000).HasColumnType("nvarchar(1000)");
+        b.Property(h => h.MediaUrls)
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null) ?? new List<string>())
+            .HasColumnType("nvarchar(max)");
+        b.Property(h => h.Status)
+            .HasConversion<string>()
+            .HasMaxLength(30)
+            .HasColumnType("varchar(30)");
         b.Property(h => h.CreatedAt)
             .HasColumnType("datetime2");
         b.Property(h => h.UpdatedAt)

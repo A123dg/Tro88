@@ -1,11 +1,13 @@
-import { useState } from 'react'
-import { DataPage, formatDate } from '../../../components/shared/DataPage'
+import { DataPage } from '../../../components/shared/DataPage'
+import { useUrlListFilters } from '../../../hooks/useUrlListFilters'
 import { useAuditLogs } from './hooks'
+import { useColumn } from './hooks/useColumn'
 import { AuditLogDto, ListFilters } from './service/types'
 
 export function AuditLogsPage() {
-  const [filters, setFilters] = useState<ListFilters>({ page: 1, pageSize: 20 })
+  const [filters, setFilters] = useUrlListFilters<ListFilters>({ page: 1, pageSize: 10 })
   const query = useAuditLogs(filters)
+  const { columns } = useColumn()
 
   return (
     <DataPage<AuditLogDto>
@@ -17,21 +19,14 @@ export function AuditLogsPage() {
       isLoading={query.isLoading}
       isError={query.isError}
       onRetry={() => query.refetch()}
-      onPageChange={(page) => setFilters((current) => ({ ...current, page }))}
+      onPageChange={(page, pageSize) => setFilters((current) => ({ ...current, page, pageSize: pageSize ?? current.pageSize }))}
       actions={
         <>
           <input value={filters.module ?? ''} onChange={(event) => setFilters({ ...filters, module: event.target.value || undefined, page: 1 })} placeholder="Module" />
           <input value={filters.action ?? ''} onChange={(event) => setFilters({ ...filters, action: event.target.value || undefined, page: 1 })} placeholder="Action" />
         </>
       }
-      columns={[
-        { key: 'module', title: 'Module', render: (item) => <strong>{item.module}</strong> },
-        { key: 'action', title: 'Hành động', render: (item) => item.action },
-        { key: 'user', title: 'UserId', render: (item) => item.userId ?? 'Hệ thống' },
-        { key: 'target', title: 'TargetId', render: (item) => item.targetId ?? 'Không có' },
-        { key: 'ip', title: 'IP', render: (item) => item.ipAddress ?? 'Không có' },
-        { key: 'createdAt', title: 'Thời gian', render: (item) => formatDate(item.createdAt) },
-      ]}
+      columns={columns}
     />
   )
 }

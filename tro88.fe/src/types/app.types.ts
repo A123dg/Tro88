@@ -43,7 +43,12 @@ export interface HouseDto {
   address: string
   province?: string | null
   district?: string | null
+  tinhThanhOption?: { id: string; name: string } | null
+  xaPhuongOption?: { id: string; name: string } | null
   description?: string | null
+  mediaUrl?: string | null
+  mediaUrls?: string[]
+  status: 'PendingApproval' | 'Active' | 'Inactive' | string
   isActive: boolean
   totalRooms: number
   occupiedRooms: number

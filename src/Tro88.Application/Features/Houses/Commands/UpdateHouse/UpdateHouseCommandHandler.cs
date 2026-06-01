@@ -42,7 +42,8 @@ public sealed class UpdateHouseCommandHandler
             request.Address,
             request.Province,
             request.District,
-            request.Description);
+            request.Description,
+            request.MediaUrls ?? house.MediaUrls);
 
         await _db.SaveChangesAsync(ct);
 

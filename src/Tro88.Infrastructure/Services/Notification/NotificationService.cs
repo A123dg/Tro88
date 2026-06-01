@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using Tro88.Application.Common.Interfaces;
 using Tro88.Application.Features.Notifications.DTOs;
-using Tro88.Domain.Entities;
 using Tro88.Infrastructure.Hubs;
 
 namespace Tro88.Infrastructure.Services.Notification;
@@ -27,6 +27,19 @@ public class NotificationService : INotificationService
         Guid? referenceId = null,
         CancellationToken ct = default)
     {
+        var existingNotification = await _db.Notifications
+            .AsNoTracking()
+            .Where(n =>
+                n.UserId == userId &&
+                n.Type == type &&
+                n.ReferenceId == referenceId &&
+                n.Title == title)
+            .OrderByDescending(n => n.CreatedAt)
+            .FirstOrDefaultAsync(ct);
+
+        if (existingNotification is not null)
+            return;
+
         var notification = Tro88.Domain.Entities.Notification.Create(
             userId, title, body, type, referenceId);
 

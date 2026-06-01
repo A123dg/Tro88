@@ -1,5 +1,10 @@
-import { useMemo, useState } from 'react'
+import { Form, Input } from 'antd'
+import { useEffect, useMemo, useState } from 'react'
+import { useMutation, useQuery } from 'react-query'
 import { RoomsPage } from '../Rooms/RoomsPage'
+import { queryClient } from '../../../queryClient'
+import { fetchHouseDetail, updateHouse } from '../../../services/houseService'
+import ModalForm from '../../../shared/components/modal-form/ModalForm'
 import { useHouses, useOwnerDashboard } from './hooks'
 import { HouseDto } from './service/types'
 
@@ -7,6 +12,13 @@ type OwnerSection = 'dashboard' | 'houses' | 'rooms'
 
 function formatCurrency(value: number) {
   return `${value.toLocaleString('vi-VN')}đ`
+}
+
+function formatHouseStatus(status?: string, isActive?: boolean) {
+  if (status === 'PendingApproval') return 'Chờ duyệt'
+  if (status === 'Active') return 'Đang hoạt động'
+  if (status === 'Inactive') return 'Không hoạt động'
+  return isActive ? 'Đang hoạt động' : 'Không hoạt động'
 }
 
 function OwnerMetric({
@@ -67,17 +79,20 @@ function OwnerDashboardSection() {
   )
 }
 
-function HouseCard({ house, onSelect }: { house: HouseDto; onSelect: (id: string) => void }) {
+function HouseCard({ house, onEdit, onSelect }: { house: HouseDto; onEdit: (id: string) => void; onSelect: (id: string) => void }) {
   const occupancyRate = house.totalRooms > 0 ? Math.round((house.occupiedRooms / house.totalRooms) * 100) : 0
+  const isActive = house.status ? house.status === 'Active' : house.isActive
+  const thumbnailUrl = house.mediaUrls?.[0] ?? house.mediaUrl
 
   return (
     <article className="house-card">
+      {thumbnailUrl ? <img className="thumbnail" src={thumbnailUrl} alt={house.name} /> : null}
       <div className="house-card__top">
         <div>
           <h3>{house.name}</h3>
           <p>{house.address}</p>
         </div>
-        <span className={house.isActive ? 'house-status is-active' : 'house-status'}>{house.isActive ? 'Đang hoạt động' : 'Tạm ngưng'}</span>
+        <span className={isActive ? 'house-status is-active' : 'house-status'}>{formatHouseStatus(house.status, house.isActive)}</span>
       </div>
       <div className="house-card__stats">
         <span>{house.totalRooms} phòng</span>
@@ -87,20 +102,66 @@ function HouseCard({ house, onSelect }: { house: HouseDto; onSelect: (id: string
       <div className="stat-card__progress">
         <span style={{ width: `${occupancyRate}%`, backgroundColor: '#52C593' }} />
       </div>
-      <button type="button" className="button button--primary" onClick={() => onSelect(house.id)}>
-        Quản lý phòng
-      </button>
+      <div className="row-actions">
+        <button type="button" className="button button--ghost" onClick={() => onEdit(house.id)}>Sửa</button>
+        <button type="button" className="button button--primary" onClick={() => onSelect(house.id)}>
+          Quản lý phòng
+        </button>
+      </div>
     </article>
   )
 }
 
 function OwnerHousesSection({ onOpenRooms }: { onOpenRooms: () => void }) {
   const [search, setSearch] = useState('')
+  const [editingHouseId, setEditingHouseId] = useState<string | null>(null)
+  const [editForm] = Form.useForm()
   const houses = useHouses({ page: 1, pageSize: 12, search })
+  const detail = useQuery(['house-detail', editingHouseId], () => fetchHouseDetail(editingHouseId ?? ''), {
+    enabled: Boolean(editingHouseId),
+    retry: 1,
+  })
+  const saveEdit = useMutation(updateHouse, {
+    onSuccess: () => {
+      queryClient.invalidateQueries('houses')
+      queryClient.invalidateQueries(['house-detail', editingHouseId])
+      setEditingHouseId(null)
+      editForm.resetFields()
+    },
+  })
 
   const handleSelectHouse = (id: string) => {
     localStorage.setItem('selectedHouseId', id)
     onOpenRooms()
+  }
+
+  useEffect(() => {
+    if (!detail.data) return
+    editForm.setFieldsValue({
+      name: detail.data.name,
+      address: detail.data.address,
+      province: detail.data.province ?? undefined,
+      district: detail.data.district ?? undefined,
+      description: detail.data.description ?? '',
+    })
+  }, [detail.data, editForm])
+
+  const closeEditModal = () => {
+    setEditingHouseId(null)
+    editForm.resetFields()
+  }
+
+  const submitEditModal = async () => {
+    if (!editingHouseId) return
+    const values = await editForm.validateFields()
+    saveEdit.mutate({
+      id: editingHouseId,
+      name: String(values.name ?? ''),
+      address: String(values.address ?? ''),
+      province: values.province,
+      district: values.district,
+      description: values.description,
+    })
   }
 
   return (
@@ -127,10 +188,41 @@ function OwnerHousesSection({ onOpenRooms }: { onOpenRooms: () => void }) {
       {houses.data ? (
         <div className="house-grid">
           {houses.data.items.map((house) => (
-            <HouseCard key={house.id} house={house} onSelect={handleSelectHouse} />
+            <HouseCard key={house.id} house={house} onEdit={setEditingHouseId} onSelect={handleSelectHouse} />
           ))}
         </div>
       ) : null}
+      <ModalForm
+        open={Boolean(editingHouseId)}
+        title="Sửa nhà trọ"
+        form={editForm}
+        formItems={[
+          {
+            label: 'Tên nhà trọ',
+            name: 'name',
+            component: <Input placeholder="Tên nhà trọ" />,
+            rules: [{ required: true, message: 'Vui lòng nhập tên nhà trọ' }],
+            span: 24,
+          },
+          {
+            label: 'Địa chỉ',
+            name: 'address',
+            component: <Input.TextArea rows={3} placeholder="Địa chỉ" />,
+            rules: [{ required: true, message: 'Vui lòng nhập địa chỉ' }],
+            span: 24,
+          },
+          { label: 'Tỉnh', name: 'province', component: <Input placeholder="Tỉnh" />, span: 12 },
+          { label: 'Xã/phường', name: 'district', component: <Input placeholder="Xã/phường" />, span: 12 },
+          { label: 'Mô tả', name: 'description', component: <Input.TextArea rows={4} placeholder="Mô tả" />, span: 24 },
+        ]}
+        isLoadingGetDetail={detail.isLoading}
+        loading={saveEdit.isLoading}
+        onCancel={closeEditModal}
+        onOk={submitEditModal}
+        okText="Lưu thay đổi"
+        cancelText="Hủy"
+        layout="vertical"
+      />
     </section>
   )
 }

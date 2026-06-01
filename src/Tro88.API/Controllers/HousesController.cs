@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Tro88.Application.Common.Constants;
+using Tro88.Application.Common.Interfaces;
 using Tro88.Application.Common.Models;
+using Tro88.Application.Features.Houses.Commands.ChangeHouseStatus;
 using Tro88.Application.Features.Houses.Commands.CreateHouse;
 using Tro88.Application.Features.Houses.Commands.UpdateHouse;
 using Tro88.Application.Features.Houses.Commands.DeleteHouse;
@@ -13,6 +15,14 @@ namespace Tro88.API.Controllers;
 [Authorize]
 public class HousesController : BaseApiController
 {
+    private const long MaxHouseUploadBytes = 25 * 1024 * 1024;
+    private readonly IStorageService _storage;
+
+    public HousesController(IStorageService storage)
+    {
+        _storage = storage;
+    }
+
     [HttpGet]
     public async Task<IActionResult> GetHouses([FromQuery] GetHousesQuery query)
     {
@@ -36,8 +46,36 @@ public class HousesController : BaseApiController
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateHouse([FromBody] CreateHouseCommand command)
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> CreateHouse([FromForm] CreateHouseFormRequest request)
     {
+        var totalUploadBytes = request.Files.Sum(file => file.Length);
+        if (totalUploadBytes > MaxHouseUploadBytes)
+        {
+            return BadRequest(ApiResponse<object>.Fail("Tổng dung lượng ảnh tối đa là 25MB"));
+        }
+
+        var mediaUrls = request.MediaUrls
+            .Where(url => !string.IsNullOrWhiteSpace(url))
+            .ToList();
+
+        foreach (var file in request.Files)
+        {
+            var url = await _storage.UploadImageAsync(
+                file.OpenReadStream(),
+                file.FileName,
+                "houses");
+            mediaUrls.Add(url);
+        }
+
+        var command = new CreateHouseCommand(
+            request.Name,
+            request.Address,
+            request.Province,
+            request.District,
+            request.Description,
+            mediaUrls);
+
         var result = await Mediator.Send(command);
         return Ok(ApiResponse<HouseDto>.Ok(result, SuccessMessages.CREATE_HOUSE_SUCCESS));
     }
@@ -50,10 +88,30 @@ public class HousesController : BaseApiController
         return Ok(ApiResponse<HouseDto>.Ok(result, SuccessMessages.UPDATE_HOUSE_SUCCESS));
     }
 
+    [Authorize(Roles = "Admin")]
+    [HttpPatch("{id}/status")]
+    public async Task<IActionResult> ChangeHouseStatus(Guid id, [FromBody] ChangeHouseStatusCommand command)
+    {
+        command = command with { Id = id };
+        var result = await Mediator.Send(command);
+        return Ok(ApiResponse<HouseDto>.Ok(result, SuccessMessages.UPDATE_HOUSE_SUCCESS));
+    }
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteHouse(Guid id)
     {
         await Mediator.Send(new DeleteHouseCommand(id));
         return Ok(ApiResponse<object>.Ok(null, SuccessMessages.DELETE_HOUSE_SUCCESS));
     }
+}
+
+public sealed class CreateHouseFormRequest
+{
+    public string Name { get; set; } = default!;
+    public string Address { get; set; } = default!;
+    public string? Province { get; set; }
+    public string? District { get; set; }
+    public string? Description { get; set; }
+    public List<string> MediaUrls { get; set; } = new();
+    public List<IFormFile> Files { get; set; } = new();
 }

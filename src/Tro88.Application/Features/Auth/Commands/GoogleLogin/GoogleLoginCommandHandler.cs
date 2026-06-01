@@ -38,13 +38,17 @@ public sealed class GoogleLoginCommandHandler
                 u.Email == googleUser.Email,
                 ct);
 
+        var requestedRole = string.IsNullOrWhiteSpace(request.Role)
+            ? UserRole.Tenant
+            : Enum.Parse<UserRole>(request.Role, true);
+
         if (user is null)
         {
             user = User.CreateFromGoogle(
                 googleUser.FullName,
                 googleUser.Email,
                 googleUser.GoogleId,
-                UserRole.Tenant);
+                requestedRole);
 
             if (!string.IsNullOrEmpty(googleUser.AvatarUrl))
                 user.UpdateAvatar(googleUser.AvatarUrl);
@@ -53,8 +57,10 @@ public sealed class GoogleLoginCommandHandler
         }
         else if (user.GoogleId is null)
         {
-            throw new BusinessRuleException(
-                ErrorMessages.EMAIL_ALREADY_REGISTERED);
+            user.LinkGoogleAccount(googleUser.GoogleId);
+
+            if (!string.IsNullOrEmpty(googleUser.AvatarUrl))
+                user.UpdateAvatar(googleUser.AvatarUrl);
         }
 
         var accessToken = _jwt.GenerateAccessToken(user);

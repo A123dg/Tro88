@@ -1,5 +1,6 @@
 import { ReactNode } from 'react'
 import { MetaData } from '../../types/room.types'
+import { PaginationBar } from './pagination'
 
 export interface DataColumn<T> {
   key: string
@@ -18,7 +19,7 @@ interface DataPageProps<T> {
   isError: boolean
   actions?: ReactNode
   onRetry: () => void
-  onPageChange: (page: number) => void
+  onPageChange: (page: number, pageSize?: number) => void
 }
 
 export function formatCurrency(value: number) {
@@ -55,6 +56,7 @@ export function DataPage<T extends { id: string }>({
   onPageChange,
 }: DataPageProps<T>) {
   const page = meta?.page ?? 1
+  const pageSize = meta?.pageSize ?? 10
   const totalPage = Math.max(meta?.totalPage ?? 1, 1)
 
   return (
@@ -99,12 +101,13 @@ export function DataPage<T extends { id: string }>({
             ))}
           </section>
 
-          <nav className="pagination" aria-label="Phân trang">
-            <button type="button" disabled={page <= 1} onClick={() => onPageChange(page - 1)}>← Trước</button>
-            <button type="button" className="is-active">{page}</button>
-            <span className="pagination__ellipsis">/ {totalPage}</span>
-            <button type="button" disabled={page >= totalPage} onClick={() => onPageChange(page + 1)}>Sau →</button>
-          </nav>
+          <PaginationBar
+            page={page}
+            pageSize={pageSize}
+            total={meta?.total ?? items.length}
+            totalPage={totalPage}
+            onChange={onPageChange}
+          />
         </>
       ) : null}
     </main>

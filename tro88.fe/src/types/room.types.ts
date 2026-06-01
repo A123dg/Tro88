@@ -18,6 +18,14 @@ export interface RoomDto {
   waterUnitPrice: number
   description?: string
   imageUrls: string[]
+  // Additional fields for tenant room search
+  houseName?: string
+  address?: string
+  province?: string
+  district?: string
+  ownerName?: string
+  ownerRating?: number
+  amenities?: string[]
 }
 
 export interface RoomFilters {

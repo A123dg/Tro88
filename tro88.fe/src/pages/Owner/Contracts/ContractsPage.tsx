@@ -1,12 +1,18 @@
-import { useState } from 'react'
-import { DataPage, formatCurrency, formatDate, StatusPill } from '../../../components/shared/DataPage'
+import { Select } from 'antd'
+import { DataPage } from '../../../components/shared/DataPage'
+import { useUrlListFilters } from '../../../hooks/useUrlListFilters'
 import { useContractActions, useContracts } from './hooks'
+import { useColumn } from './hooks/useColumn'
 import { ContractDto, ListFilters } from './service/types'
 
 export function ContractsPage() {
-  const [filters, setFilters] = useState<ListFilters>({ page: 1, pageSize: 10 })
+  const [filters, setFilters] = useUrlListFilters<ListFilters>({ page: 1, pageSize: 10 })
   const query = useContracts(filters)
   const actions = useContractActions()
+  const { columns } = useColumn({
+    handleActivate: (id) => actions.activate.mutate(id),
+    handleTerminate: (id) => actions.terminate.mutate({ id, reason: 'Chấm dứt từ giao diện quản lý' }),
+  })
 
   return (
     <DataPage<ContractDto>
@@ -18,34 +24,21 @@ export function ContractsPage() {
       isLoading={query.isLoading}
       isError={query.isError}
       onRetry={() => query.refetch()}
-      onPageChange={(page) => setFilters((current) => ({ ...current, page }))}
+      onPageChange={(page, pageSize) => setFilters((current) => ({ ...current, page, pageSize: pageSize ?? current.pageSize }))}
       actions={
-        <select value={filters.status ?? ''} onChange={(event) => setFilters({ ...filters, status: event.target.value || undefined, page: 1 })}>
-          <option value="">Tất cả trạng thái</option>
-          <option value="Draft">Nháp</option>
-          <option value="Active">Hiệu lực</option>
-          <option value="Terminated">Đã chấm dứt</option>
-          <option value="Expired">Hết hạn</option>
-        </select>
+        <Select
+          value={filters.status ?? ''}
+          onChange={(value) => setFilters({ ...filters, status: value || undefined, page: 1 })}
+          options={[
+            { value: '', label: 'Tất cả trạng thái' },
+            { value: 'Draft', label: 'Nháp' },
+            { value: 'Active', label: 'Hiệu lực' },
+            { value: 'Terminated', label: 'Đã chấm dứt' },
+            { value: 'Expired', label: 'Hết hạn' },
+          ]}
+        />
       }
-      columns={[
-        { key: 'code', title: 'Mã hợp đồng', render: (item) => <strong>{item.contractCode}</strong> },
-        { key: 'room', title: 'Phòng', render: (item) => `P.${item.roomNumber}` },
-        { key: 'tenant', title: 'Người thuê', render: (item) => item.tenantName },
-        { key: 'rent', title: 'Tiền thuê', render: (item) => formatCurrency(item.monthlyRent) },
-        { key: 'date', title: 'Thời hạn', render: (item) => `${formatDate(item.startDate)} - ${formatDate(item.endDate)}` },
-        { key: 'status', title: 'Trạng thái', render: (item) => <StatusPill value={item.status} /> },
-        {
-          key: 'actions',
-          title: 'Thao tác',
-          render: (item) => (
-            <div className="row-actions">
-              <button type="button" className="button button--primary" onClick={() => actions.activate.mutate(item.id)}>Kích hoạt</button>
-              <button type="button" className="button button--ghost" onClick={() => actions.terminate.mutate({ id: item.id, reason: 'Chấm dứt từ giao diện quản lý' })}>Kết thúc</button>
-            </div>
-          ),
-        },
-      ]}
+      columns={columns}
     />
   )
 }

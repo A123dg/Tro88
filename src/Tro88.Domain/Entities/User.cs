@@ -77,6 +77,14 @@ public class User : SoftDeleteEntity
 
     public void UpdateAvatar(string url) => AvatarUrl = url;
 
+    public void LinkGoogleAccount(string googleId)
+    {
+        if (string.IsNullOrWhiteSpace(googleId))
+            throw new DomainException("Google ID is required");
+
+        GoogleId = googleId;
+    }
+
     public void UpdatePasswordHash(string passwordHash)
         => PasswordHash = passwordHash;
 

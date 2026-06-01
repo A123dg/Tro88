@@ -1,14 +1,14 @@
 import { createRoute, createRouter } from '@tanstack/react-router'
 import { AuditLogsPage } from './pages/Admin/AuditLogs/AuditLogsPage'
-import { AdminLoginPage, OwnerLoginPage, TenantLoginPage } from './pages/Auth/Login/LoginPage'
+import { AdminLoginPage, GoogleCallbackPage, OwnerLoginPage, TenantLoginPage } from './pages/Auth/Login'
 import { ContractsPage } from './pages/Owner/Contracts/ContractsPage'
 import { InvoicesPage } from './pages/Owner/Invoices/InvoicesPage'
 import { MaintenancePage } from './pages/Owner/Maintenance/MaintenancePage'
 import { NotificationsPage } from './pages/Owner/Notifications/NotificationsPage'
 import { ProfilePage } from './pages/Owner/Profile/ProfilePage'
-import { RoomsPage } from './pages/Owner/Rooms/RoomsPage'
 import { ServiceFeesPage } from './pages/Owner/ServiceFees/ServiceFeesPage'
 import { UtilityReadingsPage } from './pages/Owner/UtilityReadings/UtilityReadingsPage'
+import { TenantRoomsPage } from './pages/Tenant/Rooms/RoomsPage'
 import { rootRoute } from './rootRoute'
 import {
   AiAgentPage,
@@ -53,6 +53,7 @@ const routeTree = rootRoute.addChildren([
   route('/login/tenant', TenantLoginPage),
   route('/login/owner', OwnerLoginPage),
   route('/login/admin', AdminLoginPage),
+  route('/auth/google/callback', GoogleCallbackPage),
   route('/register', RegisterPage),
   route('/forgot-password', ForgotPasswordPage),
   route('/dashboard', OwnerDashboardPage),
@@ -60,7 +61,7 @@ const routeTree = rootRoute.addChildren([
   route('/houses/create', HouseFormPage),
   route('/houses/$id', HouseDetailPage),
   route('/houses/$id/edit', HouseFormPage),
-  route('/houses/$id/rooms', RoomsPage),
+  route('/houses/$id/rooms', HouseDetailPage),
   route('/rooms/create', RoomFormPage),
   route('/rooms/$id', RoomDetailPage),
   route('/rooms/$id/edit', RoomFormPage),
@@ -83,6 +84,7 @@ const routeTree = rootRoute.addChildren([
   route('/service-fees', ServiceFeesPage),
   route('/profile', ProfilePage),
   route('/audit-logs', AuditLogsPage),
+  route('/my/rooms', TenantRoomsPage),
   route('/my/dashboard', TenantDashboardPage),
   route('/my/invoices', MyInvoicesPage),
   route('/my/maintenance', MaintenancePage),

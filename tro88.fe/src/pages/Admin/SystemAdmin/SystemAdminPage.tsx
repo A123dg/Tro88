@@ -1,4 +1,7 @@
 import { useAdminDashboard, useHouses } from './hooks'
+import { useMutation } from 'react-query'
+import { queryClient } from '../../../queryClient'
+import { changeHouseStatus } from '../../../services/houseService'
 
 function formatCurrency(value: number) {
   return `${value.toLocaleString('vi-VN')}đ`
@@ -21,9 +24,22 @@ function SystemMetric({
   )
 }
 
+function houseStatusLabel(status?: string, isActive?: boolean) {
+  if (status === 'PendingApproval') return 'Chờ duyệt'
+  if (status === 'Active') return 'Đang hoạt động'
+  if (status === 'Inactive') return 'Không hoạt động'
+  return isActive ? 'Đang hoạt động' : 'Không hoạt động'
+}
+
 export function SystemAdminPage() {
   const dashboard = useAdminDashboard()
   const houses = useHouses({ page: 1, pageSize: 8 })
+  const approveHouse = useMutation((id: string) => changeHouseStatus(id, 'Active'), {
+    onSuccess: () => {
+      queryClient.invalidateQueries(['houses'])
+      queryClient.invalidateQueries(['dashboard', 'admin'])
+    },
+  })
   const data = dashboard.data
 
   return (
@@ -93,6 +109,7 @@ export function SystemAdminPage() {
               <span>Phòng</span>
               <span>Đang thuê</span>
               <span>Trạng thái</span>
+              <span>Thao tác</span>
             </div>
             {houses.data.items.map((house) => (
               <div className="system-table__row" key={house.id}>
@@ -100,7 +117,19 @@ export function SystemAdminPage() {
                 <span>{house.address}</span>
                 <span>{house.totalRooms}</span>
                 <span>{house.occupiedRooms}</span>
-                <span>{house.isActive ? 'Đang hoạt động' : 'Tạm ngưng'}</span>
+                <span>{houseStatusLabel(house.status, house.isActive)}</span>
+                <span>
+                  {house.status === 'PendingApproval' ? (
+                    <button
+                      type="button"
+                      className="button button--primary"
+                      disabled={approveHouse.isLoading}
+                      onClick={() => approveHouse.mutate(house.id)}
+                    >
+                      Duyệt
+                    </button>
+                  ) : null}
+                </span>
               </div>
             ))}
           </div>

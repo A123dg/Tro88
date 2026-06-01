@@ -1,12 +1,17 @@
-import { useState } from 'react'
-import { DataPage, formatDate, StatusPill } from '../../../components/shared/DataPage'
+import { Select } from 'antd'
+import { DataPage } from '../../../components/shared/DataPage'
+import { useUrlListFilters } from '../../../hooks/useUrlListFilters'
 import { useMaintenanceActions, useMaintenanceRequests } from './hooks'
+import { useColumn } from './hooks/useColumn'
 import { ListFilters, MaintenanceRequestDto } from './service/types'
 
 export function MaintenancePage() {
-  const [filters, setFilters] = useState<ListFilters>({ page: 1, pageSize: 10 })
+  const [filters, setFilters] = useUrlListFilters<ListFilters>({ page: 1, pageSize: 10 })
   const query = useMaintenanceRequests(filters)
   const updateStatus = useMaintenanceActions()
+  const { columns } = useColumn({
+    handleUpdateStatus: (id, status, resolutionNote) => updateStatus.mutate({ id, status, resolutionNote }),
+  })
 
   return (
     <DataPage<MaintenanceRequestDto>
@@ -18,34 +23,20 @@ export function MaintenancePage() {
       isLoading={query.isLoading}
       isError={query.isError}
       onRetry={() => query.refetch()}
-      onPageChange={(page) => setFilters((current) => ({ ...current, page }))}
+      onPageChange={(page, pageSize) => setFilters((current) => ({ ...current, page, pageSize: pageSize ?? current.pageSize }))}
       actions={
-        <select value={filters.status ?? ''} onChange={(event) => setFilters({ ...filters, status: event.target.value || undefined, page: 1 })}>
-          <option value="">Tất cả trạng thái</option>
-          <option value="Open">Mới tạo</option>
-          <option value="InProgress">Đang xử lý</option>
-          <option value="Resolved">Đã xử lý</option>
-        </select>
+        <Select
+          value={filters.status ?? ''}
+          onChange={(value) => setFilters({ ...filters, status: value || undefined, page: 1 })}
+          options={[
+            { value: '', label: 'Tất cả trạng thái' },
+            { value: 'Open', label: 'Mới tạo' },
+            { value: 'InProgress', label: 'Đang xử lý' },
+            { value: 'Resolved', label: 'Đã xử lý' },
+          ]}
+        />
       }
-      columns={[
-        { key: 'title', title: 'Yêu cầu', render: (item) => <strong>{item.title}</strong> },
-        { key: 'room', title: 'Phòng', render: (item) => `P.${item.roomNumber}` },
-        { key: 'requestedBy', title: 'Người gửi', render: (item) => item.requestedByName },
-        { key: 'category', title: 'Loại', render: (item) => item.category },
-        { key: 'priority', title: 'Ưu tiên', render: (item) => item.priority },
-        { key: 'createdAt', title: 'Ngày tạo', render: (item) => formatDate(item.createdAt) },
-        { key: 'status', title: 'Trạng thái', render: (item) => <StatusPill value={item.status} /> },
-        {
-          key: 'actions',
-          title: 'Thao tác',
-          render: (item) => (
-            <div className="row-actions">
-              <button type="button" className="button button--ghost" onClick={() => updateStatus.mutate({ id: item.id, status: 'InProgress' })}>Xử lý</button>
-              <button type="button" className="button button--primary" onClick={() => updateStatus.mutate({ id: item.id, status: 'Resolved', resolutionNote: 'Đã xử lý' })}>Hoàn tất</button>
-            </div>
-          ),
-        },
-      ]}
+      columns={columns}
     />
   )
 }

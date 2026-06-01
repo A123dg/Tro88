@@ -26,5 +26,8 @@ public sealed class CreateHouseCommandValidator
 
         RuleFor(x => x.Description)
             .MaximumLength(1000);
+
+        RuleForEach(x => x.MediaUrls)
+            .MaximumLength(1000);
     }
 }

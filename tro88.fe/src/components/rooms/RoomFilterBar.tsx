@@ -1,3 +1,4 @@
+import { Select } from 'antd'
 import { useEffect, useState } from 'react'
 import { RoomFilters, RoomSort, RoomStatus, RoomStats } from '../../types/room.types'
 
@@ -45,27 +46,29 @@ export function RoomFilterBar({ filters, stats, onChange }: RoomFilterBarProps) 
           />
         </label>
 
-        <select
+        <Select
           value={filters.status ?? 'all'}
-          onChange={(event) => setStatus(event.target.value as RoomStatus | 'all')}
+          onChange={(value) => setStatus(value as RoomStatus | 'all')}
           aria-label="Lọc theo trạng thái"
-        >
-          <option value="all">Tất cả trạng thái</option>
-          <option value={RoomStatus.Occupied}>Đang thuê</option>
-          <option value={RoomStatus.Available}>Phòng trống</option>
-          <option value={RoomStatus.Maintenance}>Bảo trì</option>
-        </select>
+          options={[
+            { value: 'all', label: 'Tất cả trạng thái' },
+            { value: RoomStatus.Occupied, label: 'Đang thuê' },
+            { value: RoomStatus.Available, label: 'Phòng trống' },
+            { value: RoomStatus.Maintenance, label: 'Bảo trì' },
+          ]}
+        />
 
-        <select
+        <Select
           value={filters.sort ?? 'roomNumberAsc'}
-          onChange={(event) => setSort(event.target.value as RoomSort)}
+          onChange={(value) => setSort(value as RoomSort)}
           aria-label="Sắp xếp phòng"
-        >
-          <option value="roomNumberAsc">Số phòng tăng dần</option>
-          <option value="rentAsc">Giá thấp trước</option>
-          <option value="rentDesc">Giá cao trước</option>
-          <option value="areaDesc">Diện tích lớn trước</option>
-        </select>
+          options={[
+            { value: 'roomNumberAsc', label: 'Số phòng tăng dần' },
+            { value: 'rentAsc', label: 'Giá thấp trước' },
+            { value: 'rentDesc', label: 'Giá cao trước' },
+            { value: 'areaDesc', label: 'Diện tích lớn trước' },
+          ]}
+        />
       </div>
 
       <div className="room-filter-bar__tabs" role="tablist" aria-label="Trạng thái phòng">

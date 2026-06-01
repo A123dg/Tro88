@@ -9,4 +9,5 @@ public sealed record UpdateHouseCommand(
     string Address,
     string? Province = null,
     string? District = null,
-    string? Description = null) : IRequest<HouseDto>;
+    string? Description = null,
+    List<string>? MediaUrls = null) : IRequest<HouseDto>;

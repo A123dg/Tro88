@@ -1,39 +1,99 @@
-import { useCurrentUser } from './hooks'
+import { useState } from 'react'
+import { useProfile } from './hooks'
+import { AvatarCard } from './components/AvatarCard'
+import { ProfileTabs } from './components/ProfileTabs'
+import { ProfileForm } from './components/ProfileForm'
+import { SecurityForm } from './components/SecurityForm'
 
 export function ProfilePage() {
-  const user = useCurrentUser()
+  const [activeTab, setActiveTab] = useState<'info' | 'security'>('info')
+  const profile = useProfile()
 
-  return (
-    <main className="area-page">
-      <header className="area-header">
-        <div>
+  // Check if user logged in via Google (email ends with @gmail.com or has google provider)
+  const isGoogleLogin = profile.data?.email?.endsWith('@gmail.com') || false
+
+  if (profile.isLoading) {
+    return (
+      <main className="area-page profile-page">
+        <header className="area-header">
           <nav className="breadcrumb">Tro88 / Hồ sơ</nav>
-          <h1>Hồ sơ tài khoản</h1>
-          <p>Thông tin cá nhân và vai trò của tài khoản đang đăng nhập.</p>
-        </div>
-      </header>
+          <h1>Hồ sơ cá nhân</h1>
+          <p>Quản lý thông tin cá nhân và bảo mật tài khoản.</p>
+        </header>
 
-      {user.isLoading ? <section className="panel-state">Đang tải hồ sơ...</section> : null}
-      {user.isError ? (
+        <div className="profile-layout">
+          {/* Left Card Skeleton */}
+          <section className="panel panel--card profile-left-card skeleton-card">
+            <div className="avatar-skeleton" />
+            <div className="text-skeleton" style={{ width: '60%' }} />
+            <div className="text-skeleton" style={{ width: '80%' }} />
+          </section>
+
+          {/* Right Card Skeleton */}
+          <section className="panel panel--card profile-right-card">
+            <div className="tabs-skeleton">
+              <div className="tab-skeleton" />
+              <div className="tab-skeleton" />
+            </div>
+            <div className="form-skeleton">
+              <div className="field-skeleton" />
+              <div className="field-skeleton" />
+              <div className="field-skeleton" />
+              <div className="field-skeleton" />
+            </div>
+          </section>
+        </div>
+      </main>
+    )
+  }
+
+  if (profile.isError) {
+    return (
+      <main className="area-page">
+        <header className="area-header">
+          <nav className="breadcrumb">Tro88 / Hồ sơ</nav>
+          <h1>Hồ sơ cá nhân</h1>
+          <p>Quản lý thông tin cá nhân và bảo mật tài khoản.</p>
+        </header>
         <section className="room-error">
           <strong>Không thể tải hồ sơ</strong>
-          <button type="button" className="button button--primary" onClick={() => user.refetch()}>Thử lại</button>
+          <button type="button" className="button button--primary" onClick={() => profile.refetch()}>
+            Thử lại
+          </button>
         </section>
-      ) : null}
-      {user.data ? (
-        <section className="profile-page-card">
-          <div className="profile-avatar">
-            {user.data.avatarUrl ? <img src={user.data.avatarUrl} alt={user.data.fullName} /> : <span>{user.data.fullName.slice(0, 1).toUpperCase()}</span>}
+      </main>
+    )
+  }
+
+  if (!profile.data) {
+    return null
+  }
+
+  return (
+    <main className="area-page profile-page">
+      <header className="area-header">
+        <nav className="breadcrumb">Tro88 / Hồ sơ</nav>
+        <h1>Hồ sơ cá nhân</h1>
+        <p>Quản lý thông tin cá nhân và bảo mật tài khoản.</p>
+      </header>
+
+      <div className="profile-layout">
+        {/* Left Card - Avatar & User Info */}
+        <AvatarCard user={profile.data} />
+
+        {/* Right Card - Form */}
+        <section className="panel panel--card profile-right-card">
+          <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
+
+          <div className="tab-content">
+            {activeTab === 'info' ? (
+              <ProfileForm user={profile.data} isGoogleLogin={isGoogleLogin} />
+            ) : (
+              <SecurityForm isGoogleLogin={isGoogleLogin} />
+            )}
           </div>
-          <dl>
-            <div><dt>Họ tên</dt><dd>{user.data.fullName}</dd></div>
-            <div><dt>Email</dt><dd>{user.data.email}</dd></div>
-            <div><dt>Số điện thoại</dt><dd>{user.data.phoneNumber || 'Chưa cập nhật'}</dd></div>
-            <div><dt>Vai trò</dt><dd>{user.data.role}</dd></div>
-            <div><dt>Trạng thái</dt><dd>{user.data.isActive ? 'Đang hoạt động' : 'Tạm khóa'}</dd></div>
-          </dl>
         </section>
-      ) : null}
+      </div>
     </main>
   )
 }

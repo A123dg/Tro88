@@ -58,7 +58,7 @@ public static class DependencyInjection
         // Google OAuth
         services.Configure<GoogleAuthSettings>(
             configuration.GetSection("GoogleAuth"));
-        services.AddScoped<IGoogleAuthService, GoogleAuthService>();
+        services.AddHttpClient<IGoogleAuthService, GoogleAuthService>();
 
         // Cloudinary
         services.Configure<CloudinarySettings>(

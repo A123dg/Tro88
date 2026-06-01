@@ -2,6 +2,7 @@ using MediatR;
 using Tro88.Application.Common.Interfaces;
 using Tro88.Application.Features.Houses.DTOs;
 using Tro88.Domain.Entities;
+using Tro88.Domain.Enums;
 using Tro88.Domain.Exceptions;
 
 namespace Tro88.Application.Features.Houses.Commands.CreateHouse;
@@ -34,7 +35,9 @@ public sealed class CreateHouseCommandHandler
             request.Address,
             request.Province,
             request.District,
-            request.Description);
+            request.Description,
+            request.MediaUrls,
+            HouseStatus.PendingApproval);
 
         _db.Houses.Add(house);
         await _db.SaveChangesAsync(ct);

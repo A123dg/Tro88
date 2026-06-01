@@ -1,12 +1,18 @@
-import { useState } from 'react'
-import { DataPage, formatCurrency, formatDate, StatusPill } from '../../../components/shared/DataPage'
+import { Select } from 'antd'
+import { DataPage } from '../../../components/shared/DataPage'
+import { useUrlListFilters } from '../../../hooks/useUrlListFilters'
 import { useInvoiceActions, useInvoices } from './hooks'
+import { useColumn } from './hooks/useColumn'
 import { InvoiceDto, ListFilters } from './service/types'
 
 export function InvoicesPage() {
-  const [filters, setFilters] = useState<ListFilters>({ page: 1, pageSize: 10 })
+  const [filters, setFilters] = useUrlListFilters<ListFilters>({ page: 1, pageSize: 10 })
   const query = useInvoices(filters)
   const actions = useInvoiceActions()
+  const { columns } = useColumn({
+    handleSend: (id) => actions.send.mutate(id),
+    handleMarkPaid: (id) => actions.markPaid.mutate(id),
+  })
 
   return (
     <DataPage<InvoiceDto>
@@ -18,34 +24,20 @@ export function InvoicesPage() {
       isLoading={query.isLoading}
       isError={query.isError}
       onRetry={() => query.refetch()}
-      onPageChange={(page) => setFilters((current) => ({ ...current, page }))}
+      onPageChange={(page, pageSize) => setFilters((current) => ({ ...current, page, pageSize: pageSize ?? current.pageSize }))}
       actions={
-        <>
-          <select value={filters.status ?? ''} onChange={(event) => setFilters({ ...filters, status: event.target.value || undefined, page: 1 })}>
-            <option value="">Tất cả trạng thái</option>
-            <option value="Unpaid">Chưa thanh toán</option>
-            <option value="Paid">Đã thanh toán</option>
-            <option value="Overdue">Quá hạn</option>
-          </select>
-        </>
+        <Select
+          value={filters.status ?? ''}
+          onChange={(value) => setFilters({ ...filters, status: value || undefined, page: 1 })}
+          options={[
+            { value: '', label: 'Tất cả trạng thái' },
+            { value: 'Unpaid', label: 'Chưa thanh toán' },
+            { value: 'Paid', label: 'Đã thanh toán' },
+            { value: 'Overdue', label: 'Quá hạn' },
+          ]}
+        />
       }
-      columns={[
-        { key: 'code', title: 'Mã hóa đơn', render: (item) => <strong>{item.invoiceCode}</strong> },
-        { key: 'period', title: 'Kỳ', render: (item) => `${item.billingMonth}/${item.billingYear}` },
-        { key: 'amount', title: 'Tổng tiền', render: (item) => formatCurrency(item.totalAmount) },
-        { key: 'dueDate', title: 'Hạn thanh toán', render: (item) => formatDate(item.dueDate) },
-        { key: 'status', title: 'Trạng thái', render: (item) => <StatusPill value={item.status} /> },
-        {
-          key: 'actions',
-          title: 'Thao tác',
-          render: (item) => (
-            <div className="row-actions">
-              <button type="button" className="button button--ghost" onClick={() => actions.send.mutate(item.id)}>Gửi</button>
-              <button type="button" className="button button--primary" onClick={() => actions.markPaid.mutate(item.id)}>Đã thu</button>
-            </div>
-          ),
-        },
-      ]}
+      columns={columns}
     />
   )
 }

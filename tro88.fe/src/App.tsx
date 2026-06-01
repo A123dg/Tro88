@@ -1,12 +1,13 @@
 import { Outlet, useRouterState } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
-import { Bell, Bot, Building2, ChartBar, CreditCard, FileText, Home, LogOut, Menu, Receipt, Settings, User, Wrench, Zap } from './icons'
+import { Bell, Bot, Building2, ChartBar, CreditCard, FileText, Home, LogOut, Receipt, Settings, User, Wrench, Zap } from './icons'
 import { clearAuth, logout } from './services/authService'
+import { AIChatWidget } from './components/shared/AIChatWidget'
+import { NotificationDropdown } from './components/shared/NotificationDropdown'
 
 const ownerNav = [
   { to: '/dashboard', label: 'Tổng quan', icon: Home },
   { to: '/houses', label: 'Nhà trọ', icon: Building2 },
-  { to: '/houses/demo/rooms', label: 'Phòng', icon: Menu },
   { to: '/contracts', label: 'Hợp đồng', icon: FileText },
   { to: '/invoices', label: 'Hóa đơn', icon: CreditCard },
   { to: '/utility-readings', label: 'Điện nước', icon: Zap },
@@ -17,6 +18,7 @@ const ownerNav = [
 ]
 
 const tenantNav = [
+  { to: '/my/rooms', label: 'Tìm phòng', icon: Building2 },
   { to: '/my/dashboard', label: 'Trang chủ', icon: Home },
   { to: '/my/invoices', label: 'Hóa đơn', icon: Receipt },
   { to: '/my/maintenance', label: 'Bảo trì', icon: Wrench },
@@ -70,10 +72,7 @@ function OwnerLayout() {
             <strong>{ownerNav.find((item) => isActive(pathname, item.to))?.label ?? 'Quản lý'}</strong>
           </div>
           <div className="topbar-actions">
-            <Link to="/notifications" className="icon-button" aria-label="Thông báo">
-              <Bell />
-              <span className="notice-dot">3</span>
-            </Link>
+            <NotificationDropdown />
             <Link to="/profile" className="avatar-link">AT</Link>
             <button className="icon-button" type="button" onClick={handleLogout} aria-label="Đăng xuất">
               <LogOut />
@@ -81,6 +80,7 @@ function OwnerLayout() {
           </div>
         </header>
         <Outlet />
+        <AIChatWidget />
       </div>
     </div>
   )
@@ -105,6 +105,7 @@ function TenantLayout() {
           )
         })}
       </nav>
+      <AIChatWidget />
     </div>
   )
 }
@@ -119,7 +120,7 @@ export function AuthLayout() {
 
 export function AppShell() {
   const pathname = useRouterState({ select: (state) => state.location.pathname })
-  const isAuth = pathname.startsWith('/login') || pathname === '/register' || pathname === '/forgot-password'
+  const isAuth = pathname.startsWith('/login') || pathname.startsWith('/auth/') || pathname === '/register' || pathname === '/forgot-password'
   const isTenant = pathname.startsWith('/my')
 
   if (isAuth) {
