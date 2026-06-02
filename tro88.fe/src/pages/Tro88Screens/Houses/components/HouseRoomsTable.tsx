@@ -1,9 +1,10 @@
 import { Button, Card, Form, Input, InputNumber } from 'antd'
+import type { TableProps } from 'antd'
 import { useState } from 'react'
-import { PaginatedTable, PaginatedTableColumn } from '../../../../components/shared/pagination'
 import { useCreateRoom, useDeleteRoom, useRooms, useUpdateRoom } from '../../../../hooks/useRooms'
 import type { RoomPayload } from '../../../../services/roomService'
 import ModalForm from '../../../../shared/components/modal-form/ModalForm'
+import TableWithPagination from '../../../../shared/components/table-pagination'
 import type { RoomDto } from '../../../../types/room.types'
 import { Badge, formatVND, statusVariant, Status } from '../../shared'
 
@@ -95,37 +96,41 @@ export function HouseRoomsTable({ houseId }: { houseId: string }) {
     deleteRoom.mutate(room.id)
   }
 
-  const columns: Array<PaginatedTableColumn<RoomDto>> = [
-    { key: 'roomNumber', title: 'Phòng', render: (room) => <strong>{room.roomNumber}</strong> },
-    { key: 'floor', title: 'Tầng', render: (room) => room.floor },
-    { key: 'area', title: 'Diện tích', render: (room) => `${room.area}m²` },
-    { key: 'maxOccupants', title: 'Sức chứa', render: (room) => `${room.maxOccupants} người` },
-    { key: 'monthlyRent', title: 'Giá thuê', render: (room) => formatVND(room.monthlyRent) },
-    { key: 'status', title: 'Trạng thái', render: (room) => <Badge variant={statusVariant(room.status as Status)}>{room.status}</Badge> },
-    {
+  const isTenant = localStorage.getItem('authRole') === 'Tenant'
+
+  const columns: TableProps<RoomDto>['columns'] = [
+    { key: 'roomNumber', title: 'Phòng', dataIndex: 'roomNumber', render: (value) => <strong>{value}</strong> },
+    { key: 'floor', title: 'Tầng', dataIndex: 'floor' },
+    { key: 'area', title: 'Diện tích', dataIndex: 'area', render: (value) => `${value}m²` },
+    { key: 'maxOccupants', title: 'Sức chứa', dataIndex: 'maxOccupants', render: (value) => `${value} người` },
+    { key: 'monthlyRent', title: 'Giá thuê', dataIndex: 'monthlyRent', render: (value) => formatVND(value) },
+    { key: 'status', title: 'Trạng thái', dataIndex: 'status', render: (value) => <Badge variant={statusVariant(value as Status)}>{value}</Badge> },
+  ]
+
+  if (!isTenant) {
+    columns.push({
       key: 'actions',
       title: 'Thao tác',
-      className: 'house-rooms-table__actions',
-      render: (room) => (
+      className: 'action-column house-rooms-table__actions',
+      render: (_, room) => (
         <div className="actions">
           <Button variant="outlined" onClick={() => openEdit(room)}>Sửa</Button>
           <Button variant="solid" danger loading={deleteRoom.isLoading} onClick={() => handleDelete(room)}>Xóa</Button>
         </div>
       ),
-    },
-  ]
+    })
+  }
 
   return (
     <Card className="house-rooms-card">
       <div className="house-rooms-card__header">
         <div>
           <h2>Danh sách phòng</h2>
-          <p>Quản lý phòng của nhà trọ này, bao gồm thêm, sửa và xóa phòng.</p>
+          <p>{isTenant ? 'Danh sách phòng của nhà trọ này.' : 'Quản lý phòng của nhà trọ này, bao gồm thêm, sửa và xóa phòng.'}</p>
         </div>
-        <Button onClick={openCreate}>+ Thêm phòng</Button>
+        {!isTenant && <Button onClick={openCreate}>+ Thêm phòng</Button>}
       </div>
 
-      {roomsQuery.isLoading ? <div className="panel-state">Đang tải danh sách phòng...</div> : null}
       {roomsQuery.isError ? (
         <div className="room-error">
           <strong>Không thể tải danh sách phòng</strong>
@@ -133,19 +138,24 @@ export function HouseRoomsTable({ houseId }: { houseId: string }) {
         </div>
       ) : null}
 
-      {!roomsQuery.isLoading && !roomsQuery.isError ? (
-        <PaginatedTable
+      {!roomsQuery.isError ? (
+        <TableWithPagination
           className="house-rooms-table"
           columns={columns}
-          items={roomList}
-          meta={meta}
-          rowKey={(room) => room.id}
-          emptyText="Chưa có phòng nào."
-          disabled={roomsQuery.isFetching}
-          onPageChange={(nextPage, nextPageSize) => {
-            setPage(nextPage)
-            setPageSize(nextPageSize)
+          dataSource={roomList}
+          loading={roomsQuery.isLoading}
+          rowKey="id"
+          pagination={{
+            current: meta.page,
+            pageSize: meta.pageSize,
+            total: meta.total,
+            disabled: roomsQuery.isFetching,
+            onChange: (nextPage, nextPageSize) => {
+              setPage(nextPage)
+              setPageSize(nextPageSize)
+            },
           }}
+          locale={{ emptyText: 'Chưa có phòng nào.' }}
         />
       ) : null}
 

@@ -7,4 +7,5 @@ namespace Tro88.Application.Features.Houses.Queries.GetHouses;
 public sealed record GetHousesQuery(
     int Page = 1,
     int PageSize = 10,
-    string? Search = null) : IRequest<PagedResult<HouseDto>>;
+    string? Search = null,
+    Guid? OwnerId = null) : IRequest<PagedResult<HouseDto>>;

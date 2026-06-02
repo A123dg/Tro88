@@ -70,7 +70,6 @@ function OwnerDashboardSection() {
         <OwnerMetric label="Tổng phòng" value={data.totalRooms} color="#52C593" />
         <OwnerMetric label="Phòng đang thuê" value={data.occupiedRooms} color="#F4845F" />
         <OwnerMetric label="Phòng trống" value={data.availableRooms} color="#52C593" />
-        <OwnerMetric label="Hợp đồng hiệu lực" value={data.activeContracts} color="#5B8DEF" />
         <OwnerMetric label="Hóa đơn chờ thu" value={data.pendingInvoices} color="#FFB547" />
         <OwnerMetric label="Doanh thu" value={formatCurrency(data.totalRevenue)} color="#F4845F" />
         <OwnerMetric label="Bảo trì chờ xử lý" value={data.pendingMaintenanceRequests} color="#FFB547" />

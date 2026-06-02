@@ -1,21 +1,17 @@
-import { useAdminDashboard, useHouses } from './hooks'
+import { useMemo, useState } from 'react'
+import type { TableProps } from 'antd'
 import { useMutation } from 'react-query'
 import { queryClient } from '../../../queryClient'
+import TableWithPagination from '../../../shared/components/table-pagination'
 import { changeHouseStatus } from '../../../services/houseService'
+import { HouseDto } from '../../../types/app.types'
+import { useAdminDashboard, useHouses } from './hooks'
 
 function formatCurrency(value: number) {
   return `${value.toLocaleString('vi-VN')}đ`
 }
 
-function SystemMetric({
-  label,
-  value,
-  color,
-}: {
-  label: string
-  value: string | number
-  color: string
-}) {
+function SystemMetric({ label, value, color }: { label: string; value: string | number; color: string }) {
   return (
     <article className="admin-metric" style={{ borderLeftColor: color }}>
       <span>{label}</span>
@@ -32,9 +28,17 @@ function houseStatusLabel(status?: string, isActive?: boolean) {
 }
 
 export function SystemAdminPage() {
+  const [housePage, setHousePage] = useState(1)
+  const [housePageSize, setHousePageSize] = useState(10)
   const dashboard = useAdminDashboard()
-  const houses = useHouses({ page: 1, pageSize: 8 })
+  const houses = useHouses({ page: housePage, pageSize: housePageSize })
   const approveHouse = useMutation((id: string) => changeHouseStatus(id, 'Active'), {
+    onSuccess: () => {
+      queryClient.invalidateQueries(['houses'])
+      queryClient.invalidateQueries(['dashboard', 'admin'])
+    },
+  })
+  const rejectHouse = useMutation((id: string) => changeHouseStatus(id, 'Inactive'), {
     onSuccess: () => {
       queryClient.invalidateQueries(['houses'])
       queryClient.invalidateQueries(['dashboard', 'admin'])
@@ -42,13 +46,53 @@ export function SystemAdminPage() {
   })
   const data = dashboard.data
 
+  const houseColumns = useMemo<TableProps<HouseDto>['columns']>(
+    () => [
+      { key: 'name', title: 'Nhà trọ', render: (_, house) => <strong>{house.name}</strong> },
+      { key: 'address', title: 'Địa chỉ', render: (_, house) => house.address },
+      { key: 'totalRooms', title: 'Phòng', render: (_, house) => house.totalRooms },
+      { key: 'occupiedRooms', title: 'Đang thuê', render: (_, house) => house.occupiedRooms },
+      { key: 'status', title: 'Trạng thái', render: (_, house) => houseStatusLabel(house.status, house.isActive) },
+      {
+        key: 'actions',
+        title: 'Thao tác',
+        className: 'action-column',
+        render: (_, house) => (
+          <div className="row-actions">
+            {house.status === 'PendingApproval' ? (
+              <>
+                <button
+                  type="button"
+                  className="button button--primary"
+                  disabled={approveHouse.isLoading}
+                  onClick={() => approveHouse.mutate(house.id)}
+                >
+                  Duyệt
+                </button>
+                <button
+                  type="button"
+                  className="button button--danger"
+                  disabled={rejectHouse.isLoading}
+                  onClick={() => rejectHouse.mutate(house.id)}
+                >
+                  Từ chối
+                </button>
+              </>
+            ) : null}
+          </div>
+        ),
+      },
+    ],
+    [approveHouse, rejectHouse],
+  )
+
   return (
     <main className="area-page">
       <header className="area-header">
         <div>
           <nav className="breadcrumb">Tro88 / Admin hệ thống</nav>
-          <h1>Admin quản lý toàn bộ dữ liệu</h1>
-          <p>Dành riêng cho role Admin, xem dữ liệu tổng hợp toàn hệ thống.</p>
+          <h1>Duyệt nhà trọ</h1>
+          <p>Admin xem toàn bộ nhà trọ trong hệ thống và duyệt hoặc từ chối nhà đang chờ.</p>
         </div>
       </header>
 
@@ -66,7 +110,7 @@ export function SystemAdminPage() {
           <div className="section-heading">
             <div>
               <h2>Tổng quan toàn hệ thống</h2>
-              <p>Không lọc theo chủ trọ, bao gồm toàn bộ dữ liệu chưa bị xóa mềm.</p>
+              <p>Dữ liệu tổng hợp toàn hệ thống, không lọc theo chủ trọ.</p>
             </div>
           </div>
           <div className="admin-metric-grid">
@@ -77,7 +121,6 @@ export function SystemAdminPage() {
             <SystemMetric label="Tổng phòng" value={data.totalRooms} color="#52C593" />
             <SystemMetric label="Phòng đang thuê" value={data.occupiedRooms} color="#F4845F" />
             <SystemMetric label="Phòng trống" value={data.availableRooms} color="#52C593" />
-            <SystemMetric label="Hợp đồng hiệu lực" value={data.activeContracts} color="#5B8DEF" />
             <SystemMetric label="Hóa đơn chờ thu" value={data.pendingInvoices} color="#FFB547" />
             <SystemMetric label="Doanh thu hệ thống" value={formatCurrency(data.totalRevenue)} color="#F4845F" />
             <SystemMetric label="Bảo trì chờ xử lý" value={data.pendingMaintenanceRequests} color="#FFB547" />
@@ -89,49 +132,36 @@ export function SystemAdminPage() {
       <section className="admin-section system-data-section">
         <div className="section-heading">
           <div>
-            <h2>Dữ liệu nhà trọ toàn hệ thống</h2>
-            <p>Admin thấy toàn bộ nhà trọ qua API <code>/Houses</code>.</p>
+            <h2>Nhà trọ toàn hệ thống</h2>
+            <p>Bảng nhà trọ có phân trang, hỗ trợ duyệt hoặc từ chối nhà đang chờ duyệt.</p>
           </div>
         </div>
 
-        {houses.isLoading ? <div className="panel-state">Đang tải nhà trọ toàn hệ thống...</div> : null}
         {houses.isError ? (
           <section className="room-error">
             <strong>Không thể tải danh sách nhà trọ</strong>
             <button type="button" className="button button--primary" onClick={() => houses.refetch()}>Thử lại</button>
           </section>
         ) : null}
-        {houses.data ? (
-          <div className="system-table">
-            <div className="system-table__head">
-              <span>Nhà trọ</span>
-              <span>Địa chỉ</span>
-              <span>Phòng</span>
-              <span>Đang thuê</span>
-              <span>Trạng thái</span>
-              <span>Thao tác</span>
-            </div>
-            {houses.data.items.map((house) => (
-              <div className="system-table__row" key={house.id}>
-                <strong>{house.name}</strong>
-                <span>{house.address}</span>
-                <span>{house.totalRooms}</span>
-                <span>{house.occupiedRooms}</span>
-                <span>{houseStatusLabel(house.status, house.isActive)}</span>
-                <span>
-                  {house.status === 'PendingApproval' ? (
-                    <button
-                      type="button"
-                      className="button button--primary"
-                      disabled={approveHouse.isLoading}
-                      onClick={() => approveHouse.mutate(house.id)}
-                    >
-                      Duyệt
-                    </button>
-                  ) : null}
-                </span>
-              </div>
-            ))}
+        {!houses.isError ? (
+          <div className="data-table data-table--antd">
+            <TableWithPagination
+              columns={houseColumns}
+              dataSource={houses.data?.items ?? []}
+              loading={houses.isLoading}
+              rowKey="id"
+              scroll={{ x: true }}
+              pagination={{
+                current: houses.data?.meta.page ?? housePage,
+                pageSize: houses.data?.meta.pageSize ?? housePageSize,
+                total: houses.data?.meta.total ?? 0,
+                onChange: (page, pageSize) => {
+                  setHousePage(page)
+                  setHousePageSize(pageSize)
+                },
+              }}
+              locale={{ emptyText: 'Không có nhà trọ phù hợp.' }}
+            />
           </div>
         ) : null}
       </section>

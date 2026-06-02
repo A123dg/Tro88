@@ -38,6 +38,21 @@ public class HousesController : BaseApiController
             }));
     }
 
+    [HttpGet("owner/{ownerId}")]
+    public async Task<IActionResult> GetHousesByOwner(Guid ownerId, [FromQuery] GetHousesQuery query)
+    {
+        var result = await Mediator.Send(query with { OwnerId = ownerId });
+        return Ok(ApiResponse<List<HouseDto>>.Ok(
+            result.Items,
+            metaData: new MetaData
+            {
+                Page = query.Page,
+                PageSize = query.PageSize,
+                Total = result.Total,
+                TotalPage = result.TotalPage
+            }));
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetHouseById(Guid id)
     {

@@ -29,7 +29,6 @@ export function OwnerDashboardPage() {
       <div className="stat-grid">
         <Card><span>Doanh thu tháng</span><strong>{formatVND(data.revenue)}</strong><small>+12% so với tháng trước</small></Card>
         <Card><span>Tỷ lệ lấp đầy</span><strong>{data.occupancy}%</strong><small>24 phòng đang thuê</small></Card>
-        <Card><span>Hợp đồng active</span><strong>{data.contracts}</strong><small>3 hợp đồng sắp hết hạn</small></Card>
         <Card><span>Hóa đơn chưa thu</span><strong>{data.unpaid}</strong><small>{formatVND(18600000)}</small></Card>
       </div>
       <div className="split-60">
@@ -96,7 +95,7 @@ export function TenantDashboardPage() {
         <Card>
           <span>Ngày thanh toán tới</span>
           <strong>{data?.nextPaymentDue ? formatDate(data.nextPaymentDue) : 'Chưa có lịch'}</strong>
-          <p>Nhắc thanh toán theo hợp đồng hiện tại</p>
+          <p>Nhắc thanh toán hóa đơn</p>
         </Card>
         <Card>
           <span>Bảo trì đang xử lý</span>
@@ -113,7 +112,7 @@ export function TenantDashboardPage() {
         <div className="actions"><Link className="app-button app-button--outline" to="/my/invoices">Xem chi tiết</Link><Button>Thanh toán</Button></div>
       </Card>
       <div className="quick-grid">
-        <Link to="/contracts/c1">Hợp đồng</Link><Link to="/my/invoices">Hóa đơn</Link><Link to="/my/maintenance/create">Báo hỏng</Link><Link to="/ai-agent">Chat AI</Link>
+        <Link to="/my/invoices">Hóa đơn</Link><Link to="/my/maintenance/create">Báo hỏng</Link><Link to="/ai-agent">Chat AI</Link>
       </div>
       <Card><h2>Thông báo gần đây</h2><NotificationList limit={3} /></Card>
     </section>

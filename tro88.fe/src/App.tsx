@@ -1,29 +1,32 @@
 import { Outlet, useRouterState } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
-import { Bell, Bot, Building2, ChartBar, CreditCard, FileText, Home, LogOut, Receipt, Settings, User, Wrench, Zap } from './icons'
+import { Bell, Building2, ChartBar, CreditCard, Home, LogOut, Receipt, Settings, User, Wrench, Zap } from './icons'
 import { clearAuth, logout } from './services/authService'
-import { AIChatWidget } from './components/shared/AIChatWidget'
 import { NotificationDropdown } from './components/shared/NotificationDropdown'
 
 const ownerNav = [
   { to: '/dashboard', label: 'Tổng quan', icon: Home },
   { to: '/houses', label: 'Nhà trọ', icon: Building2 },
-  { to: '/contracts', label: 'Hợp đồng', icon: FileText },
   { to: '/invoices', label: 'Hóa đơn', icon: CreditCard },
   { to: '/utility-readings', label: 'Điện nước', icon: Zap },
   { to: '/maintenance', label: 'Bảo trì', icon: Wrench },
   { to: '/service-fees', label: 'Dịch vụ', icon: Settings },
   { to: '/statistics', label: 'Thống kê', icon: ChartBar },
-  { to: '/ai-agent', label: 'AI Trợ lý', icon: Bot },
+]
+
+const adminNav = [
+  { to: '/admin', label: 'Nhà trọ', icon: Building2 },
+  { to: '/admin/users', label: 'Người dùng', icon: User },
+  { to: '/audit-logs', label: 'Nhật ký', icon: ChartBar },
 ]
 
 const tenantNav = [
   { to: '/my/rooms', label: 'Tìm phòng', icon: Building2 },
-  { to: '/my/dashboard', label: 'Trang chủ', icon: Home },
   { to: '/my/invoices', label: 'Hóa đơn', icon: Receipt },
+  { to: '/my/service-fees', label: 'Dịch vụ', icon: Settings },
   { to: '/my/maintenance', label: 'Bảo trì', icon: Wrench },
-  { to: '/notifications', label: 'Thông báo', icon: Bell },
-  { to: '/profile', label: 'Cá nhân', icon: User },
+  { to: '/my/notifications', label: 'Thông báo', icon: Bell },
+  { to: '/my/profile', label: 'Cá nhân', icon: User },
 ]
 
 function Link({ to, className, children, ...props }: { to: string; className?: string; children: ReactNode; 'aria-label'?: string }) {
@@ -36,6 +39,8 @@ function isActive(pathname: string, target: string) {
 
 function OwnerLayout() {
   const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const role = localStorage.getItem('authRole')
+  const navigation = role === 'Admin' ? adminNav : ownerNav
 
   const handleLogout = async () => {
     try {
@@ -49,15 +54,22 @@ function OwnerLayout() {
   return (
     <div className="owner-layout">
       <aside className="owner-sidebar">
-        <Link to="/dashboard" className="brand">
+        <Link to={role === 'Admin' ? '/admin' : '/dashboard'} className="brand">
           <span>88</span>
           <strong>Tro88</strong>
         </Link>
         <nav className="owner-nav" aria-label="Owner navigation">
-          {ownerNav.map((item) => {
+          {navigation.map((item) => {
             const Icon = item.icon
+            let toPath = item.to
+            if (role !== 'Admin' && toPath === '/houses') {
+              const ownerId = localStorage.getItem('authUserId')
+              if (ownerId) {
+                toPath = `/houses/${ownerId}`
+              }
+            }
             return (
-              <Link key={item.to} to={item.to} className={isActive(pathname, item.to) ? 'active' : ''}>
+              <Link key={item.to} to={toPath} className={isActive(pathname, item.to) ? 'active' : ''}>
                 <Icon />
                 {item.label}
               </Link>
@@ -69,7 +81,7 @@ function OwnerLayout() {
         <header className="topbar">
           <div>
             <small>Tro88</small>
-            <strong>{ownerNav.find((item) => isActive(pathname, item.to))?.label ?? 'Quản lý'}</strong>
+            <strong>{navigation.find((item) => isActive(pathname, item.to))?.label ?? 'Quản lý'}</strong>
           </div>
           <div className="topbar-actions">
             <NotificationDropdown />
@@ -80,7 +92,6 @@ function OwnerLayout() {
           </div>
         </header>
         <Outlet />
-        <AIChatWidget />
       </div>
     </div>
   )
@@ -91,21 +102,26 @@ function TenantLayout() {
 
   return (
     <div className="tenant-shell">
+      <header className="tenant-top-nav">
+        <Link to="/my/rooms" className="brand">
+          <span>88</span>
+          <strong>Tro88</strong>
+        </Link>
+        <nav aria-label="Tenant navigation">
+          {tenantNav.map((item) => {
+            const Icon = item.icon
+            return (
+              <Link key={item.to} to={item.to} className={isActive(pathname, item.to) ? 'active' : ''}>
+                <Icon />
+                <span>{item.label}</span>
+              </Link>
+            )
+          })}
+        </nav>
+      </header>
       <main className="tenant-main">
         <Outlet />
       </main>
-      <nav className="tenant-bottom-nav" aria-label="Tenant navigation">
-        {tenantNav.map((item) => {
-          const Icon = item.icon
-          return (
-            <Link key={item.to} to={item.to} className={isActive(pathname, item.to) ? 'active' : ''}>
-              <Icon />
-              <span>{item.label}</span>
-            </Link>
-          )
-        })}
-      </nav>
-      <AIChatWidget />
     </div>
   )
 }
@@ -120,8 +136,13 @@ export function AuthLayout() {
 
 export function AppShell() {
   const pathname = useRouterState({ select: (state) => state.location.pathname })
-  const isAuth = pathname.startsWith('/login') || pathname.startsWith('/auth/') || pathname === '/register' || pathname === '/forgot-password'
+  const isPortal = pathname === '/'
+  const isAuth = pathname.startsWith('/login') || pathname.startsWith('/auth/') || pathname === '/register' || pathname === '/forgot-password' || pathname === '/complete-profile'
   const isTenant = pathname.startsWith('/my')
+
+  if (isPortal) {
+    return <Outlet />
+  }
 
   if (isAuth) {
     return <AuthLayout />

@@ -24,7 +24,11 @@ export function HousesPage() {
   const [wardValue, setWardValue] = useState<string | undefined>()
   const [editForm] = Form.useForm()
 
-  const query = useQuery(QK.houses, () => read('/Houses', houses))
+  const isTenant = localStorage.getItem('authRole') === 'Tenant'
+  const pathParts = window.location.pathname.split('/').filter(Boolean)
+  const ownerId = pathParts[0] === 'houses' && pathParts[1] && pathParts[1] !== 'create' && pathParts[1] !== 'detail' ? pathParts[1] : null
+
+  const query = useQuery(QK.houses, () => read(ownerId ? `/Houses/owner/${ownerId}` : '/Houses', houses))
 
   // Fetch provinces for dropdown
   const provinces = useQuery(['public-provinces'], fetchProvinceOptions, {
@@ -103,7 +107,7 @@ export function HousesPage() {
 
   return (
     <main className="page">
-      <PageHeader title="Nhà trọ" subtitle="Quản lý danh sách nhà, ảnh đại diện và trạng thái duyệt." action={<Link className="app-button app-button--primary" to="/houses/create">+ Thêm nhà trọ</Link>} />
+      <PageHeader title="Nhà trọ" subtitle="Quản lý danh sách nhà, ảnh đại diện và trạng thái duyệt." action={!isTenant ? <Link className="app-button app-button--primary" to="/houses/create">+ Thêm nhà trọ</Link> : undefined} />
       <div className="filter-bar"><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm nhà trọ" /><Select value={status} onChange={setStatus} options={[{ value: 'all', label: 'Tất cả' }, { value: 'PendingApproval', label: 'Chờ duyệt' }, { value: 'Active', label: 'Hoạt động' }, { value: 'Inactive', label: 'Không hoạt động' }]} /></div>
       {query.isLoading ? <SkeletonGrid /> : filtered.length === 0 ? <EmptyState title="Chưa có nhà trọ" description="Thêm nhà trọ đầu tiên để bắt đầu quản lý phòng." /> : (
         <div className="grid-3">
@@ -117,7 +121,15 @@ export function HousesPage() {
                 <Badge variant={statusVariant(house.status as Status)}>{houseStatusLabel(house.status, house.isActive)}</Badge>
                 <p>{house.totalRooms} phòng • {house.occupiedRooms} đang thuê</p>
                 <div className="progress"><span style={{ width: `${percent}%` }} /></div>
-                <div className="actions"><Link className="app-button app-button--outline" to={`/houses/${house.id}`}>Xem chi tiết</Link><Button variant="ghost" onClick={() => setEditingHouseId(house.id)}>Sửa</Button><Button variant="danger">Xóa</Button></div>
+                <div className="actions">
+                  <Link className="app-button app-button--outline" to={`/houses/detail/${house.id}`}>Xem chi tiết</Link>
+                  {!isTenant && (
+                    <>
+                      <Button variant="ghost" onClick={() => setEditingHouseId(house.id)}>Sửa</Button>
+                      <Button variant="danger">Xóa</Button>
+                    </>
+                  )}
+                </div>
               </Card>
             )
           })}
@@ -272,7 +284,10 @@ export function HouseFormPage() {
 
   // Use updateHouse for edit, createHouse for add
   const save = useMutation((payload: any) => (isEdit ? updateHouse(payload) : createHouse(payload)), {
-    onSuccess: () => navigateTo('/houses'),
+    onSuccess: () => {
+      const ownerId = localStorage.getItem('authUserId')
+      navigateTo(ownerId ? `/houses/${ownerId}` : '/houses')
+    },
     onError: (error: unknown) => {
       setSubmitError(error instanceof Error ? error.message : (isEdit ? 'Không thể cập nhật nhà trọ' : 'Không thể tạo nhà trọ'))
     },
@@ -375,6 +390,7 @@ export function HouseFormPage() {
 }
 
 export function HouseDetailPage() {
+  const isTenant = localStorage.getItem('authRole') === 'Tenant'
   const pathParts = window.location.pathname.split('/').filter(Boolean)
   const houseId = pathParts[pathParts.length - 1] === 'rooms'
     ? pathParts[pathParts.length - 2] ?? pageId('h1')
@@ -420,7 +436,7 @@ export function HouseDetailPage() {
 
   return (
     <main className="page">
-      <PageHeader title={house.name} subtitle={house.address} action={<Button onClick={() => setEditOpen(true)}>Sửa</Button>} />
+      <PageHeader title={house.name} subtitle={house.address} action={!isTenant ? <Button onClick={() => setEditOpen(true)}>Sửa</Button> : undefined} />
       <div className="stat-grid"><Card><span>Tổng phòng</span><strong>{house.totalRooms}</strong></Card><Card><span>Đang thuê</span><strong>{house.occupiedRooms}</strong></Card><Card><span>Còn trống</span><strong>{house.totalRooms - house.occupiedRooms}</strong></Card><Card><span>Trạng thái</span><Badge variant={statusVariant(house.status as Status)}>{houseStatusLabel(house.status, house.isActive)}</Badge></Card></div>
       <HouseRoomsTable houseId={houseId} />
       <ModalForm
@@ -451,32 +467,35 @@ export function HouseDetailPage() {
 
 export function RoomsPage() {
   const query = useQuery(QK.rooms, () => read('/Rooms', rooms))
+  const isTenant = localStorage.getItem('authRole') === 'Tenant'
   return (
     <section className="page compact">
-      <PageHeader title="Phòng" subtitle="Danh sách phòng, giá thuê, trạng thái và thao tác nhanh." action={<Link className="app-button app-button--primary" to="/rooms/create">+ Thêm phòng</Link>} />
+      <PageHeader title="Phòng" subtitle="Danh sách phòng, giá thuê, trạng thái và thao tác nhanh." action={!isTenant ? <Link className="app-button app-button--primary" to="/rooms/create">+ Thêm phòng</Link> : undefined} />
       {query.isLoading ? <SkeletonGrid /> : <div className="grid-3">{(query.data ?? rooms).map((room) => <RoomCard key={room.id} room={room} />)}</div>}
     </section>
   )
 }
 
 function RoomCard({ room }: { room: Room }) {
+  const isTenant = localStorage.getItem('authRole') === 'Tenant'
   return (
     <Card className="room-card">
       <Illustration kind="room" />
       <div className="card-heading"><h2>Phòng {room.roomNumber}</h2><Badge variant={statusVariant(room.status)}>{room.status}</Badge></div>
       <p>Tầng {room.floor} • {room.area}m² • tối đa {room.maxOccupants} người</p>
       <strong>{formatVND(room.monthlyRent)}/tháng</strong>
-      <div className="actions"><Link className="app-button app-button--outline" to={`/rooms/${room.id}`}>Xem</Link><Link className="app-button app-button--ghost" to={`/rooms/${room.id}/edit`}>Sửa</Link></div>
+      <div className="actions"><Link className="app-button app-button--outline" to={`/rooms/${room.id}`}>Xem</Link>{!isTenant && <Link className="app-button app-button--ghost" to={`/rooms/${room.id}/edit`}>Sửa</Link>}</div>
     </Card>
   )
 }
 
 export function RoomDetailPage() {
   const room = rooms.find((item) => item.id === pageId('r101')) ?? rooms[0]
+  const isTenant = localStorage.getItem('authRole') === 'Tenant'
   return (
     <main className="page">
-      <PageHeader title={`Phòng ${room.roomNumber}`} subtitle={room.description} action={<Link className="app-button app-button--primary" to={`/rooms/${room.id}/edit`}>Sửa phòng</Link>} />
-      <div className="tabs"><button>Thông tin</button><button>Hợp đồng</button><button>Hóa đơn</button><button>Lịch sử điện nước</button></div>
+      <PageHeader title={`Phòng ${room.roomNumber}`} subtitle={room.description} action={!isTenant ? <Link className="app-button app-button--primary" to={`/rooms/${room.id}/edit`}>Sửa phòng</Link> : undefined} />
+      <div className="tabs"><button>Thông tin</button><button>Hóa đơn</button><button>Lịch sử điện nước</button></div>
       <div className="split">
         <Card><h2>Thông tin</h2><dl className="info-list"><dt>Tầng</dt><dd>{room.floor}</dd><dt>Diện tích</dt><dd>{room.area}m²</dd><dt>Giá thuê</dt><dd>{formatVND(room.monthlyRent)}</dd><dt>Tiền cọc</dt><dd>{formatVND(room.depositAmount)}</dd><dt>Giá điện/nước</dt><dd>{formatVND(room.electricityUnitPrice)} / {formatVND(room.waterUnitPrice)}</dd></dl></Card>
         <Card><h2>Ảnh phòng</h2><div className="gallery"><div /><div /><div /></div><div className="upload-box">Upload thêm ảnh</div></Card>
@@ -488,7 +507,7 @@ export function RoomDetailPage() {
 
 export function RoomFormPage() {
   const isEdit = window.location.pathname.endsWith('/edit')
-  const save = useMutation(() => ok({}), { onSuccess: () => navigateTo('/houses/h1/rooms') })
+  const save = useMutation(() => ok({}), { onSuccess: () => navigateTo('/houses/detail/h1/rooms') })
   return (
     <main className="page">
       <PageHeader title={isEdit ? 'Sửa phòng' : 'Thêm phòng'} subtitle="Thông tin cơ bản, tiện nghi, đơn giá điện nước và ảnh." />

@@ -28,7 +28,11 @@ public sealed class GetHousesQueryHandler
             .Include(h => h.Rooms)
             .AsQueryable();
 
-        if (_currentUser.Role == "Owner")
+        if (request.OwnerId.HasValue)
+        {
+            query = query.Where(h => h.OwnerId == request.OwnerId.Value);
+        }
+        else if (_currentUser.Role == "Owner")
         {
             query = query.Where(h => h.OwnerId == _currentUser.UserId);
         }

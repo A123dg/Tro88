@@ -1,6 +1,7 @@
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
+import type { TableProps } from 'antd'
 import { MetaData } from '../../types/room.types'
-import { PaginationBar } from './pagination'
+import TableWithPagination from '../../shared/components/table-pagination'
 
 export interface DataColumn<T> {
   key: string
@@ -23,12 +24,12 @@ interface DataPageProps<T> {
 }
 
 export function formatCurrency(value: number) {
-  return `${value.toLocaleString('vi-VN')}đ`
+  return `${value.toLocaleString('vi-VN')}d`
 }
 
 export function formatDate(value?: string | null) {
   if (!value) {
-    return 'Chưa có'
+    return 'Chua co'
   }
 
   return new Intl.DateTimeFormat('vi-VN', {
@@ -57,7 +58,12 @@ export function DataPage<T extends { id: string }>({
 }: DataPageProps<T>) {
   const page = meta?.page ?? 1
   const pageSize = meta?.pageSize ?? 10
-  const totalPage = Math.max(meta?.totalPage ?? 1, 1)
+  const tableColumns: TableProps<T>['columns'] = columns.map((column) => ({
+    key: column.key,
+    title: column.title,
+    className: column.key === 'actions' ? 'action-column' : undefined,
+    render: (_, item) => column.render(item),
+  }))
 
   return (
     <main className="area-page">
@@ -71,44 +77,31 @@ export function DataPage<T extends { id: string }>({
 
       {actions ? <section className="data-actions">{actions}</section> : null}
 
-      {isLoading ? <section className="panel-state">Đang tải dữ liệu...</section> : null}
-
       {isError ? (
         <section className="room-error">
-          <strong>Không thể tải dữ liệu</strong>
-          <p>Vui lòng kiểm tra đăng nhập, quyền truy cập hoặc API.</p>
-          <button type="button" className="button button--primary" onClick={onRetry}>Thử lại</button>
+          <strong>Khong the tai du lieu</strong>
+          <p>Vui long kiem tra dang nhap, quyen truy cap hoac API.</p>
+          <button type="button" className="button button--primary" onClick={onRetry}>Thu lai</button>
         </section>
       ) : null}
 
-      {!isLoading && !isError && items.length === 0 ? (
-        <section className="empty-state">
-          <h2>Chưa có dữ liệu</h2>
-          <p>Không có bản ghi phù hợp với bộ lọc hiện tại.</p>
-        </section>
-      ) : null}
-
-      {!isLoading && !isError && items.length > 0 ? (
-        <>
-          <section className="data-table">
-            <div className="data-table__head" style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(140px, 1fr))` }}>
-              {columns.map((column) => <span key={column.key}>{column.title}</span>)}
-            </div>
-            {items.map((item) => (
-              <div className="data-table__row" key={item.id} style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(140px, 1fr))` }}>
-                {columns.map((column) => <span key={column.key}>{column.render(item)}</span>)}
-              </div>
-            ))}
-          </section>
-
-          <PaginationBar
-            page={page}
-            pageSize={pageSize}
-            total={meta?.total ?? items.length}
-            totalPage={totalPage}
-            onChange={onPageChange}
+      {!isError ? (
+        <section className="data-table data-table--antd">
+          <TableWithPagination
+            columns={tableColumns}
+            dataSource={items}
+            loading={isLoading}
+            rowKey="id"
+            scroll={{ x: true }}
+            pagination={{
+              current: page,
+              pageSize,
+              total: meta?.total ?? items.length,
+              onChange: onPageChange,
+            }}
+            locale={{ emptyText: 'Khong co ban ghi phu hop voi bo loc hien tai.' }}
           />
-        </>
+        </section>
       ) : null}
     </main>
   )

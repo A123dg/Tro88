@@ -1,7 +1,14 @@
 import { useEffect } from 'react'
 import { useSearch } from '@tanstack/react-router'
 import { persistAuth } from '../../../services/authService'
+import { fetchCurrentUser } from '../../../services/userService'
 import { AuthResponseDto, LoginRole } from '../../../types/auth.types'
+
+function defaultRedirect(role?: string) {
+  if (role === 'Tenant') return '/my/rooms'
+  if (role === 'Admin') return '/admin'
+  return '/dashboard'
+}
 
 export function GoogleCallbackPage() {
   const search = useSearch({ strict: false }) as Partial<AuthResponseDto> & {
@@ -32,8 +39,15 @@ export function GoogleCallbackPage() {
           role: search.role,
         })
 
+        const response = await fetchCurrentUser()
+        const user = response.data
+        if (!user.fullName?.trim() || !user.phoneNumber?.trim() || !user.dateOfBirth) {
+          window.location.href = '/complete-profile'
+          return
+        }
+
         const state = search.state ? JSON.parse(atob(search.state)) : null
-        window.location.href = state?.redirectTo || '/dashboard'
+        window.location.href = state?.redirectTo || defaultRedirect(user.role)
       } catch {
         window.location.href = '/login?error=auth_failed'
       }
