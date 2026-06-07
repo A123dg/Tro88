@@ -6,6 +6,7 @@ namespace Tro88.Application.Features.UtilityReadings.Queries.GetUtilityReadings;
 
 public record GetUtilityReadingsQuery(
     Guid? RoomId,
+    string? Keyword,
     int? Month,
     int? Year,
     int Page = 1,

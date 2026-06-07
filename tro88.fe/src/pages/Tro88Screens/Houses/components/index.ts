@@ -1,1 +1,1 @@
-export { default as HouseModal } from './Modal/HouseModal'
+export {}

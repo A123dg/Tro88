@@ -25,6 +25,9 @@ public sealed class GetUtilityReadingsQueryHandler
         if (request.RoomId.HasValue)
             query = query.Where(r => r.RoomId == request.RoomId);
 
+        if (!string.IsNullOrWhiteSpace(request.Keyword))
+            query = query.Where(r => r.Room.RoomNumber.Contains(request.Keyword));
+
         if (request.Month.HasValue)
             query = query.Where(r => r.Month == request.Month);
 

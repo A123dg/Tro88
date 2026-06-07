@@ -14,13 +14,19 @@ public sealed class CreateContractCommandHandler
 {
     private readonly IApplicationDbContext _db;
     private readonly ICurrentUserService _currentUser;
+    private readonly IEmailService _emailService;
+    private readonly INotificationService _notificationService;
 
     public CreateContractCommandHandler(
         IApplicationDbContext db,
-        ICurrentUserService currentUser)
+        ICurrentUserService currentUser,
+        IEmailService emailService,
+        INotificationService notificationService)
     {
         _db = db;
         _currentUser = currentUser;
+        _emailService = emailService;
+        _notificationService = notificationService;
     }
 
     public async Task<ContractDto> Handle(
@@ -63,6 +69,53 @@ public sealed class CreateContractCommandHandler
         _db.Contracts.Add(contract);
         await _db.SaveChangesAsync(ct);
 
-        return ContractDto.FromEntity(contract);
+        // Send in-app notification to tenant
+        await _notificationService.SendAsync(
+            tenant.Id,
+            "CONTRACT_SIGNATURE_REQUEST",
+            $"Bạn có hợp đồng thuê phòng {room.RoomNumber} tại {room.House.Name} cần xác nhận ký.",
+            "contract",
+            contract.Id,
+            ct);
+
+        // Send email to tenant for signature request (non-blocking)
+        if (!string.IsNullOrWhiteSpace(tenant.Email))
+        {
+            try
+            {
+                var actionUrl = $"http://localhost:3000/my/contracts/{contract.Id}";
+                await _emailService.SendContractSignatureRequestAsync(
+                    tenant.Email,
+                    tenant.FullName,
+                    contract.ContractCode,
+                    room.RoomNumber,
+                    room.House.Name,
+                    actionUrl,
+                    ct);
+            }
+            catch
+            {
+                // Email delivery failure should not block contract creation
+            }
+        }
+
+        return new ContractDto(
+            contract.Id,
+            contract.RoomId,
+            room.RoomNumber,
+            contract.TenantId,
+            tenant.FullName,
+            tenant.PhoneNumber,
+            tenant.Email,
+            contract.ContractCode,
+            contract.StartDate,
+            contract.EndDate,
+            contract.MonthlyRent,
+            contract.DepositAmount,
+            contract.PaymentDayOfMonth,
+            contract.Status.ToString(),
+            contract.SignedAt,
+            contract.IsOwnerSigned,
+            contract.IsTenantSigned);
     }
 }

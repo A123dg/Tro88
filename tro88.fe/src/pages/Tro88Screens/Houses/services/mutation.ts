@@ -1,40 +1,30 @@
-import { useMutation } from 'react-query'
-import { createHouse, updateHouse, changeHouseStatus } from '../../../services/houseService'
-import { queryClient } from '../../../queryClient'
-import { IAddHouse, IEditHouse, IEditStatusHouse } from './types'
+import { useMutation, useQueryClient } from 'react-query'
+import { createHouse, updateHouse } from '../../../../services/houseService'
+import { QK } from '../../shared'
 
-export const useCreateHouse = () => {
-  return useMutation({
-    mutationFn: (payload: IAddHouse) => createHouse(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['houses'] })
+export const useCreateHouseMutation = (options?: { onSuccess?: (data: any) => void; onError?: (error: any) => void }) => {
+  const queryClient = useQueryClient()
+  return useMutation(createHouse, {
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(QK.houses)
+      if (options?.onSuccess) options.onSuccess(data)
     },
+    onError: (error) => {
+      if (options?.onError) options.onError(error)
+    }
   })
 }
 
-export const useUpdateHouse = () => {
-  return useMutation({
-    mutationFn: (payload: IEditHouse) => updateHouse(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['houses'] })
+export const useUpdateHouseMutation = (options?: { onSuccess?: (data: any) => void; onError?: (error: any) => void }) => {
+  const queryClient = useQueryClient()
+  return useMutation(updateHouse, {
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries(QK.houses)
+      queryClient.invalidateQueries(['house-detail', variables.id])
+      if (options?.onSuccess) options.onSuccess(data)
     },
-  })
-}
-
-export const useUpdateHouseStatus = () => {
-  return useMutation({
-    mutationFn: ({ id, status }: IEditStatusHouse) => changeHouseStatus(id, status),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['houses'] })
-    },
-  })
-}
-
-export const useDeleteHouse = () => {
-  return useMutation({
-    mutationFn: (id: string) => Promise.resolve({ success: true } as any), // TODO: implement delete API
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['houses'] })
-    },
+    onError: (error) => {
+      if (options?.onError) options.onError(error)
+    }
   })
 }

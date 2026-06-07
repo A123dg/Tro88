@@ -9,6 +9,7 @@ using Tro88.Application.Features.Invoices.Commands.SendInvoice;
 using Tro88.Application.Features.Invoices.Queries.GetInvoicePdf;
 using Tro88.Application.Features.Invoices.Queries.GetInvoices;
 using Tro88.Application.Features.Invoices.Queries.GetInvoiceById;
+using Tro88.Application.Features.Invoices.Commands.NotifyInvoicePayment;
 
 namespace Tro88.API.Controllers;
 
@@ -58,6 +59,13 @@ public class InvoicesController : BaseApiController
     {
         var result = await Mediator.Send(new MarkInvoiceAsPaidCommand(id));
         return Ok(ApiResponse<InvoiceDto>.Ok(result, SuccessMessages.MARK_INVOICE_PAID_SUCCESS));
+    }
+
+    [HttpPatch("{id}/notify-payment")]
+    public async Task<IActionResult> NotifyInvoicePayment(Guid id)
+    {
+        var result = await Mediator.Send(new NotifyInvoicePaymentCommand(id));
+        return Ok(ApiResponse<InvoiceDto>.Ok(result, "NOTIFY_PAYMENT_SUCCESS"));
     }
 
     [HttpPost("{id}/send")]

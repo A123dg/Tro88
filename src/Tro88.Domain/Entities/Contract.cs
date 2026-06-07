@@ -19,6 +19,8 @@ public class Contract : SoftDeleteEntity
     public ContractStatus Status { get; private set; }
     public string? Terms { get; private set; }
     public DateTime? SignedAt { get; private set; }
+    public bool IsOwnerSigned { get; private set; }
+    public bool IsTenantSigned { get; private set; }
 
     public Room Room { get; private set; } = default!;
     public User Tenant { get; private set; } = default!;
@@ -50,14 +52,44 @@ public class Contract : SoftDeleteEntity
             DepositAmount = depositAmount,
             PaymentDayOfMonth = paymentDay,
             Status = ContractStatus.Draft,
-            Terms = terms
+            Terms = terms,
+            IsOwnerSigned = false,
+            IsTenantSigned = false
         };
+    }
+
+    public void SignByOwner()
+    {
+        if (Status != ContractStatus.Draft)
+            throw new BusinessRuleException("Only draft contracts can be signed");
+        IsOwnerSigned = true;
+        CheckAndActivate();
+    }
+
+    public void SignByTenant()
+    {
+        if (Status != ContractStatus.Draft)
+            throw new BusinessRuleException("Only draft contracts can be signed");
+        IsTenantSigned = true;
+        CheckAndActivate();
+    }
+
+    private void CheckAndActivate()
+    {
+        if (IsOwnerSigned && IsTenantSigned)
+        {
+            Status = ContractStatus.Active;
+            SignedAt = DateTime.UtcNow;
+            AddDomainEvent(new ContractCreatedEvent(this));
+        }
     }
 
     public void Activate()
     {
         if (Status != ContractStatus.Draft)
             throw new BusinessRuleException("Only draft contracts can be activated");
+        IsOwnerSigned = true;
+        IsTenantSigned = true;
         Status = ContractStatus.Active;
         SignedAt = DateTime.UtcNow;
         AddDomainEvent(new ContractCreatedEvent(this));

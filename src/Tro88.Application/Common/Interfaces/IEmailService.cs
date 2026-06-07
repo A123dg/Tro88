@@ -31,4 +31,21 @@ public interface IEmailService
         string toEmail,
         string toName,
         CancellationToken ct = default);
+
+    Task SendContractSignatureRequestAsync(
+        string toEmail,
+        string toName,
+        string contractCode,
+        string roomNumber,
+        string houseName,
+        string actionUrl,
+        CancellationToken ct = default);
+
+    Task SendContractSignedConfirmationAsync(
+        string toEmail,
+        string toName,
+        string contractCode,
+        string roomNumber,
+        string houseName,
+        CancellationToken ct = default);
 }

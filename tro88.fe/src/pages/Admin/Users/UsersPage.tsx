@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Form, Input, Select, Switch } from 'antd'
+import { Button, Form, Input, Select, Switch, Modal } from 'antd'
 import { useMutation, useQuery } from 'react-query'
 import { DataColumn, DataPage, formatDate, StatusPill } from '../../../components/shared/DataPage'
 import { useUrlListFilters } from '../../../hooks/useUrlListFilters'
@@ -7,6 +7,7 @@ import { queryClient } from '../../../queryClient'
 import { createUser, deleteUser, fetchUsers, SaveUserPayload, updateUser, UserFilters } from '../../../services/userService'
 import { UserDto } from '../../../types/app.types'
 import ModalForm from '../../../shared/components/modal-form/ModalForm'
+import { CustomDatePicker } from '../../../shared/components/custom-datepicker'
 
 const roleOptions = [
   { value: '', label: 'Tất cả vai trò' },
@@ -69,19 +70,26 @@ export function AdminUsersPage() {
         title: 'Thao tác',
         render: (item) => (
           <div className="row-actions">
-            <button type="button" className="button button--ghost" onClick={() => openEdit(item)}>
+            <Button type="text" onClick={() => openEdit(item)}>
               Sửa
-            </button>
-            <button
-              type="button"
-              className="button button--danger"
+            </Button>
+            <Button
+              type="text"
+              danger
               disabled={removeUser.isLoading}
               onClick={() => {
-                if (window.confirm(`Xóa tài khoản ${item.email}?`)) removeUser.mutate(item.id)
+                Modal.confirm({
+                  title: 'Xóa tài khoản',
+                  content: `Bạn có chắc chắn muốn xóa tài khoản ${item.email}?`,
+                  okText: 'Xóa',
+                  okType: 'danger',
+                  cancelText: 'Hủy',
+                  onOk: () => removeUser.mutate(item.id),
+                })
               }}
             >
               Xóa
-            </button>
+            </Button>
           </div>
         ),
       },
@@ -116,19 +124,20 @@ export function AdminUsersPage() {
         onPageChange={(page, pageSize) => setFilters((current) => ({ ...current, page, pageSize: pageSize ?? current.pageSize }))}
         actions={
           <div className="data-actions__row">
-            <Input
+            <Input.Search
               value={filters.search ?? ''}
               placeholder="Tìm tên, email, số điện thoại"
               onChange={(event) => setFilters({ ...filters, search: event.target.value, page: 1 })}
+              enterButton
             />
             <Select
               value={filters.role ?? ''}
               onChange={(role) => setFilters({ ...filters, role: role || undefined, page: 1 })}
               options={roleOptions}
             />
-            <button type="button" className="button button--primary" onClick={openCreate}>
+            <Button type="primary" onClick={openCreate}>
               Thêm người dùng
-            </button>
+            </Button>
           </div>
         }
         columns={columns}
@@ -144,7 +153,7 @@ export function AdminUsersPage() {
           { label: 'Số điện thoại', name: 'phoneNumber', component: <Input />, span: 12 },
           { label: 'Vai trò', name: 'role', component: <Select options={roleOptions.filter((item) => item.value)} />, rules: [{ required: true, message: 'Vui lòng chọn vai trò' }], span: 12 },
           { label: 'Mật khẩu', name: 'password', component: <Input.Password placeholder={editingUser ? 'Để trống nếu không đổi' : 'Nhập mật khẩu'} />, rules: editingUser ? [] : [{ required: true, message: 'Vui lòng nhập mật khẩu' }], span: 12 },
-          { label: 'Ngày sinh', name: 'dateOfBirth', component: <Input type="date" />, span: 12 },
+          { label: 'Ngày sinh', name: 'dateOfBirth', component: <CustomDatePicker placeholder="Chọn ngày sinh" />, span: 12 },
           { label: 'CCCD/CMND', name: 'nationalId', component: <Input />, span: 12 },
           { label: 'Hoạt động', name: 'isActive', component: <Switch checkedChildren="Bật" unCheckedChildren="Tắt" />, valuePropName: 'checked', span: 12 },
         ]}

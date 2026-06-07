@@ -8,10 +8,11 @@ import { queryClient } from '../../../queryClient'
 import { createAiConversation, fetchAiConversation, fetchAiConversations, sendAiMessage } from '../../../services/aiAgentService'
 import { createHouse, fetchHouseDetail, updateHouse } from '../../../services/houseService'
 import ModalForm from '../../../shared/components/modal-form/ModalForm'
+import { useNotification } from '../../../hooks/useNotification'
 import {
   AreaChartLite, Badge, Button, Card, DataTable, EmptyState, FormShell, Illustration, Link, navigateTo,
   MaintenanceCard, MiniBarChart, NotificationList, PageHeader, SimpleFormPage, SimplePage, SkeletonGrid,
-  Maintenance, Room, Status, Timeline, UtilityTable, contracts, fetchProvinceOptions, fetchWardOptions, formatDate, formatVND,
+  Maintenance,  Status, Timeline, UtilityTable, contracts, fetchProvinceOptions, fetchWardOptions, formatDate, formatVND,
   houseStatusLabel, houses, invoices, maintenance, normalizeHouse, ok, pageId, read, rooms, statusVariant, total, QK,
 } from '../shared'
 
@@ -29,13 +30,66 @@ export function InvoicesPage() {
 }
 
 export function InvoiceDetailPage() {
+  const routerState = useRouterState()
+  const isOwner = routerState.location.pathname.startsWith('/invoices')
   const invoice = invoices.find((item) => item.id === pageId('i1')) ?? invoices[0]
+  const { showSuccessNotify } = useNotification()
+  const [status, setStatus] = useState(invoice.status)
+
+  const handleConfirmTransfer = () => {
+    invoice.status = 'Paid'
+    setStatus('Paid')
+    showSuccessNotify('Xác nhận chuyển khoản thành công! Hóa đơn đã được ghi nhận thanh toán.')
+  }
+
+  const handleNotifyTransfer = () => {
+    invoice.status = 'WaitingConfirm'
+    setStatus('WaitingConfirm')
+    showSuccessNotify('Đã gửi thông báo chuyển khoản thành công! Chờ chủ trọ xác nhận.')
+  }
+
   return (
     <main className="page">
       <PageHeader title={`Hóa đơn ${invoice.code}`} />
       <div className="split">
-        <Card className="document"><h2>HÓA ĐƠN TIỀN NHÀ</h2><p>Mã: #{invoice.code}</p><p>Người thuê: {invoice.tenant} - Phòng {invoice.room}</p><DataTable headers={['STT', 'Khoản', 'Đơn giá', 'SL', 'Thành tiền']} rows={[[1, 'Tiền thuê phòng', formatVND(invoice.rent), 1, formatVND(invoice.rent)], [2, 'Tiền điện', '3.800đ', 120, formatVND(invoice.electricity)], [3, 'Tiền nước', '18.000đ', 7, formatVND(invoice.water)], [4, 'Dịch vụ', formatVND(invoice.service), 1, formatVND(invoice.service)]]} /><strong className="money">Tổng cộng: {formatVND(total(invoice))}</strong><div className="qr">QR</div><p>TK ngân hàng: 0123456789 - Tro88</p></Card>
-        <Card><Badge variant={statusVariant(invoice.status)}>{invoice.status}</Badge><Timeline items={['Tạo', 'Gửi', 'Đến hạn', 'Thanh toán']} /><div className="actions vertical"><Button>Gửi email</Button><Button variant="outline">PDF</Button><Button variant="secondary">Đánh dấu đã TT</Button><Button variant="ghost">Copy thông tin CK</Button></div></Card>
+        <Card className="document">
+          <h2>HÓA ĐƠN TIỀN NHÀ</h2>
+          <p>Mã: #{invoice.code}</p>
+          <p>Người thuê: {invoice.tenant} - Phòng {invoice.room}</p>
+          <DataTable 
+            headers={['STT', 'Khoản', 'Đơn giá', 'SL', 'Thành tiền']} 
+            rows={[
+              [1, 'Tiền thuê phòng', formatVND(invoice.rent), 1, formatVND(invoice.rent)], 
+              [2, 'Tiền điện', '3.800đ', 120, formatVND(invoice.electricity)], 
+              [3, 'Tiền nước', '18.000đ', 7, formatVND(invoice.water)], 
+              [4, 'Dịch vụ', formatVND(invoice.service), 1, formatVND(invoice.service)]
+            ]} 
+          />
+          <strong className="money">Tổng cộng: {formatVND(total(invoice))}</strong>
+          {isOwner && <div className="qr">QR</div>}
+          <p>TK ngân hàng: 0123456789 - Tro88</p>
+        </Card>
+        <Card>
+          <Badge variant={statusVariant(status)}>{status}</Badge>
+          <Timeline items={['Tạo', 'Gửi', 'Đến hạn', 'Thanh toán']} />
+          <div className="actions vertical">
+            {isOwner ? (
+              <>
+                {status !== 'Paid' && (
+                  <Button variant="primary" onClick={handleConfirmTransfer}>Xác nhận chuyển khoản</Button>
+                )}
+                <Button>Gửi email</Button>
+                <Button variant="secondary">Đánh dấu đã TT</Button>
+              </>
+            ) : (
+              <>
+                {status === 'Unpaid' || status === 'Overdue' ? (
+                  <Button variant="primary" onClick={handleNotifyTransfer}>Thông báo chuyển khoản</Button>
+                ) : null}
+              </>
+            )}
+          </div>
+        </Card>
       </div>
     </main>
   )
@@ -56,11 +110,42 @@ export function InvoiceBulkPage() {
 
 export function MyInvoicesPage() {
   const invoice = invoices[0]
+  const { showSuccessNotify } = useNotification()
+  const [status, setStatus] = useState(invoice.status)
+
+  const handleNotifyTransfer = () => {
+    invoice.status = 'WaitingConfirm'
+    setStatus('WaitingConfirm')
+    showSuccessNotify('Đã gửi thông báo chuyển khoản thành công! Chờ chủ trọ xác nhận.')
+  }
+
   return (
     <section className="tenant-page">
       <h1>Hóa đơn của tôi</h1>
-      <Card className="tenant-room-card"><Badge variant={statusVariant(invoice.status)}>{invoice.status}</Badge><strong className="money danger">{formatVND(total(invoice))}</strong><p>Hạn TT: {formatDate(invoice.dueDate)}</p><details open><summary>Chi tiết</summary><p>Tiền thuê {formatVND(invoice.rent)}</p><p>Điện {formatVND(invoice.electricity)}</p><p>Nước {formatVND(invoice.water)}</p><p>Dịch vụ {formatVND(invoice.service)}</p></details><div className="qr">QR</div><Button full>Đã chuyển khoản → Thông báo</Button></Card>
-      <Card><h2>Lịch sử</h2>{invoices.map((item) => <details key={item.id}><summary>T{item.month}/{item.year} • {formatVND(total(item))} • {item.status}</summary><Link to={`/invoices/${item.id}`}>Xem chi tiết</Link></details>)}</Card>
+      <Card className="tenant-room-card">
+        <Badge variant={statusVariant(status)}>{status}</Badge>
+        <strong className="money danger">{formatVND(total(invoice))}</strong>
+        <p>Hạn TT: {formatDate(invoice.dueDate)}</p>
+        <details open>
+          <summary>Chi tiết</summary>
+          <p>Tiền thuê {formatVND(invoice.rent)}</p>
+          <p>Điện {formatVND(invoice.electricity)}</p>
+          <p>Nước {formatVND(invoice.water)}</p>
+          <p>Dịch vụ {formatVND(invoice.service)}</p>
+        </details>
+        {status === 'Unpaid' || status === 'Overdue' ? (
+          <Button full onClick={handleNotifyTransfer}>Thông báo chuyển khoản</Button>
+        ) : null}
+      </Card>
+      <Card>
+        <h2>Lịch sử</h2>
+        {invoices.map((item) => (
+          <details key={item.id}>
+            <summary>T{item.month}/{item.year} • {formatVND(total(item))} • {item.status}</summary>
+            <Link to={`/my/invoices/${item.id}`}>Xem chi tiết</Link>
+          </details>
+        ))}
+      </Card>
     </section>
   )
 }

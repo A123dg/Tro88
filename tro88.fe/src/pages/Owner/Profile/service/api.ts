@@ -1,7 +1,19 @@
 import { api } from '../../../../services/apiClient'
 
+interface ProfileApiResponse<T> {
+  success: boolean
+  message?: string
+  data: T
+}
+
+interface EmptyApiResponse {
+  success: boolean
+  message?: string
+  data?: unknown
+}
+
 export const fetchCurrentUser = async () => {
-  const response = await api.get<unknown, { success: boolean; data: UserProfile }>('/Users/me')
+  const response = await api.get<unknown, ProfileApiResponse<UserProfile>>('/Users/me')
   if (!response.success) {
     throw new Error(response.message)
   }
@@ -34,7 +46,7 @@ export interface ChangePasswordRequest {
 }
 
 export const updateProfile = async (data: UpdateProfileRequest) => {
-  const response = await api.put<UpdateProfileRequest, { success: boolean; data: UserProfile }>('/Users/me', data)
+  const response = await api.put<UpdateProfileRequest, ProfileApiResponse<UserProfile>>('/Users/me', data)
   if (!response.success) {
     throw new Error(response.message)
   }
@@ -42,7 +54,7 @@ export const updateProfile = async (data: UpdateProfileRequest) => {
 }
 
 export const changePassword = async (data: ChangePasswordRequest) => {
-  const response = await api.post<ChangePasswordRequest, { success: boolean }>('/Users/change-password', data)
+  const response = await api.post<ChangePasswordRequest, EmptyApiResponse>('/Users/change-password', data)
   if (!response.success) {
     throw new Error(response.message)
   }

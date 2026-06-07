@@ -197,6 +197,36 @@ namespace Tro88.Infrastructure.Migrations
                     b.ToTable("AuditLogs", (string)null);
                 });
 
+            modelBuilder.Entity("Tro88.Domain.Entities.ContactLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+                    b.Property<string>("ContactType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("HouseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HouseId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ContactLogs", (string)null);
+                });
+
             modelBuilder.Entity("Tro88.Domain.Entities.Contract", b =>
                 {
                     b.Property<Guid>("Id")
@@ -230,6 +260,16 @@ namespace Tro88.Infrastructure.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<bool>("IsOwnerSigned")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsTenantSigned")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<decimal>("MonthlyRent")
                         .HasPrecision(18, 2)
@@ -278,6 +318,32 @@ namespace Tro88.Infrastructure.Migrations
                     b.HasIndex("TenantId");
 
                     b.ToTable("Contracts", (string)null);
+                });
+
+            modelBuilder.Entity("Tro88.Domain.Entities.FavoriteHouse", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("HouseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HouseId");
+
+                    b.HasIndex("UserId", "HouseId")
+                        .IsUnique();
+
+                    b.ToTable("FavoriteHouses", (string)null);
                 });
 
             modelBuilder.Entity("Tro88.Domain.Entities.House", b =>
@@ -1006,6 +1072,25 @@ namespace Tro88.Infrastructure.Migrations
                     b.Navigation("Conversation");
                 });
 
+            modelBuilder.Entity("Tro88.Domain.Entities.ContactLog", b =>
+                {
+                    b.HasOne("Tro88.Domain.Entities.House", "House")
+                        .WithMany()
+                        .HasForeignKey("HouseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Tro88.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("House");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Tro88.Domain.Entities.Contract", b =>
                 {
                     b.HasOne("Tro88.Domain.Entities.Room", "Room")
@@ -1023,6 +1108,25 @@ namespace Tro88.Infrastructure.Migrations
                     b.Navigation("Room");
 
                     b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("Tro88.Domain.Entities.FavoriteHouse", b =>
+                {
+                    b.HasOne("Tro88.Domain.Entities.House", "House")
+                        .WithMany()
+                        .HasForeignKey("HouseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Tro88.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("House");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Tro88.Domain.Entities.House", b =>

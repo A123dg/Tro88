@@ -137,7 +137,59 @@ public class GeminiAiService : IAiService
 
     private object BuildRequestBody(List<object> contents, string? systemPrompt)
     {
-        var tools = _toolManager.BuildGeminiFunctionDeclarations();
+        // Kiểm tra câu tin nhắn cuối cùng của user có chứa các từ khóa liên quan đến tools không
+        // Nếu không có, không gửi danh sách tools cho Gemini để tránh việc gọi tool call ngoài ý muốn
+        // và để Gemini trả lời bình thường dựa vào thông tin đã học/huấn luyện.
+        var hasToolKeywords = false;
+        
+        // Tìm content của tin nhắn cuối cùng từ user
+        // contents chứa danh sách các tin nhắn có dạng: new { role = "user"/"model", parts = new[] { new { text = ... } } }
+        // Hoặc là message.Content.
+        // Ta có thể duyệt ngược hoặc xem trong contents
+        if (contents.Count > 0)
+        {
+            var lastUserContent = "";
+            for (int i = contents.Count - 1; i >= 0; i--)
+            {
+                var dynamicContent = contents[i] as dynamic;
+                if (dynamicContent != null)
+                {
+                    string role = "";
+                    try { role = dynamicContent.role; } catch {}
+                    
+                    if (role == "user")
+                    {
+                        try
+                        {
+                            var parts = dynamicContent.parts;
+                            if (parts != null && parts.Length > 0)
+                            {
+                                lastUserContent = parts[0].text ?? "";
+                            }
+                        }
+                        catch {}
+                        if (!string.IsNullOrEmpty(lastUserContent))
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (!string.IsNullOrEmpty(lastUserContent))
+            {
+                var lowerContent = lastUserContent.ToLower();
+                var keywords = new[] { 
+                    "phòng", "phong", "trong", "trống", 
+                    "hóa đơn", "hoa don", "bill", "thanh toán", "thanh toan", 
+                    "hợp đồng", "hop dong", "doanh thu", "tiền", "tien",
+                    "điện", "dien", "nước", "nuoc", "nợ", "no", "còn trống", "con trong"
+                };
+                hasToolKeywords = keywords.Any(kw => lowerContent.Contains(kw));
+            }
+        }
+
+        var tools = hasToolKeywords ? _toolManager.BuildGeminiFunctionDeclarations() : Array.Empty<object>();
 
         return new
         {

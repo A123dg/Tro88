@@ -21,5 +21,7 @@ public interface IApplicationDbContext
     DbSet<AiConversation> AiConversations { get; }
     DbSet<AiMessage> AiMessages { get; }
     DbSet<AiAgentTask> AiAgentTasks { get; }
+    DbSet<FavoriteHouse> FavoriteHouses { get; }
+    DbSet<ContactLog> ContactLogs { get; }
     Task<int> SaveChangesAsync(CancellationToken ct = default);
 }

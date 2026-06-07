@@ -1,8 +1,8 @@
-import { useRouterState } from '@tanstack/react-router'
 import { FormEvent, useState } from 'react'
 import { ROUTE_PATHS } from '../../../constant/routes'
 import { useLogin } from './hooks'
 import { LoginRole } from './service/types'
+import loginIllustration from '../../../assets/login-illustration.png'
 
 interface LoginPageProps {
   role: LoginRole
@@ -34,7 +34,6 @@ function getLoginErrorMessage(error: unknown) {
 }
 
 function LoginForm({ role, title, subtitle, redirectTo, mode }: LoginPageProps) {
-  const pathname = useRouterState({ select: (state) => state.location.pathname })
   const login = useLogin()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -93,6 +92,9 @@ function LoginForm({ role, title, subtitle, redirectTo, mode }: LoginPageProps) 
 
   return (
     <main className="login-page">
+      <figure className="login-page__illustration">
+        <img src={loginIllustration} alt="Tro88 Authentication" />
+      </figure>
       <section className="login-panel">
         <div className="login-panel__brand">
           <span>88</span>
@@ -136,13 +138,24 @@ function LoginForm({ role, title, subtitle, redirectTo, mode }: LoginPageProps) 
             </>
           ) : (
             <div className="google-login-box">
-              <p>Người ở trọ và quản lý nhà trọ đăng nhập bằng Google. Bạn sẽ được chuyển sang màn chọn tài khoản Google.</p>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
+                <svg width="48" height="48" viewBox="0 0 48 48">
+                  <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                  <path fill="#4285F4" d="M46.5 24c0-1.61-.15-3.16-.42-4.69H24v8.89h12.66c-.55 2.92-2.2 5.39-4.69 7.05l7.3 5.66C43.5 35.8 46.5 30.47 46.5 24z"/>
+                  <path fill="#FBBC05" d="M10.54 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.98-6.19z"/>
+                  <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.3-5.66c-2.03 1.36-4.62 2.17-8.59 2.17-6.26 0-11.57-4.22-13.46-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                </svg>
+              </div>
+              <p style={{ margin: 0, fontWeight: 500, color: '#4b5563' }}>
+                Đăng nhập nhanh với tài khoản Google.
+              </p>
+              <p style={{ margin: 0, fontSize: '12px', color: '#9ca3af' }}>
+                Bạn sẽ được chuyển hướng an toàn tới cổng xác thực Google.
+              </p>
             </div>
           )}
 
-          {login.isError ? (
-            <p className="login-error">{getLoginErrorMessage(login.error)}</p>
-          ) : null}
+          {login.isError ? <p className="login-error">{getLoginErrorMessage(login.error)}</p> : null}
           {roleError ? <p className="login-error">{roleError}</p> : null}
 
           <button type="submit" className="app-button app-button--primary app-button--full" disabled={login.isLoading}>
@@ -150,11 +163,7 @@ function LoginForm({ role, title, subtitle, redirectTo, mode }: LoginPageProps) 
           </button>
         </form>
 
-        <nav className="login-switcher" aria-label="Chọn loại tài khoản">
-          <a className={pathname === ROUTE_PATHS.tenantLogin || pathname === ROUTE_PATHS.login ? 'active' : ''} href={ROUTE_PATHS.tenantLogin}>Người ở trọ</a>
-          <a className={pathname === ROUTE_PATHS.ownerLogin ? 'active' : ''} href={ROUTE_PATHS.ownerLogin}>Quản lý nhà trọ</a>
-          <a className={pathname === ROUTE_PATHS.adminLogin ? 'active' : ''} href={ROUTE_PATHS.adminLogin}>Admin</a>
-        </nav>
+        <a className="login-home-link" href="/">Về trang giới thiệu</a>
       </section>
     </main>
   )
@@ -165,7 +174,7 @@ export function TenantLoginPage() {
     <LoginForm
       role="Tenant"
       title="Đăng nhập người ở trọ"
-      subtitle="Truy cập thông tin phòng thuê, hóa đơn và yêu cầu bảo trì."
+      subtitle="Truy cập thông tin phòng thuê, hóa đơn, dịch vụ và yêu cầu bảo trì."
       redirectTo={ROUTE_PATHS.tenant}
       mode="google"
     />
@@ -189,7 +198,7 @@ export function AdminLoginPage() {
     <LoginForm
       role="Admin"
       title="Đăng nhập admin hệ thống"
-      subtitle="Truy cập dữ liệu toàn hệ thống, audit logs và thống kê tổng hợp."
+      subtitle="Truy cập duyệt nhà trọ, quản lý người dùng và nhật ký hệ thống."
       redirectTo={ROUTE_PATHS.admin}
       mode="password"
     />

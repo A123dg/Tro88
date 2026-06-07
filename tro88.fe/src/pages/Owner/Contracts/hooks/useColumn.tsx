@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { DataColumn, formatCurrency, formatDate, StatusPill } from '../../../../components/shared/DataPage'
 import { ContractDto } from '../service/types'
+import { navigateTo } from '../../../Tro88Screens/shared'
 
 interface UseColumnProps {
   handleActivate: (id: string) => void
@@ -8,6 +9,8 @@ interface UseColumnProps {
 }
 
 export function useColumn({ handleActivate, handleTerminate }: UseColumnProps) {
+  const isTenant = localStorage.getItem('authRole') === 'Tenant'
+  
   const columns = useMemo<Array<DataColumn<ContractDto>>>(
     () => [
       { key: 'code', title: 'Mã hợp đồng', render: (item) => <strong>{item.contractCode}</strong> },
@@ -21,17 +24,24 @@ export function useColumn({ handleActivate, handleTerminate }: UseColumnProps) {
         title: 'Thao tác',
         render: (item) => (
           <div className="row-actions">
-            <button type="button" className="button button--primary" onClick={() => handleActivate(item.id)}>
-              Kích hoạt
+            <button type="button" className="button button--primary" onClick={() => navigateTo(isTenant ? `/my/contracts/${item.id}` : `/contracts/${item.id}`)}>
+              Xem
             </button>
-            <button type="button" className="button button--ghost" onClick={() => handleTerminate(item.id)}>
-              Kết thúc
-            </button>
+            {!isTenant && item.status === 'Draft' && (
+              <button type="button" className="button button--primary" onClick={() => handleActivate(item.id)}>
+                Kích hoạt
+              </button>
+            )}
+            {!isTenant && item.status === 'Active' && (
+              <button type="button" className="button button--ghost" onClick={() => handleTerminate(item.id)}>
+                Kết thúc
+              </button>
+            )}
           </div>
         ),
       },
     ],
-    [handleActivate, handleTerminate],
+    [handleActivate, handleTerminate, isTenant],
   )
 
   return { columns }

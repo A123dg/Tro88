@@ -60,6 +60,13 @@ public class Invoice : SoftDeleteEntity
         AddDomainEvent(new PaymentReceivedEvent(this));
     }
 
+    public void MarkAsWaitingConfirm()
+    {
+        if (Status == InvoiceStatus.Paid)
+            throw new BusinessRuleException("Invoice already paid");
+        Status = InvoiceStatus.WaitingConfirm;
+    }
+
     public void MarkOverdue()
     {
         if (Status == InvoiceStatus.Paid)

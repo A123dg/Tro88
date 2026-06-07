@@ -75,7 +75,7 @@ export function DataPage<T extends { id: string }>({
         </div>
       </header>
 
-      {actions ? <section className="data-actions">{actions}</section> : null}
+      {actions ? <section className="data-actions data-actions__row">{actions}</section> : null}
 
       {isError ? (
         <section className="room-error">

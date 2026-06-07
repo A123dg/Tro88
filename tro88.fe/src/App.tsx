@@ -1,12 +1,16 @@
-import { Outlet, useRouterState } from '@tanstack/react-router'
-import type { ReactNode } from 'react'
-import { Bell, Building2, ChartBar, CreditCard, Home, LogOut, Receipt, Settings, User, Wrench, Zap } from './icons'
+import { Link as RouterLink, Outlet, useNavigate, useRouterState } from '@tanstack/react-router'
+import { ReactNode, useLayoutEffect } from 'react'
+import { getZoomRatio } from './utils/getZoomRatio'
+import { Bell, Building2, ChartBar, CreditCard, FileText, Home, LogOut, Receipt, Settings, User, Wrench, Zap } from './icons'
 import { clearAuth, logout } from './services/authService'
 import { NotificationDropdown } from './components/shared/NotificationDropdown'
+import { AIChatWidget } from './components/shared/AIChatWidget'
 
 const ownerNav = [
   { to: '/dashboard', label: 'Tổng quan', icon: Home },
   { to: '/houses', label: 'Nhà trọ', icon: Building2 },
+  { to: '/tenants', label: 'Người ở', icon: User },
+  { to: '/contracts', label: 'Hợp đồng', icon: FileText },
   { to: '/invoices', label: 'Hóa đơn', icon: CreditCard },
   { to: '/utility-readings', label: 'Điện nước', icon: Zap },
   { to: '/maintenance', label: 'Bảo trì', icon: Wrench },
@@ -17,37 +21,49 @@ const ownerNav = [
 const adminNav = [
   { to: '/admin', label: 'Nhà trọ', icon: Building2 },
   { to: '/admin/users', label: 'Người dùng', icon: User },
+  { to: '/admin/service-fees', label: 'Dịch vụ', icon: Settings },
   { to: '/audit-logs', label: 'Nhật ký', icon: ChartBar },
 ]
 
 const tenantNav = [
   { to: '/my/rooms', label: 'Tìm phòng', icon: Building2 },
+  { to: '/my/contracts', label: 'Hợp đồng', icon: FileText },
   { to: '/my/invoices', label: 'Hóa đơn', icon: Receipt },
   { to: '/my/service-fees', label: 'Dịch vụ', icon: Settings },
   { to: '/my/maintenance', label: 'Bảo trì', icon: Wrench },
-  { to: '/my/notifications', label: 'Thông báo', icon: Bell },
   { to: '/my/profile', label: 'Cá nhân', icon: User },
 ]
 
 function Link({ to, className, children, ...props }: { to: string; className?: string; children: ReactNode; 'aria-label'?: string }) {
-  return <a href={to} className={className} {...props}>{children}</a>
+  return (
+    <RouterLink to={to as any} className={className} {...props}>
+      {children}
+    </RouterLink>
+  )
 }
 
 function isActive(pathname: string, target: string) {
   return pathname === target || (target !== '/dashboard' && pathname.startsWith(target))
 }
 
-function OwnerLayout() {
+function getAuthenticatedHome(role: string | null) {
+  if (role === 'Admin') return '/admin'
+  if (role === 'Tenant') return '/my/rooms'
+  return '/dashboard'
+}
+
+export function OwnerLayout() {
   const pathname = useRouterState({ select: (state) => state.location.pathname })
   const role = localStorage.getItem('authRole')
   const navigation = role === 'Admin' ? adminNav : ownerNav
+  const navigate = useNavigate()
 
   const handleLogout = async () => {
     try {
       await logout()
     } finally {
       clearAuth()
-      window.location.href = '/login'
+      navigate({ to: '/login' })
     }
   }
 
@@ -97,8 +113,18 @@ function OwnerLayout() {
   )
 }
 
-function TenantLayout() {
+export function TenantLayout() {
   const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const navigate = useNavigate()
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+    } finally {
+      clearAuth()
+      navigate({ to: '/login' })
+    }
+  }
 
   return (
     <div className="tenant-shell">
@@ -118,10 +144,19 @@ function TenantLayout() {
             )
           })}
         </nav>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: 'auto' }}>
+          <NotificationDropdown />
+          <button className="icon-button" type="button" onClick={handleLogout} aria-label="Đăng xuất" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <LogOut />
+          </button>
+        </div>
       </header>
       <main className="tenant-main">
-        <Outlet />
+        <div className="content-body">
+          <Outlet />
+        </div>
       </main>
+      <AIChatWidget />
     </div>
   )
 }
@@ -135,22 +170,18 @@ export function AuthLayout() {
 }
 
 export function AppShell() {
-  const pathname = useRouterState({ select: (state) => state.location.pathname })
-  const isPortal = pathname === '/'
-  const isAuth = pathname.startsWith('/login') || pathname.startsWith('/auth/') || pathname === '/register' || pathname === '/forgot-password' || pathname === '/complete-profile'
-  const isTenant = pathname.startsWith('/my')
+  useLayoutEffect(() => {
+    const viewportWidth = window.innerWidth || window.document.documentElement.clientWidth;
+    const isMobile = viewportWidth < 768;
 
-  if (isPortal) {
-    return <Outlet />
-  }
+    if (!isMobile) {
+      const zoom = getZoomRatio();
+      document.documentElement.style.setProperty('--zoom', zoom.toString());
+    } else {
+      document.documentElement.style.setProperty('--zoom', '1');
+    }
+  }, []);
 
-  if (isAuth) {
-    return <AuthLayout />
-  }
-
-  if (isTenant) {
-    return <TenantLayout />
-  }
-
-  return <OwnerLayout />
+  return <Outlet />
 }
+

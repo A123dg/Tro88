@@ -11,6 +11,7 @@ export interface ListFilters {
   year?: number
   module?: string
   action?: string
+  keyword?: string
 }
 
 export interface InvoiceDto {
@@ -37,6 +38,8 @@ export interface ContractDto {
   roomNumber: string
   tenantId: string
   tenantName: string
+  tenantPhone: string
+  tenantEmail: string
   contractCode: string
   startDate: string
   endDate: string
@@ -45,6 +48,8 @@ export interface ContractDto {
   paymentDayOfMonth: number
   status: string
   signedAt?: string | null
+  isOwnerSigned: boolean
+  isTenantSigned: boolean
 }
 
 export interface MaintenanceRequestDto {

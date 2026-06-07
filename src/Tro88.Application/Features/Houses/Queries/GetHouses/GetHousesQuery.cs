@@ -8,4 +8,7 @@ public sealed record GetHousesQuery(
     int Page = 1,
     int PageSize = 10,
     string? Search = null,
-    Guid? OwnerId = null) : IRequest<PagedResult<HouseDto>>;
+    string? Keyword = null,
+    Guid? OwnerId = null,
+    decimal? MinPrice = null,
+    decimal? MaxPrice = null) : IRequest<PagedResult<HouseDto>>;

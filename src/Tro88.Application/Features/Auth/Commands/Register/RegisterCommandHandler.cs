@@ -40,7 +40,7 @@ public sealed class RegisterCommandHandler
         var role = Enum.Parse<UserRole>(request.Role, true);
         var hash = _hasher.Hash(request.Password);
 
-        var user = User.Create(
+        var user = User.CreateUserService(
             request.FullName,
             request.Email,
             request.PhoneNumber,

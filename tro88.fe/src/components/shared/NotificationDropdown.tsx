@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { Bell, CreditCard, FileText, Wrench } from '../../icons'
 import { NotificationDto } from '../../types/management.types'
 import { NotificationFilter, useNotificationCenter } from '../../hooks/useNotificationCenter'
@@ -54,21 +55,56 @@ function NotificationIcon({ type }: { type: string }) {
 function NotificationItem({
   item,
   onRead,
+  onClose,
 }: {
   item: NotificationDto
   onRead: (id: string) => void
+  onClose?: () => void
 }) {
   const unread = item.status === 'Unread'
+  const navigate = useNavigate()
+
+  const handleClick = () => {
+    if (unread) {
+      onRead(item.id)
+    }
+    if (onClose) {
+      onClose()
+    }
+
+    const role = localStorage.getItem('authRole')
+    const refId = item.referenceId
+    const type = (item.type ?? '').toLowerCase()
+
+    if (role === 'Tenant') {
+      if (type === 'contract' && refId) {
+        navigate({ to: `/my/contracts/${refId}` as any })
+      } else if (type === 'invoice' && refId) {
+        navigate({ to: `/my/invoices/${refId}` as any })
+      } else if (type === 'maintenance' && refId) {
+        navigate({ to: `/my/maintenance/${refId}` as any })
+      } else {
+        navigate({ to: '/my/rooms' as any })
+      }
+    } else {
+      // Owner or Admin
+      if (type === 'contract' && refId) {
+        navigate({ to: `/contracts/${refId}` as any })
+      } else if (type === 'invoice' && refId) {
+        navigate({ to: `/invoices/${refId}` as any })
+      } else if (type === 'maintenance' && refId) {
+        navigate({ to: `/maintenance/${refId}` as any })
+      } else {
+        navigate({ to: '/dashboard' as any })
+      }
+    }
+  }
 
   return (
     <button
       type="button"
       className={`notification-dropdown__item ${unread ? 'is-unread' : ''}`}
-      onClick={() => {
-        if (unread) {
-          onRead(item.id)
-        }
-      }}
+      onClick={handleClick}
     >
       <NotificationIcon type={item.type} />
       <span className="notification-dropdown__content">
@@ -187,7 +223,7 @@ export function NotificationDropdown() {
 
             {!isLoading
               ? notifications.map((item) => (
-                  <NotificationItem key={item.id} item={item} onRead={markRead} />
+                  <NotificationItem key={item.id} item={item} onRead={markRead} onClose={() => setOpen(false)} />
                 ))
               : null}
           </div>

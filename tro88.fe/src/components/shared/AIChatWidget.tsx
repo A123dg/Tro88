@@ -144,11 +144,7 @@ export function AIChatWidget() {
         onClick={() => setIsOpen(true)}
         aria-label="Mo AI Chat"
       >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-          <path d="M20 3v4h-4" />
-          <path d="M12 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" />
-        </svg>
+        <SparkleChatIcon />
         <span className="ai-chat-fab-badge">AI</span>
       </button>
     )
@@ -285,5 +281,46 @@ export function AIChatWidget() {
         </>
       )}
     </div>
+  )
+}
+
+function SparkleChatIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: 'middle' }}>
+      <defs>
+        <linearGradient id="aiChatIconStarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#da22ff" />
+          <stop offset="100%" stopColor="#9733ee" />
+        </linearGradient>
+        <linearGradient id="aiChatIconSmallStarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#ff5e62" />
+          <stop offset="100%" stopColor="#ff9966" />
+        </linearGradient>
+      </defs>
+      
+      {/* Speech bubble path with gap on top-right for the sparkle */}
+      <path 
+        d="M 14 4 H 5 C 3.9 4 3 4.9 3 6 V 14 C 3 15.1 3.9 16 5 16 H 7 V 19 L 10.5 16 H 17 C 18.1 16 19 15.1 19 14 V 11" 
+        fill="none" 
+      />
+      
+      {/* Horizontal text lines representing chat */}
+      <line x1="6" y1="8" x2="13" y2="8" strokeWidth="2.2" />
+      <line x1="6" y1="11" x2="10" y2="11" strokeWidth="2.2" />
+      
+      {/* Big Sparkle Star at top-right */}
+      <path 
+        d="M 19 4.5 C 19 7 17 8 16 8 C 17 8 19 9 19 11.5 C 19 9 21 8 22 8 C 21 8 19 7 19 4.5 Z" 
+        fill="url(#aiChatIconStarGrad)" 
+        stroke="none"
+      />
+      
+      {/* Small Sparkle Star above the bubble */}
+      <path 
+        d="M 15.5 1 C 15.5 2.1 14.7 2.5 14.2 2.5 C 14.7 2.5 15.5 2.9 15.5 4 C 15.5 2.9 16.3 2.5 16.8 2.5 C 16.3 2.5 15.5 2.1 15.5 1 Z" 
+        fill="url(#aiChatIconSmallStarGrad)" 
+        stroke="none"
+      />
+    </svg>
   )
 }

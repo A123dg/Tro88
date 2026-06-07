@@ -70,3 +70,7 @@ export const deleteUser = async (id: string): Promise<ApiResponse<object | null>
 export const updateCurrentUser = async (payload: UpdateProfilePayload): Promise<ApiResponse<UserDto>> => {
   return api.put<unknown, ApiResponse<UserDto>>('/Users/me', payload)
 }
+
+export const checkEmailExists = async (email: string): Promise<ApiResponse<UserDto>> => {
+  return api.get<unknown, ApiResponse<UserDto>>(`/Users/check-email?email=${encodeURIComponent(email)}`)
+}

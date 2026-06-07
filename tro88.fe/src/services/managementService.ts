@@ -43,7 +43,20 @@ export const fetchInvoices = (filters?: ListFilters) => fetchPaged<InvoiceDto>('
 export const markInvoicePaid = (id: string) => api.patch<unknown, ApiResponse<InvoiceDto>>(`/Invoices/${id}/mark-paid`)
 export const sendInvoice = (id: string) => api.post<unknown, ApiResponse<object>>(`/Invoices/${id}/send`)
 
+export interface CreateContractPayload {
+  roomId: string
+  tenantId: string
+  startDate: string
+  endDate: string
+  monthlyRent: number
+  depositAmount: number
+  paymentDay: number
+  terms?: string | null
+}
+
 export const fetchContracts = (filters?: ListFilters) => fetchPaged<ContractDto>('/Contracts', filters)
+export const createContract = (payload: CreateContractPayload) =>
+  api.post<unknown, ApiResponse<ContractDto>>('/Contracts', payload)
 export const activateContract = (id: string) => api.patch<unknown, ApiResponse<ContractDto>>(`/Contracts/${id}/activate`)
 export const terminateContract = (id: string, reason: string) =>
   api.patch<unknown, ApiResponse<ContractDto>>(`/Contracts/${id}/terminate`, { reason })
@@ -58,9 +71,27 @@ export const markNotificationRead = (id: string) =>
   api.patch<unknown, ApiResponse<NotificationDto>>(`/Notifications/${id}/read`)
 export const markAllNotificationsRead = () => api.patch<unknown, ApiResponse<object>>('/Notifications/read-all')
 
+export interface SaveServiceFeePayload {
+  id?: string
+  houseId: string
+  name: string
+  feeType: string
+  amount: number
+  unit?: string
+}
+
 export const fetchServiceFees = (filters?: ListFilters) => fetchPaged<ServiceFeeDto>('/ServiceFees', filters)
 export const toggleServiceFee = (id: string) =>
   api.patch<unknown, ApiResponse<ServiceFeeDto>>(`/ServiceFees/${id}/toggle`)
+
+export const createServiceFee = (payload: SaveServiceFeePayload) =>
+  api.post<unknown, ApiResponse<ServiceFeeDto>>('/ServiceFees', payload)
+
+export const updateServiceFee = (payload: SaveServiceFeePayload) =>
+  api.put<unknown, ApiResponse<ServiceFeeDto>>(`/ServiceFees/${payload.id}`, payload)
+
+export const deleteServiceFee = (id: string) =>
+  api.delete<unknown, ApiResponse<object>>(`/ServiceFees/${id}`)
 
 export const fetchUtilityReadings = (filters?: ListFilters) =>
   fetchPaged<UtilityReadingDto>('/UtilityReadings', filters)

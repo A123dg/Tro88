@@ -191,6 +191,23 @@ public class UsersController : BaseApiController
         return Ok(ApiResponse<object>.Ok(
             null, SuccessMessages.CHANGE_PASSWORD_SUCCESS));
     }
+
+    [HttpGet("check-email")]
+    public async Task<IActionResult> CheckEmail([FromQuery] string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return BadRequest(ApiResponse<object>.Fail("Email không được trống"));
+
+        var targetEmail = email.Trim().ToLowerInvariant();
+        var user = await _db.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Email.Trim().ToLower() == targetEmail && !u.IsDeleted);
+
+        if (user is null)
+            return Ok(ApiResponse<UserDto>.Fail("Không tìm thấy người dùng này trong hệ thống"));
+
+        return Ok(ApiResponse<UserDto>.Ok(UserDto.FromEntity(user)));
+    }
 }
 
 public sealed class GetUsersRequest

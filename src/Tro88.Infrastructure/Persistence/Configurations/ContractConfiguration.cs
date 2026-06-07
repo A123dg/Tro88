@@ -25,6 +25,10 @@ public class ContractConfiguration : IEntityTypeConfiguration<Contract>
             .HasMaxLength(2000).HasColumnType("nvarchar(2000)");
         b.Property(c => c.SignedAt)
             .HasColumnType("datetime2");
+        b.Property(c => c.IsOwnerSigned)
+            .HasDefaultValue(false);
+        b.Property(c => c.IsTenantSigned)
+            .HasDefaultValue(false);
         b.Property(c => c.CreatedAt)
             .HasColumnType("datetime2");
         b.Property(c => c.UpdatedAt)

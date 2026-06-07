@@ -45,6 +45,15 @@ public sealed class GetContractsQueryHandler
         if (request.TenantId.HasValue)
             query = query.Where(c => c.TenantId == request.TenantId);
 
+        if (!string.IsNullOrWhiteSpace(request.Keyword))
+        {
+            var search = request.Keyword.Trim().ToLower();
+            query = query.Where(c =>
+                c.Room.RoomNumber.ToLower().Contains(search) ||
+                c.Tenant.FullName.ToLower().Contains(search) ||
+                c.Tenant.PhoneNumber.Contains(search));
+        }
+
         if (!string.IsNullOrEmpty(request.Status))
         {
             if (Enum.TryParse<ContractStatus>(request.Status, true, out var status))

@@ -15,15 +15,133 @@ import {
   houseStatusLabel, houses, invoices, maintenance, normalizeHouse, ok, pageId, read, rooms, statusVariant, total, QK,
 } from '../shared'
 
+import dayjs from 'dayjs'
+import { CustomDatePicker } from '../../../shared/components/custom-datepicker'
+
 export function StatisticsPage() {
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'All' | 'Paid' | 'Debt'>('All')
+
+  const stats = useMemo(() => {
+    let revenue = 0
+    let debt = 0
+    let paidCount = 0
+    let debtCount = 0
+
+    invoices.forEach((item) => {
+      const amt = total(item)
+      if (item.status === 'Paid') {
+        revenue += amt
+        paidCount++
+      } else {
+        debt += amt
+        debtCount++
+      }
+    })
+
+    return { revenue, debt, paidCount, debtCount }
+  }, [])
+
+  const filteredInvoices = useMemo(() => {
+    return invoices.filter((item) => {
+      const matchesSearch = 
+        item.tenant.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.room.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.code.toLowerCase().includes(searchTerm.toLowerCase())
+
+      if (statusFilter === 'Paid') {
+        return matchesSearch && item.status === 'Paid'
+      }
+      if (statusFilter === 'Debt') {
+        return matchesSearch && item.status !== 'Paid'
+      }
+      return matchesSearch
+    })
+  }, [searchTerm, statusFilter])
+
   return (
     <main className="page">
-      <PageHeader title="Thống kê & Báo cáo" subtitle="Lọc theo khoảng thời gian và nhà trọ." />
-      <div className="filter-bar"><input type="month" defaultValue="2026-05" /><Select defaultValue="Tất cả nhà" options={[{ value: 'Tất cả nhà', label: 'Tất cả nhà' }]} /></div>
-      <div className="stat-grid"><Card><span>Tổng doanh thu tháng này</span><strong>{formatVND(128500000)}</strong><small>↑ 12%</small></Card><Card><span>HĐ active</span><strong>24</strong></Card><Card><span>Tỷ lệ lấp đầy</span><strong>82%</strong></Card><Card><span>Công nợ</span><strong>{formatVND(18600000)}</strong></Card></div>
-      <Card><h2>Revenue Chart</h2><AreaChartLite /></Card>
-      <div className="split"><Card><h2>Phân bổ thu nhập</h2><div className="pie-lite" /></Card><Card><h2>Top phòng doanh thu cao</h2>{rooms.map((room) => <div className="mini-bar" key={room.id}><span>Phòng {room.roomNumber}</span><div><i style={{ width: `${room.monthlyRent / 50000}%` }} /></div><strong>{formatVND(room.monthlyRent)}</strong></div>)}</Card></div>
-      <Card><h2>Unpaid analysis</h2><DataTable headers={['Phòng', 'Tenant', 'Số tiền', 'Quá hạn']} rows={invoices.filter((item) => item.status !== 'Paid').map((item) => [item.room, item.tenant, formatVND(total(item)), item.status === 'Overdue' ? '25 ngày' : '0 ngày'])} /></Card>
+      <PageHeader title="Thống kê & Doanh thu" subtitle="Quản lý chi tiết doanh thu, công nợ cửa hàng/nhà trọ." />
+      
+      {/* KPI Cards */}
+      <div className="stat-grid">
+        <Card>
+          <span>Tổng doanh thu thực tế</span>
+          <strong>{formatVND(stats.revenue)}</strong>
+          <small>{stats.paidCount} hóa đơn đã hoàn thành</small>
+        </Card>
+        <Card>
+          <span>Tổng công nợ chưa thu</span>
+          <strong style={{ color: 'var(--primary)' }}>{formatVND(stats.debt)}</strong>
+          <small>{stats.debtCount} hóa đơn chưa thanh toán</small>
+        </Card>
+        <Card>
+          <span>Hóa đơn đã thu</span>
+          <strong>{stats.paidCount}</strong>
+          <small>Đã xác nhận</small>
+        </Card>
+        <Card>
+          <span>Hóa đơn chưa thu</span>
+          <strong>{stats.debtCount}</strong>
+          <small>Đang nợ/chờ xác nhận</small>
+        </Card>
+      </div>
+
+      {/* Filter and Search Section */}
+      <Card style={{ marginBottom: 20 }}>
+        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ flex: 1, minWidth: 250 }}>
+            <span style={{ display: 'block', marginBottom: 6, fontWeight: 500 }}>Tìm kiếm hóa đơn</span>
+            <Input 
+              placeholder="Nhập tên người thuê, phòng, hoặc mã hóa đơn..." 
+              value={searchTerm} 
+              onChange={(e) => setSearchTerm(e.target.value)} 
+              allowClear 
+            />
+          </div>
+          <div style={{ width: 200 }}>
+            <span style={{ display: 'block', marginBottom: 6, fontWeight: 500 }}>Trạng thái thanh toán</span>
+            <Select 
+              value={statusFilter} 
+              onChange={(value) => setStatusFilter(value)} 
+              style={{ width: '100%' }}
+              options={[
+                { value: 'All', label: 'Tất cả' },
+                { value: 'Paid', label: 'Đã thanh toán' },
+                { value: 'Debt', label: 'Còn nợ' }
+              ]} 
+            />
+          </div>
+        </div>
+      </Card>
+
+      {/* Invoice List Table */}
+      <Card>
+        <div className="card-heading" style={{ marginBottom: 16 }}>
+          <h2>Danh sách hóa đơn lọc ({filteredInvoices.length})</h2>
+        </div>
+        <DataTable 
+          headers={['Mã hóa đơn', 'Phòng', 'Người thuê', 'Tiền thuê phòng', 'Tổng hóa đơn', 'Hạn thanh toán', 'Trạng thái', 'Hành động']} 
+          rows={filteredInvoices.map((item) => [
+            item.code,
+            `Phòng ${item.room}`,
+            item.tenant,
+            formatVND(item.rent),
+            formatVND(total(item)),
+            formatDate(item.dueDate),
+            <Badge variant={statusVariant(item.status)}>
+              {item.status === 'Paid' 
+                ? 'Đã thanh toán' 
+                : item.status === 'WaitingConfirm' 
+                ? 'Chờ xác nhận' 
+                : item.status === 'Overdue' 
+                ? 'Quá hạn' 
+                : 'Chưa thanh toán'}
+            </Badge>,
+            <Link to={`/invoices/${item.id}`}>Xem</Link>
+          ])} 
+        />
+      </Card>
     </main>
   )
 }

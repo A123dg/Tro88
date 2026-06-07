@@ -33,7 +33,7 @@ public class GetOwnerDashboardQueryHandler : IRequestHandler<GetOwnerDashboardQu
             .CountAsync(ct);
 
         var pendingInvoices = await _db.Invoices
-            .Where(i => i.Status == InvoiceStatus.Unpaid)
+            .Where(i => i.Status != InvoiceStatus.Paid)
             .CountAsync(ct);
 
         var totalRevenue = await _db.Invoices

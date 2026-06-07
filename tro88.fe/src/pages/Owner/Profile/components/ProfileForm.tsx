@@ -1,6 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useUpdateProfile } from '../hooks'
 import type { UserProfile } from '../service/api'
+import dayjs from 'dayjs'
+import { CustomDatePicker } from '../../../../shared/components/custom-datepicker'
 
 interface ProfileFormProps {
   user: UserProfile
@@ -208,18 +210,12 @@ export function ProfileForm({ user, isGoogleLogin = false }: ProfileFormProps) {
           <div className="form-field full-width">
             <label className="form-label">Ngày sinh</label>
             <div className="date-input-wrapper">
-              <input
-                type="date"
+              <CustomDatePicker
                 className="form-input"
-                value={formData.dateOfBirth}
-                onChange={(event) => setFormData((current) => ({ ...current, dateOfBirth: event.target.value }))}
+                value={formData.dateOfBirth ? dayjs(formData.dateOfBirth) : null}
+                onChange={(_date, dateString) => setFormData((current) => ({ ...current, dateOfBirth: dateString ? (typeof dateString === 'string' ? dateString : dateString[0]) : '' }))}
+                placeholder="Chọn ngày sinh"
               />
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="calendar-icon">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
             </div>
           </div>
         </div>

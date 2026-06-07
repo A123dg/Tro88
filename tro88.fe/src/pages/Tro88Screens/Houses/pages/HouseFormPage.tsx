@@ -1,0 +1,218 @@
+import { useState, useEffect } from 'react'
+import { Form, Input, Select, Checkbox, Button, Upload, Flex, Card, Typography, Alert } from 'antd'
+import { UploadOutlined, ArrowLeftOutlined, SaveOutlined } from '@ant-design/icons'
+import { useNavigate, useParams } from '@tanstack/react-router'
+import { useProvincesQuery, useWardsQuery, useHouseDetailQuery } from '../services/query'
+import { useCreateHouseMutation, useUpdateHouseMutation } from '../services/mutation'
+import { PageHeader } from '../../shared'
+
+const { Title, Paragraph } = Typography
+
+export function HouseFormPage() {
+  const navigate = useNavigate()
+  const params = useParams({ strict: false }) as { id?: string }
+  const houseId = params.id || null
+  const isEdit = Boolean(houseId)
+
+  const [form] = Form.useForm()
+  const [provinceValue, setProvinceValue] = useState<string | undefined>()
+  const [wardValue, setWardValue] = useState<string | undefined>()
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [submitError, setSubmitError] = useState('')
+
+  const provinces = useProvincesQuery()
+  const wards = useWardsQuery(provinceValue)
+  const houseDetail = useHouseDetailQuery(houseId, isEdit)
+
+  const ownerId = localStorage.getItem('authUserId')
+  const redirectPath = ownerId ? `/houses/${ownerId}` : '/houses'
+
+  const createMutation = useCreateHouseMutation({
+    onSuccess: () => navigate({ to: redirectPath }),
+    onError: (error: any) => setSubmitError(error?.message || 'Không thể tạo nhà trọ')
+  })
+
+  const updateMutation = useUpdateHouseMutation({
+    onSuccess: () => navigate({ to: redirectPath }),
+    onError: (error: any) => setSubmitError(error?.message || 'Không thể cập nhật nhà trọ')
+  })
+
+  useEffect(() => {
+    if (!houseDetail.data) return
+    form.setFieldsValue({
+      name: houseDetail.data.name,
+      address: houseDetail.data.address,
+      province: houseDetail.data.tinhThanhOption?.id ?? houseDetail.data.province ?? undefined,
+      district: houseDetail.data.xaPhuongOption?.id ?? houseDetail.data.district ?? undefined,
+      description: houseDetail.data.description ?? '',
+    })
+    setProvinceValue(houseDetail.data.tinhThanhOption?.id ?? houseDetail.data.province ?? undefined)
+    setWardValue(houseDetail.data.xaPhuongOption?.id ?? houseDetail.data.district ?? undefined)
+  }, [houseDetail.data, form])
+
+  const onFinish = async (values: any) => {
+    setSubmitError('')
+    const payload = {
+      name: values.name,
+      address: values.address,
+      province: provinceValue,
+      district: wardValue,
+      description: values.description,
+      files: selectedFiles,
+      services: values.services,
+    }
+
+    if (isEdit && houseId) {
+      updateMutation.mutate({ id: houseId, ...payload })
+    } else {
+      createMutation.mutate(payload)
+    }
+  }
+
+  const isLoading = createMutation.isLoading || updateMutation.isLoading || houseDetail.isLoading
+
+  return (
+    <div style={{ padding: '24px', maxWidth: '800px', margin: '0 auto' }}>
+      <PageHeader
+        title={isEdit ? 'Sửa nhà trọ' : 'Thêm nhà trọ'}
+        subtitle="Thông tin cơ bản, trạng thái duyệt và ảnh đại diện."
+        action={
+          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate({ to: redirectPath })}>
+            Quay lại
+          </Button>
+        }
+      />
+
+      <Card style={{ borderRadius: '16px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' }}>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={onFinish}
+          initialValues={{ services: [] }}
+        >
+          <Form.Item
+            label="Tên nhà trọ"
+            name="name"
+            rules={[{ required: true, message: 'Vui lòng nhập tên nhà trọ' }]}
+          >
+            <Input placeholder="Nhập tên nhà trọ" size="large" />
+          </Form.Item>
+
+          <Form.Item
+            label="Địa chỉ"
+            name="address"
+            rules={[{ required: true, message: 'Vui lòng nhập địa chỉ' }]}
+          >
+            <Input.TextArea placeholder="Nhập địa chỉ chi tiết" rows={3} />
+          </Form.Item>
+
+          <Flex gap="16px">
+            <Form.Item
+              label="Tỉnh/Thành phố"
+              name="province"
+              style={{ flex: 1 }}
+              rules={[{ required: true, message: 'Vui lòng chọn Tỉnh/Thành phố' }]}
+            >
+              <Select
+                showSearch
+                allowClear
+                placeholder={provinces.isLoading ? 'Đang tải tỉnh...' : 'Chọn tỉnh'}
+                optionFilterProp="label"
+                loading={provinces.isLoading}
+                disabled={provinces.isLoading}
+                onChange={(val) => {
+                  setProvinceValue(val)
+                  setWardValue(undefined)
+                  form.setFieldValue('district', undefined)
+                }}
+                options={(provinces.data ?? []).map((p) => ({ value: p.value, label: p.label }))}
+              />
+            </Form.Item>
+
+            <Form.Item
+              label="Xã/Phường"
+              name="district"
+              style={{ flex: 1 }}
+              rules={[{ required: true, message: 'Vui lòng chọn Xã/Phường' }]}
+            >
+              <Select
+                showSearch
+                allowClear
+                placeholder={!provinceValue ? 'Chọn tỉnh trước' : wards.isLoading ? 'Đang tải xã/phường...' : 'Chọn xã/phường'}
+                optionFilterProp="label"
+                loading={wards.isLoading}
+                disabled={!provinceValue || wards.isLoading}
+                onChange={(val) => setWardValue(val)}
+                options={(wards.data ?? []).map((w) => ({ value: w.value, label: w.label }))}
+              />
+            </Form.Item>
+          </Flex>
+
+          <Form.Item label="Mô tả" name="description">
+            <Input.TextArea placeholder="Mô tả thêm về nhà trọ" rows={4} />
+          </Form.Item>
+
+          {!isEdit && (
+            <Paragraph style={{ color: '#8c8c8c', fontStyle: 'italic' }}>
+              * Nhà trọ mới sẽ ở trạng thái Chờ duyệt. Ban quản trị duyệt xong mới chuyển sang Hoạt động.
+            </Paragraph>
+          )}
+
+          <Form.Item label="Hình ảnh nhà trọ">
+            <Upload
+              beforeUpload={(file) => {
+                setSelectedFiles((current) => [...current, file])
+                return false
+              }}
+              multiple
+              fileList={selectedFiles.map((file, idx) => ({
+                uid: String(idx),
+                name: file.name,
+                status: 'done',
+              }))}
+              onRemove={(file) => {
+                const index = Number(file.uid)
+                setSelectedFiles((current) => current.filter((_, idx) => idx !== index))
+              }}
+            >
+              <Button icon={<UploadOutlined />}>Upload ảnh nhà trọ</Button>
+            </Upload>
+          </Form.Item>
+
+          {!isEdit && (
+            <Form.Item label="Tiện ích dịch vụ" name="services">
+              <Checkbox.Group>
+                <Flex gap="16px" wrap="wrap">
+                  {['Wifi', 'Bãi xe', 'Camera', 'Máy giặt', 'Thang máy'].map((item) => (
+                    <Checkbox key={item} value={item}>
+                      {item}
+                    </Checkbox>
+                  ))}
+                </Flex>
+              </Checkbox.Group>
+            </Form.Item>
+          )}
+
+          {submitError && (
+            <Alert message={submitError} type="error" showIcon style={{ marginBottom: '20px' }} />
+          )}
+
+          <Form.Item style={{ marginTop: '24px', marginBottom: 0 }}>
+            <Flex gap="12px" justify="end">
+              <Button onClick={() => navigate({ to: redirectPath })}>Hủy</Button>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={isLoading}
+                icon={<SaveOutlined />}
+                style={{ background: '#f4845f', borderColor: '#f4845f' }}
+              >
+                Lưu lại
+              </Button>
+            </Flex>
+          </Form.Item>
+        </Form>
+      </Card>
+    </div>
+  )
+}

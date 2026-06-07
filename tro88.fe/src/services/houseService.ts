@@ -6,6 +6,9 @@ export interface HouseFilters {
   page?: number
   pageSize?: number
   search?: string
+  keyword?: string
+  minPrice?: number
+  maxPrice?: number
 }
 
 export interface CreateHousePayload {
@@ -15,6 +18,7 @@ export interface CreateHousePayload {
   district?: string
   description?: string
   files?: File[]
+  services?: string[]
 }
 
 export interface UpdateHousePayload extends CreateHousePayload {
@@ -36,8 +40,15 @@ export const fetchHouses = async (filters?: HouseFilters): Promise<PagedData<Hou
   if (filters?.pageSize) {
     params.append('pageSize', String(filters.pageSize))
   }
-  if (filters?.search?.trim()) {
-    params.append('search', filters.search.trim())
+  const keyword = filters?.keyword ?? filters?.search
+  if (keyword?.trim()) {
+    params.append('keyword', keyword.trim())
+  }
+  if (filters?.minPrice !== undefined) {
+    params.append('minPrice', String(filters.minPrice))
+  }
+  if (filters?.maxPrice !== undefined) {
+    params.append('maxPrice', String(filters.maxPrice))
   }
 
   const query = params.toString()
@@ -58,6 +69,7 @@ export const createHouse = async (payload: CreateHousePayload): Promise<ApiRespo
   if (payload.district) form.append('district', payload.district)
   if (payload.description) form.append('description', payload.description)
   payload.files?.forEach((file) => form.append('files', file))
+  payload.services?.forEach((service) => form.append('services', service))
 
   return api.post<unknown, ApiResponse<HouseDto>>('/Houses', form, {
     headers: { 'Content-Type': 'multipart/form-data' },
@@ -90,3 +102,16 @@ export const changeHouseStatus = async (
 ): Promise<ApiResponse<HouseDto>> => {
   return api.patch<unknown, ApiResponse<HouseDto>>(`/Houses/${id}/status`, { id, status })
 }
+
+export const contactHouse = async (houseId: string, contactType: string): Promise<ApiResponse<{ phoneNumber: string }>> => {
+  return api.post<unknown, ApiResponse<{ phoneNumber: string }>>(`/Houses/${houseId}/contact`, { contactType })
+}
+
+export const toggleFavoriteHouse = async (houseId: string): Promise<ApiResponse<{ isFavorite: boolean }>> => {
+  return api.post<unknown, ApiResponse<{ isFavorite: boolean }>>(`/Houses/${houseId}/favorite`)
+}
+
+export const fetchFavoriteHouses = async (): Promise<ApiResponse<HouseDto[]>> => {
+  return api.get<unknown, ApiResponse<HouseDto[]>>('/Houses/favorites')
+}
+

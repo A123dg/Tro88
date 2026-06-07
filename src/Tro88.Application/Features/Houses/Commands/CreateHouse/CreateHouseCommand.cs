@@ -9,4 +9,5 @@ public sealed record CreateHouseCommand(
     string? Province = null,
     string? District = null,
     string? Description = null,
-    List<string>? MediaUrls = null) : IRequest<HouseDto>;
+    List<string>? MediaUrls = null,
+    List<string>? Services = null) : IRequest<HouseDto>;

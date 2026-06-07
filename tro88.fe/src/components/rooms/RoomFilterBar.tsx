@@ -1,4 +1,4 @@
-import { Select } from 'antd'
+import { Select, Input } from 'antd'
 import { useEffect, useState } from 'react'
 import { RoomFilters, RoomSort, RoomStatus, RoomStats } from '../../types/room.types'
 
@@ -37,14 +37,13 @@ export function RoomFilterBar({ filters, stats, onChange }: RoomFilterBarProps) 
   return (
     <section className="room-filter-bar" aria-label="Bộ lọc phòng">
       <div className="room-filter-bar__controls">
-        <label className="search-field" aria-label="Tìm kiếm số phòng">
-          <span>🔍</span>
-          <input
-            value={searchValue}
-            onChange={(event) => setSearchValue(event.target.value)}
-            placeholder="Tìm số phòng..."
-          />
-        </label>
+        <Input.Search
+          value={searchValue}
+          onChange={(event) => setSearchValue(event.target.value)}
+          placeholder="Tìm số phòng..."
+          enterButton
+          style={{ width: 220 }}
+        />
 
         <Select
           value={filters.status ?? 'all'}

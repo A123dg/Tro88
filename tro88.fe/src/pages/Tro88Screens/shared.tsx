@@ -1,7 +1,7 @@
 import { useRouterState } from '@tanstack/react-router'
 import { UploadOutlined } from '@ant-design/icons'
 import { FormEvent, ReactNode, useEffect, useMemo, useState } from 'react'
-import { Form, Input, Select } from 'antd'
+import { Form, Input, Select, Modal } from 'antd'
 import { useMutation, useQuery } from 'react-query'
 import { api } from '../../services/apiClient'
 import { queryClient } from '../../queryClient'
@@ -9,15 +9,18 @@ import { createAiConversation, fetchAiConversation, fetchAiConversations, sendAi
 import { createHouse, fetchHouseDetail, updateHouse } from '../../services/houseService'
 import ModalForm from '../../shared/components/modal-form/ModalForm'
 
+import { Link as RouterLink } from '@tanstack/react-router'
+import { router } from '../../route'
+
 export function Link({ to, className, children }: { to: string; className?: string; children: ReactNode }) {
-  return <a href={to} className={className}>{children}</a>
+  return <RouterLink to={to as any} className={className}>{children}</RouterLink>
 }
 
 export function navigateTo(to: string) {
-  window.location.href = to
+  router.navigate({ to: to as any })
 }
 
-export type Status = 'Available' | 'Occupied' | 'Maintenance' | 'Draft' | 'Active' | 'Expired' | 'Terminated' | 'Unpaid' | 'Paid' | 'Overdue' | 'New' | 'InProgress' | 'Done' | 'Normal' | 'Soon' | 'Urgent' | 'PendingApproval' | 'Inactive'
+export type Status = 'Available' | 'Occupied' | 'Maintenance' | 'Draft' | 'Active' | 'Expired' | 'Terminated' | 'Unpaid' | 'Paid' | 'Overdue' | 'New' | 'InProgress' | 'Done' | 'Normal' | 'Soon' | 'Urgent' | 'PendingApproval' | 'Inactive' | 'WaitingConfirm'
 
 export interface ApiResponse<T> {
   code: number
@@ -153,7 +156,7 @@ export interface Invoice {
   water: number
   service: number
   dueDate: string
-  status: 'Unpaid' | 'Paid' | 'Overdue'
+  status: 'Unpaid' | 'WaitingConfirm' | 'Paid' | 'Overdue'
 }
 
 export interface Maintenance {
@@ -252,8 +255,8 @@ export function total(invoice: Invoice) {
   return invoice.rent + invoice.electricity + invoice.water + invoice.service
 }
 
-export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <section className={`card ${className}`}>{children}</section>
+export function Card({ children, className = '', style }: { children: ReactNode; className?: string; style?: React.CSSProperties }) {
+  return <section className={`card ${className}`} style={style}>{children}</section>
 }
 
 export function Button({ children, variant = 'primary', full = false, loading = false, onClick, type = 'button' }: { children: ReactNode; variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'; full?: boolean; loading?: boolean; onClick?: () => void; type?: 'button' | 'submit' }) {
@@ -268,7 +271,7 @@ export function statusVariant(status: Status): 'success' | 'warning' | 'danger' 
   if (status === 'Active' || status === 'Paid' || status === 'Available' || status === 'Done') return 'success'
   if (status === 'Unpaid' || status === 'Draft' || status === 'New' || status === 'PendingApproval') return 'warning'
   if (status === 'Overdue' || status === 'Expired' || status === 'Urgent' || status === 'Inactive') return 'danger'
-  if (status === 'Maintenance' || status === 'InProgress') return 'info'
+  if (status === 'Maintenance' || status === 'InProgress' || status === 'WaitingConfirm') return 'info'
   return 'gray'
 }
 
@@ -285,6 +288,7 @@ export function normalizeHouse(house: House) {
   const isActive = house.isActive ?? house.active ?? house.status === 'Active'
   const status = house.status ?? (isActive ? 'Active' : 'Inactive')
   const mediaUrls = house.mediaUrls ?? (house.mediaUrl ? [house.mediaUrl] : [])
+  const description = (house as any).description ?? ''
 
   return {
     ...house,
@@ -293,6 +297,7 @@ export function normalizeHouse(house: House) {
     isActive,
     status,
     mediaUrls,
+    description,
   }
 }
 
@@ -316,6 +321,38 @@ export function EmptyState({ title, description }: { title: string; description:
       <h3>{title}</h3>
       <p>{description}</p>
     </Card>
+  )
+}
+
+export function ConfirmDialog({
+  open,
+  title,
+  content,
+  onConfirm,
+  onCancel,
+  confirmLoading = false,
+}: {
+  open: boolean
+  title: string
+  content: string
+  onConfirm: () => void
+  onCancel: () => void
+  confirmLoading?: boolean
+}) {
+  return (
+    <Modal
+      title={<strong style={{ fontSize: 16 }}>{title}</strong>}
+      open={open}
+      onOk={onConfirm}
+      onCancel={onCancel}
+      confirmLoading={confirmLoading}
+      okText="Xác nhận"
+      cancelText="Hủy"
+      okButtonProps={{ danger: title.toLowerCase().includes('hủy') || title.toLowerCase().includes('chấm dứt') }}
+      centered
+    >
+      <p style={{ fontSize: 14, margin: '10px 0' }}>{content}</p>
+    </Modal>
   )
 }
 

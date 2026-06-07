@@ -1,5 +1,5 @@
 import { useRouterState } from '@tanstack/react-router'
-import { UploadOutlined } from '@ant-design/icons'
+import { UploadOutlined, FilterOutlined } from '@ant-design/icons'
 import { FormEvent, ReactNode, useEffect, useMemo, useState } from 'react'
 import { Form, Input, Select } from 'antd'
 import { useMutation, useQuery } from 'react-query'
@@ -15,11 +15,32 @@ import {
   houseStatusLabel, houses, invoices, maintenance, normalizeHouse, ok, pageId, read, rooms, statusVariant, total, QK,
 } from '../shared'
 
+import useDebounce from '../../../shared/hooks/useDebounce'
+import { CustomDatePicker } from '../../../shared/components/custom-datepicker'
+
 export function AuditLogsPage() {
+  const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const debounce = useDebounce(300)
+
   return (
     <main className="page">
       <PageHeader title="Lịch sử hoạt động" subtitle="Admin only: lọc user, module, action và xem diff JSON." />
-      <div className="filter-bar"><input placeholder="Search user/action" /><Select defaultValue="Module" options={[{ value: 'Module', label: 'Module' }]} /><Select defaultValue="CREATE" options={[{ value: 'CREATE', label: 'CREATE' }, { value: 'UPDATE', label: 'UPDATE' }, { value: 'DELETE', label: 'DELETE' }, { value: 'LOGIN', label: 'LOGIN' }]} /><input type="date" /></div>
+      <div className="filter-bar">
+        <FilterOutlined style={{ fontSize: 16, color: 'var(--primary)', display: 'inline-flex', alignItems: 'center', marginRight: 4 }} />
+        <Input
+          placeholder="Search user/action"
+          value={search}
+          onChange={(event) => {
+            setSearch(event.target.value)
+            debounce(() => setDebouncedSearch(event.target.value))
+          }}
+          style={{ width: 220 }}
+        />
+        <Select defaultValue="Module" options={[{ value: 'Module', label: 'Module' }]} style={{ width: 180 }} />
+        <Select defaultValue="CREATE" options={[{ value: 'CREATE', label: 'CREATE' }, { value: 'UPDATE', label: 'UPDATE' }, { value: 'DELETE', label: 'DELETE' }, { value: 'LOGIN', label: 'LOGIN' }]} style={{ width: 180 }} />
+        <CustomDatePicker placeholder="Chọn ngày" style={{ width: 150 }} />
+      </div>
       <DataTable dense headers={['Thời gian', 'User', 'Role', 'Action', 'Module', 'Mô tả', 'IP', 'Chi tiết']} rows={[['28/05/2026 15:20', 'admin', 'Admin', 'UPDATE', 'Invoice', 'Đánh dấu đã thanh toán', '127.0.0.1', <Button variant="outline">Chi tiết</Button>], ['28/05/2026 14:10', 'owner', 'Owner', 'CREATE', 'Room', 'Tạo phòng 102', '127.0.0.1', <Button variant="outline">Chi tiết</Button>]]} />
       <Card className="drawer"><h2>Diff JSON</h2><pre>{JSON.stringify({ old: { status: 'Unpaid' }, new: { status: 'Paid' } }, null, 2)}</pre></Card>
     </main>

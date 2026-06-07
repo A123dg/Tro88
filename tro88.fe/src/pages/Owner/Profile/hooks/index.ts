@@ -2,6 +2,18 @@ import { useQuery, useMutation, useQueryClient } from 'react-query'
 import { api } from '../../../../services/apiClient'
 import { QK } from '../../../../queryClient'
 
+interface ApiResponse<T> {
+  success: boolean
+  message?: string
+  data: T
+}
+
+interface EmptyApiResponse {
+  success: boolean
+  message?: string
+  data?: unknown
+}
+
 export interface UserProfile {
   id: string
   fullName: string
@@ -31,7 +43,7 @@ export function useProfile() {
   return useQuery(
     QK.me,
     async () => {
-      const response = await api.get<unknown, { success: boolean; data: UserProfile }>('/Users/me')
+      const response = await api.get<unknown, ApiResponse<UserProfile>>('/Users/me')
       if (!response.success) {
         throw new Error(response.message)
       }
@@ -48,7 +60,7 @@ export function useUpdateProfile() {
 
   return useMutation(
     (data: UpdateProfileRequest) =>
-      api.put<UpdateProfileRequest, { success: boolean; data: UserProfile }>('/Users/me', data),
+      api.put<UpdateProfileRequest, ApiResponse<UserProfile>>('/Users/me', data),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(QK.me)
@@ -64,7 +76,7 @@ export function useUploadAvatar() {
     async (file: File) => {
       const formData = new FormData()
       formData.append('file', file)
-      const response = await api.post<FormData, { success: boolean; data: UserProfile }>('/Users/me/avatar', formData, {
+      const response = await api.post<FormData, ApiResponse<UserProfile>>('/Users/me/avatar', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -85,6 +97,6 @@ export function useUploadAvatar() {
 export function useChangePassword() {
   return useMutation(
     (data: ChangePasswordRequest) =>
-      api.post<ChangePasswordRequest, { success: boolean }>('/Users/me/password', data)
+      api.post<ChangePasswordRequest, EmptyApiResponse>('/Users/me/password', data)
   )
 }

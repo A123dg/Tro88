@@ -10,6 +10,12 @@ using Tro88.Application.Features.Houses.Commands.DeleteHouse;
 using Tro88.Application.Features.Houses.Queries.GetHouses;
 using Tro88.Application.Features.Houses.Queries.GetHouseById;
 
+using Tro88.Application.Features.Houses.Queries.GetPublicHouseDetail;
+using Tro88.Application.Features.Houses.Queries.GetFavoriteHouses;
+using Tro88.Application.Features.Houses.Commands.CreateContactLog;
+using Tro88.Application.Features.Houses.Commands.ToggleFavoriteHouse;
+using Tro88.Application.Features.Houses.DTOs;
+
 namespace Tro88.API.Controllers;
 
 [Authorize]
@@ -23,6 +29,39 @@ public class HousesController : BaseApiController
         _storage = storage;
     }
 
+    [HttpPost("{houseId}/contact")]
+    public async Task<IActionResult> CreateContactLog(Guid houseId, [FromBody] CreateContactLogRequest request)
+    {
+        var command = new CreateContactLogCommand(houseId, request.ContactType);
+        var result = await Mediator.Send(command);
+        return Ok(ApiResponse<ContactLogResponseDto>.Ok(result));
+    }
+
+    [HttpPost("{houseId}/favorite")]
+    public async Task<IActionResult> ToggleFavorite(Guid houseId)
+    {
+        var command = new ToggleFavoriteHouseCommand(houseId);
+        var result = await Mediator.Send(command);
+        return Ok(ApiResponse<ToggleFavoriteHouseResponseDto>.Ok(result));
+    }
+
+    [HttpGet("favorites")]
+    public async Task<IActionResult> GetFavorites()
+    {
+        var result = await Mediator.Send(new GetFavoriteHousesQuery());
+        return Ok(ApiResponse<List<HouseDto>>.Ok(result));
+    }
+
+    [AllowAnonymous]
+    [HttpGet("/api/public/houses/{id}")]
+    [HttpGet("/api/v1/public/houses/{id}")]
+    public async Task<IActionResult> GetPublicHouseDetail(Guid id)
+    {
+        var result = await Mediator.Send(new GetPublicHouseDetailQuery(id));
+        return Ok(ApiResponse<PublicHouseDetailDto>.Ok(result));
+    }
+
+    [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> GetHouses([FromQuery] GetHousesQuery query)
     {
@@ -89,7 +128,8 @@ public class HousesController : BaseApiController
             request.Province,
             request.District,
             request.Description,
-            mediaUrls);
+            mediaUrls,
+            request.Services);
 
         var result = await Mediator.Send(command);
         return Ok(ApiResponse<HouseDto>.Ok(result, SuccessMessages.CREATE_HOUSE_SUCCESS));
@@ -129,4 +169,10 @@ public sealed class CreateHouseFormRequest
     public string? Description { get; set; }
     public List<string> MediaUrls { get; set; } = new();
     public List<IFormFile> Files { get; set; } = new();
+    public List<string> Services { get; set; } = new();
+}
+
+public sealed class CreateContactLogRequest
+{
+    public string ContactType { get; set; } = default!;
 }

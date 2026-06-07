@@ -82,6 +82,35 @@ public class EmailService : IEmailService
             null,
             ct);
 
+    public Task SendContractSignatureRequestAsync(
+        string toEmail,
+        string toName,
+        string contractCode,
+        string roomNumber,
+        string houseName,
+        string actionUrl,
+        CancellationToken ct = default)
+        => SendAsync(
+            toEmail,
+            $"Yêu cầu ký hợp đồng thuê phòng - {contractCode}",
+            $"Chào {toName},\n\nHợp đồng thuê phòng {roomNumber} tại {houseName} (Mã: {contractCode}) đã được tạo và đang chờ bạn ký xác nhận.\n\nVui lòng truy cập liên kết sau để xem chi tiết và thực hiện ký hợp đồng:\n{actionUrl}\n\nTrân trọng,\nĐội ngũ Tro88",
+            null,
+            ct);
+
+    public Task SendContractSignedConfirmationAsync(
+        string toEmail,
+        string toName,
+        string contractCode,
+        string roomNumber,
+        string houseName,
+        CancellationToken ct = default)
+        => SendAsync(
+            toEmail,
+            $"Hợp đồng thuê phòng đã được kích hoạt thành công - {contractCode}",
+            $"Chào {toName},\n\nHợp đồng thuê phòng {roomNumber} tại {houseName} (Mã: {contractCode}) đã được cả hai bên ký xác nhận thành công và hiện đang hoạt động.\n\nTrân trọng,\nĐội ngũ Tro88",
+            null,
+            ct);
+
     private async Task SendAsync(
         string toEmail,
         string subject,

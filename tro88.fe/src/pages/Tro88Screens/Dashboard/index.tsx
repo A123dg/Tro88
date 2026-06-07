@@ -19,6 +19,23 @@ export function OwnerDashboardPage() {
   const dashboard = useQuery(QK.ownerDashboard, () => read('/Dashboard/owner', { revenue: 128500000, occupancy: 82, contracts: 24, unpaid: 8 }))
   const remind = useMutation((id: string) => ok(id))
 
+  const dynamicStats = useMemo(() => {
+    let revenue = 0
+    let debt = 0
+    let unpaidCount = 0
+    
+    invoices.forEach((item) => {
+      const amt = total(item)
+      if (item.status === 'Paid') {
+        revenue += amt
+      } else {
+        debt += amt
+        unpaidCount++
+      }
+    })
+    return { revenue, debt, unpaidCount }
+  }, [])
+
   if (dashboard.isLoading) return <main className="page"><SkeletonGrid /></main>
   if (dashboard.isError) return <main className="page"><EmptyState title="Không tải được tổng quan" description="Bấm thử lại để tải lại dữ liệu dashboard." /></main>
   const data = dashboard.data ?? { revenue: 0, occupancy: 0, contracts: 0, unpaid: 0 }
@@ -27,9 +44,9 @@ export function OwnerDashboardPage() {
     <main className="page">
       <PageHeader title="Tổng quan" subtitle="Theo dõi doanh thu, công nợ và việc cần xử lý." />
       <div className="stat-grid">
-        <Card><span>Doanh thu tháng</span><strong>{formatVND(data.revenue)}</strong><small>+12% so với tháng trước</small></Card>
+        <Card><span>Doanh thu thực tế</span><strong>{formatVND(dynamicStats.revenue)}</strong><small>Từ hóa đơn đã thanh toán</small></Card>
         <Card><span>Tỷ lệ lấp đầy</span><strong>{data.occupancy}%</strong><small>24 phòng đang thuê</small></Card>
-        <Card><span>Hóa đơn chưa thu</span><strong>{data.unpaid}</strong><small>{formatVND(18600000)}</small></Card>
+        <Card><span>Công nợ (Chưa thu)</span><strong>{formatVND(dynamicStats.debt)}</strong><small>{dynamicStats.unpaidCount} hóa đơn chưa xong</small></Card>
       </div>
       <div className="split-60">
         <Card>
@@ -37,7 +54,7 @@ export function OwnerDashboardPage() {
           <MiniBarChart values={[42, 56, 48, 71, 64, 83]} />
         </Card>
         <Card>
-          <div className="card-heading"><h2>Hóa đơn chưa thanh toán</h2><Badge variant="warning">5</Badge></div>
+          <div className="card-heading"><h2>Hóa đơn chưa thanh toán</h2><Badge variant="warning">{dynamicStats.unpaidCount}</Badge></div>
           <div className="list">
             {invoices.filter((item) => item.status !== 'Paid').map((item) => (
               <div className="list-row" key={item.id}>

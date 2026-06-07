@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Input } from 'antd'
 import type { TableProps } from 'antd'
 import { useMutation } from 'react-query'
 import { queryClient } from '../../../queryClient'
@@ -30,8 +31,9 @@ function houseStatusLabel(status?: string, isActive?: boolean) {
 export function SystemAdminPage() {
   const [housePage, setHousePage] = useState(1)
   const [housePageSize, setHousePageSize] = useState(10)
+  const [keyword, setKeyword] = useState('')
   const dashboard = useAdminDashboard()
-  const houses = useHouses({ page: housePage, pageSize: housePageSize })
+  const houses = useHouses({ page: housePage, pageSize: housePageSize, keyword })
   const approveHouse = useMutation((id: string) => changeHouseStatus(id, 'Active'), {
     onSuccess: () => {
       queryClient.invalidateQueries(['houses'])
@@ -90,22 +92,21 @@ export function SystemAdminPage() {
     <main className="area-page">
       <header className="area-header">
         <div>
-          <nav className="breadcrumb">Tro88 / Admin hệ thống</nav>
-          <h1>Duyệt nhà trọ</h1>
-          <p>Admin xem toàn bộ nhà trọ trong hệ thống và duyệt hoặc từ chối nhà đang chờ.</p>
+          <nav className="breadcrumb">Quản lý phòng trọ</nav>
+         
         </div>
       </header>
 
       {dashboard.isLoading ? <section className="panel-state">Đang tải dữ liệu toàn hệ thống...</section> : null}
       {dashboard.isError ? (
         <section className="room-error">
-          <strong>Không thể tải dữ liệu admin</strong>
-          <p>Kiểm tra đăng nhập role Admin hoặc API <code>/Dashboard/admin</code>.</p>
+          <strong>Không thể tải dữ liệu </strong>
+          {/* <p>Kiểm tra đăng nhập role Admin hoặc API <code>/Dashboard/admin</code>.</p> */}
           <button type="button" className="button button--primary" onClick={() => dashboard.refetch()}>Thử lại</button>
         </section>
       ) : null}
 
-      {data ? (
+      {/* {data ? (
         <section className="admin-section">
           <div className="section-heading">
             <div>
@@ -127,15 +128,14 @@ export function SystemAdminPage() {
             <SystemMetric label="Nhật ký hệ thống" value={data.totalAuditLogs} color="#8C8C8C" />
           </div>
         </section>
-      ) : null}
+      ) : null} */}
 
       <section className="admin-section system-data-section">
-        <div className="section-heading">
+        {/* <div className="section-heading">
           <div>
             <h2>Nhà trọ toàn hệ thống</h2>
-            <p>Bảng nhà trọ có phân trang, hỗ trợ duyệt hoặc từ chối nhà đang chờ duyệt.</p>
           </div>
-        </div>
+        </div> */}
 
         {houses.isError ? (
           <section className="room-error">
@@ -145,6 +145,16 @@ export function SystemAdminPage() {
         ) : null}
         {!houses.isError ? (
           <div className="data-table data-table--antd">
+            <div className="table-toolbar">
+              <Input
+                value={keyword}
+                placeholder="Tìm kiếm theo tên, địa chỉ"
+                onChange={(event) => {
+                  setKeyword(event.target.value)
+                  setHousePage(1)
+                }}
+              />
+            </div>
             <TableWithPagination
               columns={houseColumns}
               dataSource={houses.data?.items ?? []}

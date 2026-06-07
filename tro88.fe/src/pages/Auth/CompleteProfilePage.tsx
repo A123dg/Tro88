@@ -1,6 +1,8 @@
 import { FormEvent, useEffect, useState } from 'react'
 import { fetchCurrentUser, updateCurrentUser } from '../../services/userService'
 import { UserDto } from '../../types/app.types'
+import dayjs from 'dayjs'
+import { CustomDatePicker } from '../../shared/components/custom-datepicker'
 
 function getDefaultRedirect(role?: string) {
   if (role === 'Tenant') return '/my/rooms'
@@ -74,7 +76,7 @@ export function CompleteProfilePage() {
             </label>
             <label>
               Ngày sinh
-              <input type="date" value={dateOfBirth} onChange={(event) => setDateOfBirth(event.target.value)} required />
+              <CustomDatePicker value={dateOfBirth ? dayjs(dateOfBirth) : null} onChange={(_date, dateString) => setDateOfBirth(dateString ? (typeof dateString === 'string' ? dateString : dateString[0]) : '')} placeholder="Chọn ngày sinh" />
             </label>
             {error ? <p className="login-error">{error}</p> : null}
             <button className="app-button app-button--primary app-button--full" type="submit" disabled={saving}>

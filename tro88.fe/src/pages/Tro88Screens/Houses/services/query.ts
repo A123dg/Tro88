@@ -1,44 +1,36 @@
 import { useQuery } from 'react-query'
-import { fetchHouses, fetchHouseDetail } from '../../../services/houseService'
-import { fetchProvinceOptions, fetchWardOptions, ProvinceOption, WardOption } from '../../shared'
-import { QK } from '../../shared'
+import { fetchHouses, fetchHouseDetail, HouseFilters } from '../../../../services/houseService'
+import { fetchProvinceOptions, fetchWardOptions, read, QK, rooms } from '../../shared'
 
-// Fetch danh sách houses
-export const useHousesQuery = (filters?: { page?: number; pageSize?: number; status?: string; keyword?: string }) => {
+export const useHousesQuery = (filters?: HouseFilters, enabled = true) => {
   return useQuery(
     [QK.houses, filters],
     () => fetchHouses(filters),
     {
+      enabled,
       staleTime: 1000 * 60 * 5,
     }
   )
 }
 
-// Fetch chi tiết house
-export const useHouseByIdQuery = (id: string | null) => {
+export const useHouseDetailQuery = (id: string | null, enabled = true) => {
   return useQuery(
     ['house-detail', id],
-    () => fetchHouseDetail(id!),
+    () => fetchHouseDetail(id ?? ''),
     {
-      enabled: Boolean(id),
-      staleTime: 1000 * 60 * 5,
+      enabled: enabled && Boolean(id),
+      retry: 1,
     }
   )
 }
 
-// Fetch danh sách tỉnh/thành
 export const useProvincesQuery = () => {
-  return useQuery(
-    ['public-provinces'],
-    fetchProvinceOptions,
-    {
-      staleTime: 1000 * 60 * 60 * 24,
-    }
-  )
+  return useQuery(['public-provinces'], fetchProvinceOptions, {
+    staleTime: 1000 * 60 * 60 * 24,
+  })
 }
 
-// Fetch danh sách xã/phường theo tỉnh
-export const useWardsQuery = (provinceId: string | null) => {
+export const useWardsQuery = (provinceId?: string) => {
   return useQuery(
     ['public-wards', provinceId],
     () => fetchWardOptions(provinceId ?? ''),
@@ -47,4 +39,8 @@ export const useWardsQuery = (provinceId: string | null) => {
       staleTime: 1000 * 60 * 60 * 24,
     }
   )
+}
+
+export const useRoomsQuery = (enabled = true) => {
+  return useQuery(QK.rooms, () => read('/Rooms', rooms), { enabled })
 }

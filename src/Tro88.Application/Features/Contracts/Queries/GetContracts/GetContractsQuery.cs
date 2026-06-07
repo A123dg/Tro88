@@ -9,4 +9,5 @@ public sealed record GetContractsQuery(
     Guid? TenantId = null,
     int Page = 1,
     int PageSize = 10,
-    string? Status = null) : IRequest<PagedResult<ContractDto>>;
+    string? Status = null,
+    string? Keyword = null) : IRequest<PagedResult<ContractDto>>;

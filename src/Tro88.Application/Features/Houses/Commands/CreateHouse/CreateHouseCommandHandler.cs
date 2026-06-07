@@ -40,6 +40,43 @@ public sealed class CreateHouseCommandHandler
             HouseStatus.PendingApproval);
 
         _db.Houses.Add(house);
+
+        if (request.Services != null && request.Services.Any())
+        {
+            foreach (var serviceName in request.Services)
+            {
+                var feeType = "Fixed";
+                decimal amount = 0;
+                string? unit = "Tháng";
+
+                switch (serviceName.ToLower())
+                {
+                    case "wifi":
+                        amount = 100000;
+                        break;
+                    case "bãi xe":
+                    case "bai xe":
+                        amount = 150000;
+                        unit = "Xe";
+                        break;
+                    case "camera":
+                        amount = 50000;
+                        break;
+                    case "máy giặt":
+                    case "may giat":
+                        amount = 100000;
+                        break;
+                    case "thang máy":
+                    case "thang may":
+                        amount = 50000;
+                        break;
+                }
+
+                var serviceFee = ServiceFee.Create(house.Id, serviceName, feeType, amount, unit);
+                _db.ServiceFees.Add(serviceFee);
+            }
+        }
+
         await _db.SaveChangesAsync(ct);
 
         return HouseDto.FromEntity(house);

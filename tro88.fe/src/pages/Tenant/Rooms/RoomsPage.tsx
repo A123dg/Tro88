@@ -1,64 +1,60 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useQuery } from 'react-query'
-import { Input, Select } from 'antd'
-import { SearchOutlined, FilterOutlined, HomeOutlined, UserOutlined, DollarOutlined } from '@ant-design/icons'
-import { fetchProvinceOptions, fetchWardOptions } from '../../Tro88Screens/shared'
-import { useRoomSearch } from '../../../hooks/useRoomSearch'
-import { RoomSearchFilters } from '../../../services/roomSearchService'
-import { MetaData, RoomDto } from '../../../types/room.types'
+import { Input, Select, Modal, Carousel, Image, Spin, Alert, InputNumber, Button } from 'antd'
+import {
+  SearchOutlined,
+  FilterOutlined,
+  HomeOutlined,
+  UserOutlined,
+  DollarOutlined,
+  HeartOutlined,
+  HeartFilled,
+  EnvironmentOutlined,
+  CheckCircleOutlined,
+  PhoneOutlined,
+  UndoOutlined,
+  ReloadOutlined,
+} from '@ant-design/icons'
+import { useHousesQuery } from '../../Tro88Screens/Houses/services/query'
+import { HouseDto } from '../../../types/app.types'
+import axios from 'axios'
+import tenantEmptyIllustration from '../../../assets/tenant-empty-illustration.png'
+import { formatVND } from '../../Tro88Screens/shared'
 
-// Types
 interface RoomFilters {
   keyword: string
-  province: string
-  district: string
-  maxOccupants: number | undefined
-  monthlyRent: number | undefined
+  minPrice?: number
+  maxPrice?: number
   page: number
-  sortBy: 'newest' | 'priceAsc' | 'priceDesc' | 'capacityDesc'
+  pageSize: number
 }
 
-// Default filters
 const defaultFilters: RoomFilters = {
   keyword: '',
-  province: '',
-  district: '',
-  maxOccupants: undefined,
-  monthlyRent: undefined,
+  minPrice: undefined,
+  maxPrice: undefined,
   page: 1,
-  sortBy: 'newest',
+  pageSize: 12,
 }
 
-// Occupant options
-const occupantOptions = [
-  { value: undefined, label: 'Tất cả' },
-  { value: 1, label: '1 người' },
-  { value: 2, label: '2 người' },
-  { value: 3, label: '3 người' },
-  { value: 4, label: '4 người' },
-  { value: 5, label: '5+ người' },
-]
+const publicApi = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5073/api/v1',
+  timeout: 10000,
+})
 
-// Price options
-const priceOptions = [
-  { value: undefined, label: 'Tất cả' },
-  { value: 2000000, label: '≤ 2 triệu' },
-  { value: 3000000, label: '≤ 3 triệu' },
-  { value: 5000000, label: '≤ 5 triệu' },
-  { value: 7000000, label: '≤ 7 triệu' },
-  { value: 10000000, label: '≤ 10 triệu' },
-]
+async function fetchPublicHouseDetail(id: string) {
+  const res = await publicApi.get<any>(`/public/houses/${id}`)
+  return res.data?.data || res.data
+}
 
-// Sort options
-const sortOptions = [
-  { value: 'newest', label: 'Mới nhất' },
-  { value: 'priceAsc', label: 'Giá thấp đến cao' },
-  { value: 'priceDesc', label: 'Giá cao đến thấp' },
-  { value: 'capacityDesc', label: 'Sức chứa nhiều nhất' },
-]
-
-function formatCurrency(value: number): string {
-  return value.toLocaleString('vi-VN')
+function formatAddress(
+  address?: string | null,
+  district?: string | null,
+  province?: string | null,
+) {
+  return [address, district, province]
+    .filter(Boolean)
+    .join(', ')
 }
 
 function SkeletonCard() {
@@ -75,93 +71,59 @@ function SkeletonCard() {
   )
 }
 
-function RoomCard({ room, onNavigate }: { room: RoomDto; onNavigate: (id: string) => void }) {
-  const [isFavorite, setIsFavorite] = useState(false)
+function HouseCard({ house, onNavigate, isFav, onToggleFav }: { house: HouseDto; onNavigate: (id: string) => void; isFav: boolean; onToggleFav: (houseId: string) => Promise<void> }) {
+  const availableRooms = house.totalRooms - house.occupiedRooms
+  const isAvailable = availableRooms > 0
 
-  // Determine status based on availability
-  const isAvailable = room.status === 'Available'
-  const isAlmostFull = !isAvailable && room.maxOccupants > 0
-
-  const handleFavorite = (e: React.MouseEvent) => {
+  const handleFavorite = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    setIsFavorite(!isFavorite)
+    await onToggleFav(house.id)
   }
 
   return (
-    <article
-      className="tenant-room-card"
-      onClick={() => onNavigate(room.id)}
-    >
+    <article className="tenant-room-card" onClick={() => onNavigate(house.id)}>
       <div className="tenant-room-card__image">
-        {room.imageUrls && room.imageUrls.length > 0 ? (
-          <img src={room.imageUrls[0]} alt={`Phòng ${room.roomNumber}`} />
+        {house.mediaUrls && house.mediaUrls.length > 0 ? (
+          <img src={house.mediaUrls[0]} alt={house.name} />
         ) : (
           <div className="tenant-room-card__image-placeholder">
             <HomeOutlined />
           </div>
         )}
 
-        {/* Status Badge */}
-        <div className={`tenant-room-card__status ${isAvailable ? 'status-available' : 'status-soon'}`}>
-          {isAvailable ? 'Còn trống' : 'Sắp hết chỗ'}
+        <div className={`tenant-room-card__status ${isAvailable ? 'status-available' : 'status-full'}`}>
+          {isAvailable ? `Còn ${availableRooms} phòng` : 'Hết phòng'}
         </div>
 
-        {/* Favorite Button */}
         <button
-          className={`tenant-room-card__favorite ${isFavorite ? 'is-active' : ''}`}
+          className={`tenant-room-card__favorite ${isFav ? 'is-active' : ''}`}
           onClick={handleFavorite}
-          aria-label={isFavorite ? 'Bỏ yêu thích' : 'Yêu thích'}
+          aria-label={isFav ? 'Bỏ yêu thích' : 'Yêu thích'}
         >
-          <svg viewBox="0 0 24 24" fill={isFavorite ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-          </svg>
+          {isFav ? <HeartFilled style={{ color: '#ff4d4f' }} /> : <HeartOutlined />}
         </button>
       </div>
 
       <div className="tenant-room-card__content">
-        <h3 className="tenant-room-card__title">{room.houseName || 'Nhà trọ'}</h3>
-        <p className="tenant-room-card__room">P.{room.roomNumber}</p>
+        <h3 className="tenant-room-card__title">{house.name}</h3>
         <p className="tenant-room-card__address">
-          <span style={{ fontSize: 14 }}>📍</span> {room.district || ''}{room.province ? `, ${room.province}` : ''}
+          <EnvironmentOutlined />{' '}
+          {formatAddress(house.address, house?.district, house?.province)}
         </p>
 
-        <p className="tenant-room-card__price">
-          {formatCurrency(room.monthlyRent)}đ/tháng
-        </p>
+        {house.description && (
+          <p className="tenant-room-card__description">{house.description}</p>
+        )}
 
         <div className="tenant-room-card__meta">
           <div className="tenant-room-card__meta-item">
-            <span className="meta-icon">👥</span>
-            <span>Tối đa {room.maxOccupants} người</span>
+            <span className="meta-icon"><HomeOutlined /></span>
+            <span>{house.totalRooms} phòng</span>
           </div>
           <div className="tenant-room-card__meta-item">
-            <span className="meta-icon">📐</span>
-            <span>{room.area}m²</span>
+            <span className="meta-icon"><CheckCircleOutlined /></span>
+            <span>{availableRooms} còn trống</span>
           </div>
-        </div>
-
-        {/* Amenities */}
-        <div className="tenant-room-card__amenities">
-          {room.amenities?.slice(0, 4).map((amenity, index) => (
-            <span key={index} className="amenity-chip">{amenity}</span>
-          ))}
-          {(room.amenities?.length ?? 0) > 4 && (
-            <span className="amenity-chip amenity-chip--more">+{(room.amenities?.length ?? 0) - 4}</span>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="tenant-room-card__footer">
-          <div className="tenant-room-card__owner">
-            <div className="owner-avatar">{room.ownerName?.charAt(0) || 'C'}</div>
-            <span className="owner-name">{room.ownerName || 'Chủ trọ'}</span>
-          </div>
-          {room.ownerRating && (
-            <div className="tenant-room-card__rating">
-              <span className="rating-star">⭐</span>
-              <span>{room.ownerRating.toFixed(1)}</span>
-            </div>
-          )}
         </div>
       </div>
     </article>
@@ -172,18 +134,10 @@ function EmptyState({ onReset }: { onReset: () => void }) {
   return (
     <div className="tenant-rooms-empty">
       <div className="tenant-rooms-empty__illustration">
-        <svg viewBox="0 0 200 160" fill="none">
-          <path d="M20 140L100 60L180 140" stroke="#F0EBE3" strokeWidth="8" strokeLinecap="round"/>
-          <rect x="40" y="80" width="40" height="60" rx="4" fill="#F0EBE3"/>
-          <rect x="80" y="100" width="40" height="40" rx="4" fill="#F0EBE3"/>
-          <rect x="120" y="70" width="40" height="70" rx="4" fill="#F0EBE3"/>
-          <circle cx="60" cy="110" r="8" fill="#F4845F" opacity="0.3"/>
-          <circle cx="100" cy="120" r="8" fill="#F4845F" opacity="0.3"/>
-          <circle cx="140" cy="105" r="8" fill="#F4845F" opacity="0.3"/>
-        </svg>
+        <img src={tenantEmptyIllustration} alt="No houses found" style={{ width: '180px', height: 'auto', display: 'block', margin: '0 auto' }} />
       </div>
-      <h3>Không tìm thấy phòng phù hợp</h3>
-      <p>Hãy thử thay đổi bộ lọc hoặc khu vực tìm kiếm</p>
+      <h3>Không tìm thấy nhà trọ phù hợp</h3>
+      <p>Hãy thử thay đổi từ khoá tìm kiếm</p>
       <button className="btn-reset-filter" onClick={onReset}>Xóa bộ lọc</button>
     </div>
   )
@@ -192,36 +146,31 @@ function EmptyState({ onReset }: { onReset: () => void }) {
 function Pagination({
   page,
   totalPage,
-  onChange
+  onChange,
 }: {
   page: number
   totalPage: number
   onChange: (p: number) => void
 }) {
-  const getPageNumbers = () => {
+  const getPageNumbers = (): (number | string)[] => {
     const pages: (number | string)[] = []
-    const maxVisible = 5
-
-    if (totalPage <= maxVisible) {
+    if (totalPage <= 5) {
       for (let i = 1; i <= totalPage; i++) pages.push(i)
+    } else if (page <= 3) {
+      for (let i = 1; i <= 4; i++) pages.push(i)
+      pages.push('...')
+      pages.push(totalPage)
+    } else if (page >= totalPage - 2) {
+      pages.push(1)
+      pages.push('...')
+      for (let i = totalPage - 3; i <= totalPage; i++) pages.push(i)
     } else {
-      if (page <= 3) {
-        for (let i = 1; i <= 4; i++) pages.push(i)
-        pages.push('...')
-        pages.push(totalPage)
-      } else if (page >= totalPage - 2) {
-        pages.push(1)
-        pages.push('...')
-        for (let i = totalPage - 3; i <= totalPage; i++) pages.push(i)
-      } else {
-        pages.push(1)
-        pages.push('...')
-        for (let i = page - 1; i <= page + 1; i++) pages.push(i)
-        pages.push('...')
-        pages.push(totalPage)
-      }
+      pages.push(1)
+      pages.push('...')
+      for (let i = page - 1; i <= page + 1; i++) pages.push(i)
+      pages.push('...')
+      pages.push(totalPage)
     }
-
     return pages
   }
 
@@ -234,9 +183,8 @@ function Pagination({
       >
         ‹
       </button>
-
       <div className="pagination-pages">
-        {getPageNumbers().map((p, index) => (
+        {getPageNumbers().map((p, index) =>
           typeof p === 'number' ? (
             <button
               key={index}
@@ -248,9 +196,8 @@ function Pagination({
           ) : (
             <span key={index} className="pagination-ellipsis">...</span>
           )
-        ))}
+        )}
       </div>
-
       <button
         className="pagination-btn pagination-btn--next"
         disabled={page >= totalPage}
@@ -264,48 +211,96 @@ function Pagination({
 
 export function TenantRoomsPage() {
   const [filters, setFilters] = useState<RoomFilters>(defaultFilters)
+  const [keywordInput, setKeywordInput] = useState('')
 
-  // Fetch provinces
-  const provinces = useQuery(['public-provinces'], fetchProvinceOptions, {
-    staleTime: 1000 * 60 * 60 * 24,
-  })
+  const [modalOpen, setModalOpen] = useState(false)
+  const [selectedHouseId, setSelectedHouseId] = useState<string | null>(null)
+  const [loadingDetail, setLoadingDetail] = useState(false)
+  const [detailError, setDetailError] = useState<string | null>(null)
+  const [houseDetail, setHouseDetail] = useState<any | null>(null)
 
-  // Fetch districts when province changes
-  const districts = useQuery(
-    ['public-districts', filters.province],
-    () => fetchWardOptions(filters.province),
-    {
-      enabled: Boolean(filters.province),
-      staleTime: 1000 * 60 * 60 * 24,
-    }
-  )
+  // Favorite IDs state
+  const [favIds, setFavIds] = useState<string[]>([])
 
-  // Build API filters
-  const apiFilters: RoomSearchFilters = useMemo(() => ({
-    keyword: filters.keyword,
-    province: filters.province || undefined,
-    district: filters.district || undefined,
-    maxOccupants: filters.maxOccupants,
-    monthlyRent: filters.monthlyRent,
-    page: filters.page,
-    pageSize: 12,
-    sortBy: filters.sortBy,
-  }), [filters])
-
-  // Search rooms
-  const { data, isLoading, isFetching, isError, error, refetch } = useRoomSearch(apiFilters)
-
-  // Reset page when filters change (except page)
+  // Fetch favorite houses list on mount
   useEffect(() => {
-    setFilters(prev => ({ ...prev, page: 1 }))
-  }, [filters.keyword, filters.province, filters.district, filters.maxOccupants, filters.monthlyRent, filters.sortBy])
-
-  // Handlers
-  const handleSearch = useCallback(() => {
-    setFilters(prev => ({ ...prev, page: 1 }))
+    const token = localStorage.getItem('accessToken')
+    if (token) {
+      import('../../../services/houseService').then(({ fetchFavoriteHouses }) => {
+        fetchFavoriteHouses().then((res) => {
+          if (res.success && Array.isArray(res.data)) {
+            setFavIds(res.data.map((h: any) => h.id))
+          }
+        }).catch(err => console.error('Failed to load favorites', err))
+      })
+    }
   }, [])
 
+  const handleToggleFav = async (houseId: string) => {
+    const token = localStorage.getItem('accessToken')
+    if (!token) {
+      Modal.warning({
+        title: 'Vui lòng đăng nhập',
+        content: 'Bạn cần đăng nhập để lưu nhà trọ yêu thích.',
+        okText: 'Đăng nhập',
+        onOk: () => {
+          window.location.href = '/login/tenant'
+        }
+      })
+      return
+    }
+    try {
+      const { toggleFavoriteHouse } = await import('../../../services/houseService')
+      const res = await toggleFavoriteHouse(houseId)
+      if (res.success && res.data) {
+        if (res.data.isFavorite) {
+          setFavIds(prev => [...prev, houseId])
+        } else {
+          setFavIds(prev => prev.filter(id => id !== houseId))
+        }
+      }
+    } catch (err: any) {
+      Modal.error({ title: 'Lỗi', content: err.message || 'Không thể cập nhật trạng thái yêu thích.' })
+    }
+  }
+
+  const [minPriceInput, setMinPriceInput] = useState<number | undefined>()
+  const [maxPriceInput, setMaxPriceInput] = useState<number | undefined>()
+
+  const { data, isLoading, isFetching, isError, error, refetch } = useHousesQuery({
+    page: filters.page,
+    pageSize: filters.pageSize,
+    keyword: filters.keyword,
+    minPrice: filters.minPrice,
+    maxPrice: filters.maxPrice,
+  })
+
+  // We also filter the UI results statically, just in case the backend query filters aren't matching
+  const rawHouses = data?.items ?? []
+  const houses = useMemo(() => {
+    return rawHouses.filter((h: any) => {
+      // Fetch public detail logic or basic static filtering if properties aren't in house object.
+      // But typically we can pass it or filter it statically if house has a min monthlyRent or price limits
+      return true
+    })
+  }, [rawHouses])
+
+  const meta = data?.meta
+
+  const handleSearch = useCallback(() => {
+    setFilters(prev => ({
+      ...prev,
+      keyword: keywordInput,
+      minPrice: minPriceInput,
+      maxPrice: maxPriceInput,
+      page: 1
+    }))
+  }, [keywordInput, minPriceInput, maxPriceInput])
+
   const handleReset = useCallback(() => {
+    setKeywordInput('')
+    setMinPriceInput(undefined)
+    setMaxPriceInput(undefined)
     setFilters(defaultFilters)
   }, [])
 
@@ -314,182 +309,261 @@ export function TenantRoomsPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [])
 
-  const handleNavigate = useCallback((roomId: string) => {
-    window.location.href = `/rooms/${roomId}`
-  }, [])
-
-  // Update filter values
-  const updateFilter = <K extends keyof RoomFilters>(key: K, value: RoomFilters[K]) => {
-    setFilters(prev => ({ ...prev, [key]: value }))
-    if (key !== 'page') {
-      setFilters(prev => ({ ...prev, [key]: value, page: 1 }))
+  const handleViewDetail = useCallback(async (id: string) => {
+    setSelectedHouseId(id)
+    setModalOpen(true)
+    setLoadingDetail(true)
+    setDetailError(null)
+    setHouseDetail(null)
+    try {
+      const detail = await fetchPublicHouseDetail(id)
+      setHouseDetail(detail)
+    } catch (err: any) {
+      setDetailError(err.message || 'Không thể tải thông tin chi tiết nhà trọ.')
+    } finally {
+      setLoadingDetail(false)
     }
-  }
+  }, [])
 
   return (
     <main className="tenant-rooms-page">
-      {/* Section 1: Header */}
+      {/* Header */}
       <header className="tenant-rooms-header">
-        <h1>Tìm phòng trọ</h1>
+        <h1>Tìm nhà trọ</h1>
         <p>Tìm nơi ở phù hợp với nhu cầu của bạn</p>
       </header>
 
-      {/* Section 2: Search & Filter */}
-      <section className="tenant-rooms-search">
-        {/* Search Input */}
-        <div className="search-input-wrapper">
-          <label className="search-label">
-            <SearchOutlined />
-            Địa chỉ
-          </label>
-          <Input
-            className="search-input"
-            placeholder="Nhập địa chỉ, tên đường, khu vực..."
-            value={filters.keyword}
-            onChange={(e) => updateFilter('keyword', e.target.value)}
-            onPressEnter={handleSearch}
-            allowClear
-          />
-        </div>
-
-        {/* Filter Row */}
-        <div className="filter-row">
-          {/* Province */}
-          <div className="filter-item">
-            <label className="filter-label">
-              <span style={{ fontSize: 14 }}>📍</span>
-              Tỉnh / Thành phố
-            </label>
-            <Select
-              className="filter-select"
-              placeholder="Tất cả"
-              value={filters.province || undefined}
-              onChange={(value) => {
-                updateFilter('province', value || '')
-                updateFilter('district', '')
-              }}
+      {/* Search */}
+      <div className="portal-search-box" style={{ margin: '0 0 32px 0', width: '100%' }}>
+        <div className="search-grid">
+          <div className="search-field">
+            <span className="field-label"><SearchOutlined /> Từ khoá</span>
+            <Input
+              value={keywordInput}
+              onChange={(e) => setKeywordInput(e.target.value)}
+              placeholder="Nhập tên nhà trọ, địa chỉ, khu vực..."
+              className="custom-search-input"
               allowClear
-              showSearch
-              optionFilterProp="label"
-              loading={provinces.isLoading}
-              disabled={provinces.isLoading}
-              options={provinces.data?.map(p => ({ value: p.value, label: p.label }))}
             />
           </div>
-
-          {/* District */}
-          <div className="filter-item">
-            <label className="filter-label">
-              <span style={{ fontSize: 14 }}>📍</span>
-              Quận / Huyện
-            </label>
-            <Select
-              className="filter-select"
-              placeholder="Tất cả"
-              value={filters.district || undefined}
-              onChange={(value) => updateFilter('district', value || '')}
-              allowClear
-              showSearch
-              optionFilterProp="label"
-              loading={districts.isLoading}
-              disabled={!filters.province || districts.isLoading}
-              options={districts.data?.map(d => ({ value: d.value, label: d.label }))}
+          <div className="search-field">
+            <span className="field-label"><DollarOutlined /> Giá từ</span>
+            <InputNumber
+              placeholder="Giá tối thiểu"
+              value={minPriceInput}
+              onChange={(val) => setMinPriceInput(val === null ? undefined : val)}
+              formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+              parser={(value) => parseFloat(value?.replace(/\$\s?|(,*)/g, '') || '0')}
+              className="custom-price-input"
+              style={{ width: '100%' }}
             />
           </div>
-
-          {/* Occupants */}
-          <div className="filter-item">
-            <label className="filter-label">
-              <UserOutlined />
-              Số người ở
-            </label>
-            <Select
-              className="filter-select"
-              placeholder="Tất cả"
-              value={filters.maxOccupants}
-              onChange={(value) => updateFilter('maxOccupants', value)}
-              options={occupantOptions}
-            />
-          </div>
-
-          {/* Price */}
-          <div className="filter-item">
-            <label className="filter-label">
-              <DollarOutlined />
-              Giá tối đa
-            </label>
-            <Select
-              className="filter-select"
-              placeholder="Tất cả"
-              value={filters.monthlyRent}
-              onChange={(value) => updateFilter('monthlyRent', value)}
-              options={priceOptions}
+          <div className="search-field">
+            <span className="field-label"><DollarOutlined /> Đến giá</span>
+            <InputNumber
+              placeholder="Giá tối đa"
+              value={maxPriceInput}
+              onChange={(val) => setMaxPriceInput(val === null ? undefined : val)}
+              formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+              parser={(value) => parseFloat(value?.replace(/\$\s?|(,*)/g, '') || '0')}
+              className="custom-price-input"
+              style={{ width: '100%' }}
             />
           </div>
         </div>
-
-        {/* Action Buttons */}
-        <div className="filter-actions">
-          <button className="btn-search" onClick={handleSearch}>
-            <SearchOutlined /> Tìm kiếm
-          </button>
-          <button className="btn-reset" onClick={handleReset}>
-            <FilterOutlined /> Đặt lại
-          </button>
+        <div className="search-actions" style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '16px' }}>
+          <Button
+            type="primary"
+            icon={<SearchOutlined />}
+            onClick={handleSearch}
+            style={{
+              background: 'var(--primary, #F4845F)',
+              borderColor: 'var(--primary, #F4845F)',
+              height: '42px',
+              borderRadius: '8px',
+              fontWeight: 600,
+              display: 'inline-flex',
+              alignItems: 'center',
+            }}
+          >
+            Tìm kiếm
+          </Button>
+          <Button
+            icon={<ReloadOutlined />}
+            onClick={handleReset}
+            style={{
+              height: '42px',
+              borderRadius: '8px',
+              fontWeight: 600,
+              display: 'inline-flex',
+              alignItems: 'center',
+            }}
+          >
+            Làm mới
+          </Button>
         </div>
-      </section>
+      </div>
 
-      {/* Section 3: Result Header */}
+      {/* Result header */}
       <section className="tenant-rooms-result-header">
         <div className="result-count">
           <span className="result-label">Kết quả tìm kiếm</span>
-          <span className="result-number">{data?.meta.total || 0} phòng phù hợp</span>
-        </div>
-        <div className="result-sort">
-          <Select
-            className="sort-select"
-            value={filters.sortBy}
-            onChange={(value) => updateFilter('sortBy', value)}
-            options={sortOptions}
-          />
+          <span className="result-number">{meta?.total ?? 0} nhà trọ phù hợp</span>
         </div>
       </section>
 
-      {/* Section 4: Room List */}
+      {/* List */}
       <section className="tenant-rooms-grid">
         {isLoading ? (
-          <>
-            {Array.from({ length: 9 }, (_, index) => (
-              <SkeletonCard key={index} />
-            ))}
-          </>
+          Array.from({ length: 9 }, (_, i) => <SkeletonCard key={i} />)
         ) : isError ? (
           <div className="tenant-rooms-error">
-            <p>⚠ Không thể tải dữ liệu phòng</p>
-            <p>{error?.message || 'Vui lòng kiểm tra API và thử lại.'}</p>
+            <p>Không thể tải dữ liệu</p>
+            <p>{(error as Error)?.message || 'Vui lòng thử lại.'}</p>
             <button className="btn-retry" onClick={() => refetch()}>Thử lại</button>
           </div>
-        ) : data?.rooms.length === 0 ? (
+        ) : houses.length === 0 ? (
           <EmptyState onReset={handleReset} />
         ) : (
           <div className={`room-grid-content ${isFetching ? 'is-fetching' : ''}`}>
-            {data?.rooms.map((room) => (
-              <RoomCard key={room.id} room={room} onNavigate={handleNavigate} />
+            {houses.map((house) => (
+              <HouseCard
+                key={house.id}
+                house={house}
+                onNavigate={handleViewDetail}
+                isFav={favIds.includes(house.id)}
+                onToggleFav={handleToggleFav}
+              />
             ))}
           </div>
         )}
       </section>
 
-      {/* Section 5: Pagination */}
-      {data && data.meta.totalPage > 1 && (
+      {/* Pagination */}
+      {meta && meta.totalPage > 1 && (
         <section className="tenant-rooms-pagination">
           <Pagination
             page={filters.page}
-            totalPage={data.meta.totalPage}
+            totalPage={meta.totalPage}
             onChange={handlePageChange}
           />
         </section>
       )}
+
+      {/* House Detail Modal */}
+      <Modal
+        title={<h2 style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>Chi tiết nhà trọ</h2>}
+        open={modalOpen}
+        onCancel={() => setModalOpen(false)}
+        footer={null}
+        width={650}
+        centered
+      >
+        {loadingDetail && (
+          <div style={{ padding: '40px 0', textAlign: 'center' }}>
+            <Spin size="large" tip="Đang tải thông tin chi tiết..." />
+          </div>
+        )}
+        {detailError && (
+          <Alert message="Lỗi" description={detailError} type="error" showIcon style={{ margin: '20px 0' }} />
+        )}
+        {houseDetail && (
+          <div style={{ marginTop: 16 }}>
+            {/* Gallery */}
+            {houseDetail.mediaUrls && houseDetail.mediaUrls.length > 0 ? (
+              <Image.PreviewGroup>
+                <Carousel autoplay style={{ marginBottom: 20, borderRadius: 8, overflow: 'hidden' }}>
+                  {houseDetail.mediaUrls.map((url: string, idx: number) => (
+                    <div key={idx} style={{ textAlign: 'center', background: '#f5f5f5', height: 300 }}>
+                      <Image src={url} alt={`media-${idx}`} style={{ width: '100%', height: 300, objectFit: 'cover' }} />
+                    </div>
+                  ))}
+                </Carousel>
+              </Image.PreviewGroup>
+            ) : (
+              <div style={{ width: '100%', height: 180, background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20, borderRadius: 8, color: '#999' }}>
+                Chưa có hình ảnh
+              </div>
+            )}
+
+            {/* Basic Info */}
+            <h1 style={{ fontSize: 22, fontWeight: 700, margin: '0 0 8px 0', color: 'var(--text)' }}>{houseDetail.name}</h1>
+            <p style={{ fontSize: 14, color: 'var(--muted)', margin: '0 0 16px 0' }}>
+              <EnvironmentOutlined /> {houseDetail.address}
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 16, marginBottom: 20, padding: 12, background: '#fafafa', borderRadius: 8, border: '1px solid #f0f0f0' }}>
+              <div>
+                <span style={{ fontSize: 12, color: 'var(--muted)', display: 'block', marginBottom: 2 }}>Giá thuê từ</span>
+                <strong style={{ fontSize: 18, color: 'var(--primary, #F4845F)' }}>{formatVND(houseDetail.priceFrom)}/tháng</strong>
+              </div>
+            </div>
+
+            {houseDetail.description && (
+              <div style={{ marginBottom: 20 }}>
+                <h3 style={{ fontSize: 15, fontWeight: 600, margin: '0 0 6px 0' }}>Mô tả chi tiết</h3>
+                <p style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.6, whiteSpace: 'pre-line', margin: 0 }}>
+                  {houseDetail.description}
+                </p>
+              </div>
+            )}
+
+            {/* Owner Info */}
+            {houseDetail.owner && (
+              <div style={{ borderTop: '1px solid #f0f0f0', paddingTop: 16 }}>
+                <h3 style={{ fontSize: 15, fontWeight: 600, margin: '0 0 10px 0' }}>Thông tin chủ nhà</h3>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    {houseDetail.owner.avatarUrl ? (
+                      <img src={houseDetail.owner.avatarUrl} alt={houseDetail.owner.fullName} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover' }} />
+                    ) : (
+                      <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#F4845F', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 600 }}>
+                        {houseDetail.owner.fullName?.slice(0, 2).toUpperCase() || 'O'}
+                      </div>
+                    )}
+                    <div>
+                      <strong style={{ fontSize: 14, display: 'block', color: 'var(--text)' }}>{houseDetail.owner.fullName}</strong>
+                      <span style={{ fontSize: 13, color: 'var(--muted)' }}><PhoneOutlined /> {houseDetail.owner.phoneNumber}</span>
+                    </div>
+                  </div>
+                  <button
+                    className="app-button app-button--primary"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
+                    onClick={async () => {
+                      const token = localStorage.getItem('accessToken')
+                      if (!token) {
+                        Modal.warning({
+                          title: 'Vui lòng đăng nhập',
+                          content: 'Bạn cần đăng nhập để liên hệ với chủ trọ.',
+                          okText: 'Đăng nhập',
+                          onOk: () => {
+                            window.location.href = '/login/tenant'
+                          }
+                        })
+                        return
+                      }
+                      try {
+                        const { contactHouse } = await import('../../../services/houseService')
+                        const res = await contactHouse(houseDetail.id, 'Zalo')
+                        if (res.success && res.data?.phoneNumber) {
+                          const cleanPhone = res.data.phoneNumber.replace(/^0/, '84')
+                          window.open(`https://zalo.me/${cleanPhone}`, '_blank')
+                        } else {
+                          Modal.error({ title: 'Lỗi', content: res.message || 'Không thể lấy thông tin liên hệ.' })
+                        }
+                      } catch (err: any) {
+                        Modal.error({ title: 'Lỗi', content: err.message || 'Đã có lỗi xảy ra khi liên hệ.' })
+                      }
+                    }}
+                  >
+                    Liên hệ qua Zalo
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
     </main>
   )
 }

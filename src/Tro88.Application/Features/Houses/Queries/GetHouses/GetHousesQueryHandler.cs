@@ -37,12 +37,21 @@ public sealed class GetHousesQueryHandler
             query = query.Where(h => h.OwnerId == _currentUser.UserId);
         }
 
-        if (!string.IsNullOrEmpty(request.Search))
+        var keyword = request.Keyword ?? request.Search;
+        if (!string.IsNullOrWhiteSpace(keyword))
         {
-            var search = request.Search.ToLower();
+            var search = keyword.Trim().ToLower();
             query = query.Where(h =>
                 h.Name.ToLower().Contains(search) ||
                 h.Address.ToLower().Contains(search));
+        }
+
+        if (request.MinPrice.HasValue || request.MaxPrice.HasValue)
+        {
+            query = query.Where(h => h.Rooms.Any(r =>
+                (!request.MinPrice.HasValue || r.MonthlyRent >= request.MinPrice.Value) &&
+                (!request.MaxPrice.HasValue || r.MonthlyRent <= request.MaxPrice.Value)
+            ));
         }
 
         var total = await query.CountAsync(ct);

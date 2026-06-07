@@ -6,7 +6,7 @@ import type { RoomPayload } from '../../../../services/roomService'
 import ModalForm from '../../../../shared/components/modal-form/ModalForm'
 import TableWithPagination from '../../../../shared/components/table-pagination'
 import type { RoomDto } from '../../../../types/room.types'
-import { Badge, formatVND, statusVariant, Status } from '../../shared'
+import { Badge, formatVND, statusVariant, Status, navigateTo } from '../../shared'
 
 function toRoomPayload(values: Record<string, unknown>): RoomPayload {
   return {
@@ -114,6 +114,7 @@ export function HouseRoomsTable({ houseId }: { houseId: string }) {
       className: 'action-column house-rooms-table__actions',
       render: (_, room) => (
         <div className="actions">
+          <Button variant="outlined" onClick={() => navigateTo(`/rooms/${room.id}`)}>Xem</Button>
           <Button variant="outlined" onClick={() => openEdit(room)}>Sửa</Button>
           <Button variant="solid" danger loading={deleteRoom.isLoading} onClick={() => handleDelete(room)}>Xóa</Button>
         </div>

@@ -36,6 +36,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<AiConversation> AiConversations => Set<AiConversation>();
     public DbSet<AiMessage> AiMessages => Set<AiMessage>();
     public DbSet<AiAgentTask> AiAgentTasks => Set<AiAgentTask>();
+    public DbSet<FavoriteHouse> FavoriteHouses => Set<FavoriteHouse>();
+    public DbSet<ContactLog> ContactLogs => Set<ContactLog>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {

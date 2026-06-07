@@ -8,6 +8,8 @@ public sealed record ContractDto(
     string RoomNumber,
     Guid TenantId,
     string TenantName,
+    string TenantPhone,
+    string TenantEmail,
     string ContractCode,
     DateTime StartDate,
     DateTime EndDate,
@@ -15,7 +17,9 @@ public sealed record ContractDto(
     decimal DepositAmount,
     int PaymentDayOfMonth,
     string Status,
-    DateTime? SignedAt)
+    DateTime? SignedAt,
+    bool IsOwnerSigned,
+    bool IsTenantSigned)
 {
     public static ContractDto FromEntity(Contract c)
         => new(
@@ -24,6 +28,8 @@ public sealed record ContractDto(
             c.Room.RoomNumber,
             c.TenantId,
             c.Tenant.FullName,
+            c.Tenant.PhoneNumber,
+            c.Tenant.Email,
             c.ContractCode,
             c.StartDate,
             c.EndDate,
@@ -31,5 +37,7 @@ public sealed record ContractDto(
             c.DepositAmount,
             c.PaymentDayOfMonth,
             c.Status.ToString(),
-            c.SignedAt);
+            c.SignedAt,
+            c.IsOwnerSigned,
+            c.IsTenantSigned);
 };

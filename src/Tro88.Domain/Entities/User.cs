@@ -25,7 +25,7 @@ public class User : SoftDeleteEntity
 
     private User() { }
 
-    public static User Create(
+    public static User CreateUserService(
         string fullName, string email,
         string phoneNumber, string passwordHash,
         UserRole role)
@@ -102,5 +102,30 @@ public class User : SoftDeleteEntity
         DateOfBirth = dateOfBirth;
     }
 
+    public void UpdateByAdmin(
+        string fullName,
+        string email,
+        string phoneNumber,
+        UserRole role,
+        string? nationalId,
+        DateTime? dateOfBirth,
+        bool isActive)
+    {
+        if (string.IsNullOrWhiteSpace(fullName))
+            throw new DomainException("Full name is required");
+        if (string.IsNullOrWhiteSpace(email))
+            throw new DomainException("Email is required");
+
+        FullName = fullName;
+        Email = email.ToLowerInvariant();
+        PhoneNumber = phoneNumber;
+        Role = role;
+        NationalId = nationalId;
+        DateOfBirth = dateOfBirth;
+        IsActive = isActive;
+    }
+
     public void Deactivate() => IsActive = false;
+
+    public void Activate() => IsActive = true;
 }
