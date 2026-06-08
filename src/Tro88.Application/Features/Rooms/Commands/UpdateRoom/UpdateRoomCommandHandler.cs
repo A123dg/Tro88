@@ -4,7 +4,6 @@ using Tro88.Application.Common.Constants;
 using Tro88.Application.Common.Interfaces;
 using Tro88.Application.Features.Rooms.DTOs;
 using Tro88.Domain.Entities;
-using Tro88.Domain.Enums;
 using Tro88.Domain.Exceptions;
 
 namespace Tro88.Application.Features.Rooms.Commands.UpdateRoom;
@@ -45,8 +44,30 @@ public sealed class UpdateRoomCommandHandler
             request.ElectricityUnitPrice,
             request.WaterUnitPrice);
 
+        // Update room service fees
+        var existingFees = await _db.RoomServiceFees
+            .Where(rs => rs.RoomId == room.Id)
+            .ToListAsync(ct);
+
+        _db.RoomServiceFees.RemoveRange(existingFees);
+
+        if (request.ServiceFees != null && request.ServiceFees.Any())
+        {
+            foreach (var sf in request.ServiceFees)
+            {
+                var roomServiceFee = RoomServiceFee.Create(room.Id, sf.ServiceId, sf.Amount);
+                _db.RoomServiceFees.Add(roomServiceFee);
+            }
+        }
+
         await _db.SaveChangesAsync(ct);
 
-        return RoomDto.FromEntity(room);
+        var savedRoom = await _db.Rooms
+            .Include(r => r.Images)
+            .Include(r => r.RoomServiceFees)
+            .ThenInclude(rs => rs.Service)
+            .FirstAsync(r => r.Id == room.Id, ct);
+
+        return RoomDto.FromEntity(savedRoom);
     }
 }

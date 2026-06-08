@@ -6,20 +6,17 @@ namespace Tro88.Domain.Entities;
 public class ServiceFee : AuditableEntity
 {
     public Guid HouseId { get; private set; }
-    public string Name { get; private set; } = default!;
-    public string FeeType { get; private set; } = default!;
+    public Guid ServiceId { get; private set; }
     public decimal Amount { get; private set; }
-    public string? Unit { get; private set; }
     public bool IsActive { get; private set; } = true;
 
     public House House { get; private set; } = default!;
+    public Service Service { get; private set; } = default!;
 
     private ServiceFee() { }
 
     public static ServiceFee Create(
-        Guid houseId, string name,
-        string feeType, decimal amount,
-        string? unit = null)
+        Guid houseId, Guid serviceId, decimal amount, bool isActive = true)
     {
         if (amount < 0)
             throw new DomainException("Amount must be non-negative");
@@ -27,21 +24,17 @@ public class ServiceFee : AuditableEntity
         return new ServiceFee
         {
             HouseId = houseId,
-            Name = name,
-            FeeType = feeType,
+            ServiceId = serviceId,
             Amount = amount,
-            Unit = unit
+            IsActive = isActive
         };
     }
 
-    public void Update(
-        string name, string feeType,
-        decimal amount, string? unit)
+    public void Update(decimal amount)
     {
-        Name = name;
-        FeeType = feeType;
+        if (amount < 0)
+            throw new DomainException("Amount must be non-negative");
         Amount = amount;
-        Unit = unit;
     }
 
     public void Toggle() => IsActive = !IsActive;

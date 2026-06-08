@@ -7,8 +7,8 @@ public record RecordUtilityReadingCommand(
     Guid RoomId,
     int Month,
     int Year,
-    decimal ElectricityOld,
+    decimal? ElectricityOld,
     decimal ElectricityNew,
-    decimal WaterOld,
+    decimal? WaterOld,
     decimal WaterNew,
     string? Notes = null) : IRequest<UtilityReadingDto>;

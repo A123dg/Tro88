@@ -5,7 +5,5 @@ namespace Tro88.Application.Features.ServiceFees.Commands.CreateServiceFee;
 
 public record CreateServiceFeeCommand(
     Guid HouseId,
-    string Name,
-    string FeeType,
-    decimal Amount,
-    string? Unit = null) : IRequest<ServiceFeeDto>;
+    Guid ServiceId,
+    decimal Amount) : IRequest<ServiceFeeDto>;

@@ -6,8 +6,8 @@ using Tro88.Application.Features.UtilityReadings.Commands.RecordUtilityReading;
 using Tro88.Application.Features.UtilityReadings.Commands.BulkRecordReadings;
 using Tro88.Application.Features.UtilityReadings.Queries.GetUtilityReadingById;
 using Tro88.Application.Features.UtilityReadings.DTOs;
-using Tro88.Application.Features.UtilityReadings.Queries.GetUtilityReadingById;
 using Tro88.Application.Features.UtilityReadings.Queries.GetUtilityReadings;
+using Tro88.Application.Features.UtilityReadings.Queries.GetUtilityReadingPreview;
 
 namespace Tro88.API.Controllers;
 
@@ -27,6 +27,13 @@ public class UtilityReadingsController : BaseApiController
                 Total = result.Total,
                 TotalPage = result.TotalPage
             }));
+    }
+
+    [HttpGet("preview")]
+    public async Task<IActionResult> GetUtilityReadingPreview([FromQuery] GetUtilityReadingPreviewQuery query)
+    {
+        var result = await Mediator.Send(query);
+        return Ok(ApiResponse<List<UtilityReadingPreviewDto>>.Ok(result));
     }
 
     [HttpPost]

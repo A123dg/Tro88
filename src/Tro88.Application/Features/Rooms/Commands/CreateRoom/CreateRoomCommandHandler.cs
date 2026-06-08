@@ -52,6 +52,22 @@ public sealed class CreateRoomCommandHandler
         _db.Rooms.Add(room);
         await _db.SaveChangesAsync(ct);
 
-        return RoomDto.FromEntity(room);
+        if (request.ServiceFees != null && request.ServiceFees.Any())
+        {
+            foreach (var sf in request.ServiceFees)
+            {
+                var roomServiceFee = RoomServiceFee.Create(room.Id, sf.ServiceId, sf.Amount);
+                _db.RoomServiceFees.Add(roomServiceFee);
+            }
+            await _db.SaveChangesAsync(ct);
+        }
+
+        var savedRoom = await _db.Rooms
+            .Include(r => r.Images)
+            .Include(r => r.RoomServiceFees)
+            .ThenInclude(rs => rs.Service)
+            .FirstAsync(r => r.Id == room.Id, ct);
+
+        return RoomDto.FromEntity(savedRoom);
     }
 }

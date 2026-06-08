@@ -8,6 +8,7 @@ import {
   MaintenanceRequestDto,
   NotificationDto,
   ServiceFeeDto,
+  ServiceDto,
   UtilityReadingDto,
 } from '../types/management.types'
 import { api } from './apiClient'
@@ -93,7 +94,54 @@ export const updateServiceFee = (payload: SaveServiceFeePayload) =>
 export const deleteServiceFee = (id: string) =>
   api.delete<unknown, ApiResponse<object>>(`/ServiceFees/${id}`)
 
+export interface SaveServicePayload {
+  id?: string
+  name: string
+  feeType: string
+  unit?: string
+}
+
+export const fetchServices = (filters?: ListFilters) => fetchPaged<ServiceDto>('/Services', filters)
+export const toggleService = (id: string) =>
+  api.patch<unknown, ApiResponse<ServiceDto>>(`/Services/${id}/toggle`)
+export const createService = (payload: SaveServicePayload) =>
+  api.post<unknown, ApiResponse<ServiceDto>>('/Services', payload)
+export const updateService = (payload: SaveServicePayload) =>
+  api.put<unknown, ApiResponse<ServiceDto>>(`/Services/${payload.id}`, payload)
+export const deleteService = (id: string) =>
+  api.delete<unknown, ApiResponse<object>>(`/Services/${id}`)
+
 export const fetchUtilityReadings = (filters?: ListFilters) =>
   fetchPaged<UtilityReadingDto>('/UtilityReadings', filters)
+
+export interface UtilityReadingPreviewDto {
+  roomId: string
+  roomNumber: string
+  electricityUnitPrice: number
+  waterUnitPrice: number
+  electricityOld: number
+  waterOld: number
+  electricityNew: number | null
+  waterNew: number | null
+  notes: string | null
+  hasContract: boolean
+}
+
+export interface BulkRecordReadingsPayload {
+  readings: {
+    roomId: string
+    month: number
+    year: number
+    electricityNew: number
+    waterNew: number
+    notes?: string | null
+  }[]
+}
+
+export const fetchUtilityReadingPreview = (houseId: string, month: number, year: number) =>
+  api.get<unknown, ApiResponse<UtilityReadingPreviewDto[]>>(`/UtilityReadings/preview?houseId=${houseId}&month=${month}&year=${year}`)
+
+export const bulkRecordReadings = (payload: BulkRecordReadingsPayload) =>
+  api.post<unknown, ApiResponse<UtilityReadingDto[]>>('/UtilityReadings/bulk', payload)
 
 export const fetchAuditLogs = (filters?: ListFilters) => fetchPaged<AuditLogDto>('/AuditLogs', filters)

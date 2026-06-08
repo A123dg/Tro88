@@ -1,125 +1,100 @@
 import { useMemo, useState } from 'react'
-import { Form, Input, InputNumber, Select, Switch } from 'antd'
+import { Form, Input, Select, Switch } from 'antd'
 import type { TableProps } from 'antd'
 import { useMutation, useQuery } from 'react-query'
 import { queryClient } from '../../../queryClient'
 import TableWithPagination from '../../../shared/components/table-pagination'
 import ModalForm from '../../../shared/components/modal-form/ModalForm'
 import {
-  fetchServiceFees,
-  createServiceFee,
-  updateServiceFee,
-  deleteServiceFee,
-  toggleServiceFee,
-  SaveServiceFeePayload,
+  fetchServices,
+  createService,
+  updateService,
+  deleteService,
+  toggleService,
+  SaveServicePayload,
 } from '../../../services/managementService'
-import { fetchHouses } from '../../../services/houseService'
-import { ListFilters, ServiceFeeDto } from '../../../types/management.types'
+import { ListFilters, ServiceDto } from '../../../types/management.types'
 import { useUrlListFilters } from '../../../hooks/useUrlListFilters'
 
 export function AdminServiceFeesPage() {
   const [filters, setFilters] = useUrlListFilters<ListFilters>({ page: 1, pageSize: 10 })
-  const [editingFee, setEditingFee] = useState<ServiceFeeDto | null>(null)
+  const [editingService, setEditingService] = useState<ServiceDto | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
-  const [form] = Form.useForm<SaveServiceFeePayload>()
+  const [form] = Form.useForm<SaveServicePayload>()
 
-  // Fetch Service Fees
-  const query = useQuery(['admin-service-fees', filters], () => fetchServiceFees(filters), {
+  // Fetch Global Services
+  const query = useQuery(['admin-services', filters], () => fetchServices(filters), {
     keepPreviousData: true,
   })
 
-  // Fetch Houses for select dropdown
-  const housesQuery = useQuery(['all-houses-list'], () => fetchHouses({ page: 1, pageSize: 100 }))
-  const houseOptions = useMemo(() => {
-    return (housesQuery.data?.items ?? []).map((h) => ({
-      value: h.id,
-      label: h.name,
-    }))
-  }, [housesQuery.data])
-
-  const saveFee = useMutation(
-    (payload: SaveServiceFeePayload) => (payload.id ? updateServiceFee(payload) : createServiceFee(payload)),
+  const saveService = useMutation(
+    (payload: SaveServicePayload) => (payload.id ? updateService(payload) : createService(payload)),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries('admin-service-fees')
+        queryClient.invalidateQueries('admin-services')
         setModalOpen(false)
-        setEditingFee(null)
+        setEditingService(null)
         form.resetFields()
       },
     }
   )
 
-  const removeFee = useMutation(deleteServiceFee, {
-    onSuccess: () => queryClient.invalidateQueries('admin-service-fees'),
+  const removeService = useMutation(deleteService, {
+    onSuccess: () => queryClient.invalidateQueries('admin-services'),
   })
 
-  const toggleFee = useMutation(toggleServiceFee, {
-    onSuccess: () => queryClient.invalidateQueries('admin-service-fees'),
+  const toggleServiceMut = useMutation(toggleService, {
+    onSuccess: () => queryClient.invalidateQueries('admin-services'),
   })
 
   const openCreate = () => {
-    setEditingFee(null)
+    setEditingService(null)
+    form.resetFields()
     form.setFieldsValue({
       feeType: 'Fixed',
-      amount: 0,
       unit: 'Tháng',
     })
     setModalOpen(true)
   }
 
-  const openEdit = (fee: ServiceFeeDto) => {
-    setEditingFee(fee)
+  const openEdit = (service: ServiceDto) => {
+    setEditingService(service)
     form.setFieldsValue({
-      id: fee.id,
-      houseId: fee.houseId,
-      name: fee.name,
-      feeType: fee.feeType,
-      amount: fee.amount,
-      unit: fee.unit ?? undefined,
+      id: service.id,
+      name: service.name,
+      feeType: service.feeType,
+      unit: service.unit ?? undefined,
     })
     setModalOpen(true)
   }
 
-  const columns = useMemo<TableProps<ServiceFeeDto>['columns']>(
+  const columns = useMemo<TableProps<ServiceDto>['columns']>(
     () => [
       {
         key: 'name',
         title: 'Tên dịch vụ',
-        render: (_, fee) => <strong>{fee.name}</strong>,
-      },
-      {
-        key: 'houseName',
-        title: 'Nhà trọ',
-        render: (_, fee) => {
-          const house = (housesQuery.data?.items ?? []).find((h) => h.id === fee.houseId)
-          return house ? house.name : 'Chưa xác định'
-        },
+        render: (_, service) => <strong>{service.name}</strong>,
       },
       {
         key: 'feeType',
         title: 'Loại phí',
-        render: (_, fee) => (fee.feeType === 'Fixed' ? 'Cố định tháng' : fee.feeType),
-      },
-      {
-        key: 'amount',
-        title: 'Đơn giá',
-        render: (_, fee) => <span>{fee.amount.toLocaleString('vi-VN')}đ</span>,
+        render: (_, service) => (service.feeType === 'Fixed' ? 'Cố định tháng' : 'Theo chỉ số sử dụng'),
       },
       {
         key: 'unit',
         title: 'Đơn vị',
-        render: (_, fee) => <span>{fee.unit || '—'}</span>,
+        render: (_, service) => <span>{service.unit || '—'}</span>,
       },
       {
         key: 'status',
         title: 'Trạng thái',
-        render: (_, fee) => (
+        render: (_, service) => (
           <Switch
-            checked={fee.isActive}
-            checkedChildren="Mở"
-            unCheckedChildren="Tắt"
-            loading={toggleFee.isLoading}
-            onChange={() => toggleFee.mutate(fee.id)}
+            checked={service.isActive}
+            checkedChildren="Hoạt động"
+            unCheckedChildren="Tạm dừng"
+            loading={toggleServiceMut.isLoading}
+            onChange={() => toggleServiceMut.mutate(service.id)}
           />
         ),
       },
@@ -127,18 +102,18 @@ export function AdminServiceFeesPage() {
         key: 'actions',
         title: 'Thao tác',
         className: 'action-column',
-        render: (_, fee) => (
+        render: (_, service) => (
           <div className="row-actions">
-            <button type="button" className="button button--ghost" onClick={() => openEdit(fee)}>
+            <button type="button" className="button button--ghost" onClick={() => openEdit(service)}>
               Sửa
             </button>
             <button
               type="button"
               className="button button--danger"
-              disabled={removeFee.isLoading}
+              disabled={removeService.isLoading}
               onClick={() => {
-                if (window.confirm(`Bạn có chắc chắn muốn xóa dịch vụ "${fee.name}"?`)) {
-                  removeFee.mutate(fee.id)
+                if (window.confirm(`Bạn có chắc chắn muốn xóa dịch vụ "${service.name}"?`)) {
+                  removeService.mutate(service.id)
                 }
               }}
             >
@@ -148,14 +123,14 @@ export function AdminServiceFeesPage() {
         ),
       },
     ],
-    [housesQuery.data, removeFee, toggleFee]
+    [removeService, toggleServiceMut]
   )
 
   const submit = async () => {
     const values = await form.validateFields()
-    saveFee.mutate({
+    saveService.mutate({
       ...values,
-      id: editingFee?.id,
+      id: editingService?.id,
     })
   }
 
@@ -163,7 +138,6 @@ export function AdminServiceFeesPage() {
     <main className="area-page">
       <header className="area-header">
         <div>
-          <nav className="breadcrumb">Quản lý dịch vụ toàn hệ thống</nav>
         </div>
       </header>
 
@@ -182,16 +156,8 @@ export function AdminServiceFeesPage() {
             <div className="table-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                 <Select
-                  placeholder="Lọc theo nhà trọ"
-                  style={{ width: 220 }}
-                  allowClear
-                  value={filters.houseId}
-                  onChange={(val) => setFilters({ ...filters, houseId: val || undefined, page: 1 })}
-                  options={houseOptions}
-                />
-                <Select
                   placeholder="Trạng thái"
-                  style={{ width: 140 }}
+                  style={{ width: 180 }}
                   allowClear
                   value={filters.isActive === undefined ? undefined : String(filters.isActive)}
                   onChange={(val) =>
@@ -199,7 +165,7 @@ export function AdminServiceFeesPage() {
                   }
                   options={[
                     { value: 'true', label: 'Đang hoạt động' },
-                    { value: 'false', label: 'Tạm ngắt' },
+                    { value: 'false', label: 'Tạm dừng' },
                   ]}
                 />
               </div>
@@ -230,20 +196,13 @@ export function AdminServiceFeesPage() {
 
       <ModalForm
         open={modalOpen}
-        title={editingFee ? 'Sửa dịch vụ' : 'Thêm dịch vụ mới'}
+        title={editingService ? 'Sửa dịch vụ' : 'Thêm dịch vụ mới'}
         form={form}
         formItems={[
           {
-            label: 'Chọn nhà trọ',
-            name: 'houseId',
-            component: <Select options={houseOptions} placeholder="Chọn nhà áp dụng" />,
-            rules: [{ required: true, message: 'Vui lòng chọn nhà trọ' }],
-            span: 24,
-          },
-          {
             label: 'Tên dịch vụ',
             name: 'name',
-            component: <Input placeholder="Ví dụ: Tiền mạng Wifi, Bãi gửi xe..." />,
+            component: <Input placeholder="Ví dụ: Điện, Nước, Wifi, Gửi xe, Rác..." />,
             rules: [{ required: true, message: 'Vui lòng nhập tên dịch vụ' }],
             span: 24,
           },
@@ -264,21 +223,14 @@ export function AdminServiceFeesPage() {
           {
             label: 'Đơn vị tính',
             name: 'unit',
-            component: <Input placeholder="Ví dụ: Tháng, Xe, Phòng..." />,
+            component: <Input placeholder="Ví dụ: kWh, m³, Tháng, Xe..." />,
             span: 12,
           },
-          {
-            label: 'Số tiền (VNĐ)',
-            name: 'amount',
-            component: <InputNumber style={{ width: '100%' }} formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} parser={(value) => value!.replace(/\$\s?|(,*)/g, '')} />,
-            rules: [{ required: true, message: 'Vui lòng nhập đơn giá' }],
-            span: 24,
-          },
         ]}
-        loading={saveFee.isLoading}
+        loading={saveService.isLoading}
         onCancel={() => {
           setModalOpen(false)
-          setEditingFee(null)
+          setEditingService(null)
           form.resetFields()
         }}
         onOk={submit}

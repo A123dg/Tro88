@@ -18,6 +18,7 @@ export interface RoomDto {
   waterUnitPrice: number
   description?: string
   imageUrls: string[]
+  serviceFees: RoomServiceFeeDto[]
   // Additional fields for tenant room search
   houseName?: string
   address?: string
@@ -64,4 +65,10 @@ export interface RoomStats {
   available: number
   maintenance: number
   occupancyRate: number
+}
+
+export interface RoomServiceFeeDto {
+  serviceId: string
+  name: string
+  amount: number
 }

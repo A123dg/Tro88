@@ -8,7 +8,18 @@ import TableWithPagination from '../../../../shared/components/table-pagination'
 import type { RoomDto } from '../../../../types/room.types'
 import { Badge, formatVND, statusVariant, Status, navigateTo } from '../../shared'
 
-function toRoomPayload(values: Record<string, unknown>): RoomPayload {
+import { useServiceFees } from '../../../../hooks/useManagement'
+import { ServiceFeeDto } from '../../../../types/management.types'
+
+function toRoomPayload(values: Record<string, any>): RoomPayload {
+  const servicesPayload = Object.entries(values.services_price ?? {}).map(([serviceId, amount]) => ({
+    serviceId,
+    amount: Number(amount ?? 0),
+  }))
+
+  const electricityPrice = servicesPayload.find(s => s.serviceId === '11111111-1111-1111-1111-111111111111')?.amount ?? 0
+  const waterPrice = servicesPayload.find(s => s.serviceId === '22222222-2222-2222-2222-222222222222')?.amount ?? 0
+
   return {
     roomNumber: String(values.roomNumber ?? ''),
     floor: Number(values.floor ?? 1),
@@ -16,22 +27,41 @@ function toRoomPayload(values: Record<string, unknown>): RoomPayload {
     maxOccupants: Number(values.maxOccupants ?? 1),
     monthlyRent: Number(values.monthlyRent ?? 0),
     depositAmount: Number(values.depositAmount ?? 0),
-    electricityUnitPrice: Number(values.electricityUnitPrice ?? 0),
-    waterUnitPrice: Number(values.waterUnitPrice ?? 0),
+    electricityUnitPrice: electricityPrice,
+    waterUnitPrice: waterPrice,
     description: values.description ? String(values.description) : null,
+    serviceFees: servicesPayload,
   }
 }
 
-function roomFormItems() {
-  return [
+function roomFormItems(houseServices: ServiceFeeDto[]) {
+  const baseItems = [
     { label: 'Số phòng', name: 'roomNumber', component: <Input placeholder="Ví dụ: 101" />, rules: [{ required: true, message: 'Vui lòng nhập số phòng' }], span: 12 },
     { label: 'Tầng', name: 'floor', component: <InputNumber min={1} precision={0} style={{ width: '100%' }} />, rules: [{ required: true, message: 'Vui lòng nhập tầng' }], span: 12 },
     { label: 'Diện tích (m²)', name: 'area', component: <InputNumber min={1} style={{ width: '100%' }} />, rules: [{ required: true, message: 'Vui lòng nhập diện tích' }], span: 12 },
     { label: 'Số người tối đa', name: 'maxOccupants', component: <InputNumber min={1} precision={0} style={{ width: '100%' }} />, rules: [{ required: true, message: 'Vui lòng nhập số người tối đa' }], span: 12 },
     { label: 'Giá thuê/tháng', name: 'monthlyRent', component: <InputNumber min={0} step={100000} style={{ width: '100%' }} />, rules: [{ required: true, message: 'Vui lòng nhập giá thuê' }], span: 12 },
     { label: 'Tiền cọc', name: 'depositAmount', component: <InputNumber min={0} step={100000} style={{ width: '100%' }} />, rules: [{ required: true, message: 'Vui lòng nhập tiền cọc' }], span: 12 },
-    { label: 'Giá điện', name: 'electricityUnitPrice', component: <InputNumber min={0} step={100} style={{ width: '100%' }} />, rules: [{ required: true, message: 'Vui lòng nhập giá điện' }], span: 12 },
-    { label: 'Giá nước', name: 'waterUnitPrice', component: <InputNumber min={0} step={1000} style={{ width: '100%' }} />, rules: [{ required: true, message: 'Vui lòng nhập giá nước' }], span: 12 },
+  ]
+
+  const serviceItems = houseServices.map((service) => ({
+    label: `Giá ${service.name} ${service.unit ? `(${service.unit})` : ''}`,
+    name: ['services_price', service.serviceId],
+    component: (
+      <InputNumber<number>
+        min={0}
+        style={{ width: '100%' }}
+        formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+        parser={(value) => parseFloat(value?.replace(/\$\s?|(,*)/g, '') || '0')}
+      />
+    ),
+    rules: [{ required: true, message: `Vui lòng nhập giá ${service.name}` }],
+    span: 12,
+  }))
+
+  return [
+    ...baseItems,
+    ...serviceItems,
     { label: 'Mô tả', name: 'description', component: <Input.TextArea rows={4} placeholder="Mô tả phòng" />, span: 24 },
   ]
 }
@@ -49,24 +79,45 @@ export function HouseRoomsTable({ houseId }: { houseId: string }) {
   const roomList = roomsQuery.data?.rooms ?? []
   const meta = roomsQuery.data?.meta ?? { page: 1, pageSize, total: 0, totalPage: 1 }
 
+  const houseServicesQuery = useServiceFees({ houseId, isActive: true })
+  const houseServices = houseServicesQuery.data?.items ?? []
+
   const openCreate = () => {
     setEditingRoom(null)
     roomForm.resetFields()
+
+    const servicesPrice: Record<string, number> = {}
+    houseServices.forEach((hs) => {
+      servicesPrice[hs.serviceId] = hs.amount
+    })
+
     roomForm.setFieldsValue({
       floor: 1,
       area: 20,
       maxOccupants: 2,
       monthlyRent: 0,
       depositAmount: 0,
-      electricityUnitPrice: 3800,
-      waterUnitPrice: 18000,
+      services_price: servicesPrice,
     })
     setOpen(true)
   }
 
   const openEdit = (room: RoomDto) => {
     setEditingRoom(room)
-    roomForm.setFieldsValue(room)
+
+    const servicesPrice: Record<string, number> = {}
+    houseServices.forEach((hs) => {
+      servicesPrice[hs.serviceId] = hs.amount
+    })
+
+    room.serviceFees?.forEach((rs) => {
+      servicesPrice[rs.serviceId] = rs.amount
+    })
+
+    roomForm.setFieldsValue({
+      ...room,
+      services_price: servicesPrice,
+    })
     setOpen(true)
   }
 
@@ -164,7 +215,7 @@ export function HouseRoomsTable({ houseId }: { houseId: string }) {
         open={open}
         title={editingRoom ? 'Sửa phòng' : 'Thêm phòng'}
         form={roomForm}
-        formItems={roomFormItems()}
+        formItems={roomFormItems(houseServices)}
         loading={createRoom.isLoading || updateRoom.isLoading}
         onCancel={closeModal}
         onOk={submitRoom}

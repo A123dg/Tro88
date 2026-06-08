@@ -92,8 +92,6 @@ export function SystemAdminPage() {
     <main className="area-page">
       <header className="area-header">
         <div>
-          <nav className="breadcrumb">Quản lý phòng trọ</nav>
-         
         </div>
       </header>
 

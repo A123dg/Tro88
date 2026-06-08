@@ -15,6 +15,8 @@ public interface IApplicationDbContext
     DbSet<Invoice> Invoices { get; }
     DbSet<InvoiceLineItem> InvoiceLineItems { get; }
     DbSet<ServiceFee> ServiceFees { get; }
+    DbSet<Service> Services { get; }
+    DbSet<RoomServiceFee> RoomServiceFees { get; }
     DbSet<MaintenanceRequest> MaintenanceRequests { get; }
     DbSet<Notification> Notifications { get; }
     DbSet<AuditLog> AuditLogs { get; }

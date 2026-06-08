@@ -52,7 +52,7 @@ function getAuthenticatedHome(role: string | null) {
   return '/dashboard'
 }
 
-export function OwnerLayout() {
+export const OwnerLayout = () => {
   const pathname = useRouterState({ select: (state) => state.location.pathname })
   const role = localStorage.getItem('authRole')
   const navigation = role === 'Admin' ? adminNav : ownerNav
@@ -109,11 +109,12 @@ export function OwnerLayout() {
         </header>
         <Outlet />
       </div>
+      <AIChatWidget />
     </div>
   )
 }
 
-export function TenantLayout() {
+export const TenantLayout = () => {
   const pathname = useRouterState({ select: (state) => state.location.pathname })
   const navigate = useNavigate()
 
@@ -161,7 +162,7 @@ export function TenantLayout() {
   )
 }
 
-export function AuthLayout() {
+export const AuthLayout = () => {
   return (
     <main className="auth-layout">
       <Outlet />
@@ -169,7 +170,7 @@ export function AuthLayout() {
   )
 }
 
-export function AppShell() {
+export const AppShell = () => {
   useLayoutEffect(() => {
     const viewportWidth = window.innerWidth || window.document.documentElement.clientWidth;
     const isMobile = viewportWidth < 768;

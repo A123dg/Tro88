@@ -18,11 +18,12 @@ export interface CreateHousePayload {
   district?: string
   description?: string
   files?: File[]
-  services?: string[]
+  services?: Array<{ serviceId: string; amount: number }>
 }
 
 export interface UpdateHousePayload extends CreateHousePayload {
   id: string
+  mediaUrls?: string[]
 }
 
 const defaultMeta: MetaData = {
@@ -69,7 +70,10 @@ export const createHouse = async (payload: CreateHousePayload): Promise<ApiRespo
   if (payload.district) form.append('district', payload.district)
   if (payload.description) form.append('description', payload.description)
   payload.files?.forEach((file) => form.append('files', file))
-  payload.services?.forEach((service) => form.append('services', service))
+  payload.services?.forEach((service, index) => {
+    form.append(`services[${index}].serviceId`, service.serviceId)
+    form.append(`services[${index}].amount`, String(service.amount))
+  })
 
   return api.post<unknown, ApiResponse<HouseDto>>('/Houses', form, {
     headers: { 'Content-Type': 'multipart/form-data' },
@@ -90,6 +94,7 @@ export const updateHouse = async (payload: UpdateHousePayload): Promise<ApiRespo
   if (payload.district) form.append('district', payload.district)
   if (payload.description) form.append('description', payload.description)
   payload.files?.forEach((file) => form.append('files', file))
+  payload.mediaUrls?.forEach((url) => form.append('mediaUrls', url))
 
   return api.put<unknown, ApiResponse<HouseDto>>(`/Houses/${payload.id}`, form, {
     headers: { 'Content-Type': 'multipart/form-data' },
@@ -113,5 +118,9 @@ export const toggleFavoriteHouse = async (houseId: string): Promise<ApiResponse<
 
 export const fetchFavoriteHouses = async (): Promise<ApiResponse<HouseDto[]>> => {
   return api.get<unknown, ApiResponse<HouseDto[]>>('/Houses/favorites')
+}
+
+export const deleteHouse = async (id: string): Promise<ApiResponse<object>> => {
+  return api.delete<unknown, ApiResponse<object>>(`/Houses/${id}`)
 }
 

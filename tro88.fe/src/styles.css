@@ -1470,11 +1470,13 @@ input,
   padding: 0;
 }
 
-.page-header {
+.page-header,
+.area-header {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 16px;
+  margin-bottom: 24px;
 }
 
 .breadcrumb {

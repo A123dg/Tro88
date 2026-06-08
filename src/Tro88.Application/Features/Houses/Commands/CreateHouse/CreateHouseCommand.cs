@@ -1,7 +1,11 @@
 using MediatR;
+using System;
+using System.Collections.Generic;
 using Tro88.Application.Features.Houses.DTOs;
 
 namespace Tro88.Application.Features.Houses.Commands.CreateHouse;
+
+public record HouseServiceInput(Guid ServiceId, decimal Amount);
 
 public sealed record CreateHouseCommand(
     string Name,
@@ -10,4 +14,4 @@ public sealed record CreateHouseCommand(
     string? District = null,
     string? Description = null,
     List<string>? MediaUrls = null,
-    List<string>? Services = null) : IRequest<HouseDto>;
+    List<HouseServiceInput>? Services = null) : IRequest<HouseDto>;

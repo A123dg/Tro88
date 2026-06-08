@@ -22,6 +22,9 @@ public sealed class GetUtilityReadingsQueryHandler
             .Include(r => r.Room)
             .AsQueryable();
 
+        if (request.HouseId.HasValue)
+            query = query.Where(r => r.Room.HouseId == request.HouseId.Value);
+
         if (request.RoomId.HasValue)
             query = query.Where(r => r.RoomId == request.RoomId);
 

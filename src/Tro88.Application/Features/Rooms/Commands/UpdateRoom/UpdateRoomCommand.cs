@@ -1,5 +1,6 @@
 using MediatR;
 using Tro88.Application.Features.Rooms.DTOs;
+using Tro88.Application.Features.Rooms.Commands.CreateRoom;
 
 namespace Tro88.Application.Features.Rooms.Commands.UpdateRoom;
 
@@ -13,4 +14,5 @@ public sealed record UpdateRoomCommand(
     decimal DepositAmount,
     decimal ElectricityUnitPrice,
     decimal WaterUnitPrice,
-    string? Description = null) : IRequest<RoomDto>;
+    string? Description = null,
+    List<RoomServiceFeeInput>? ServiceFees = null) : IRequest<RoomDto>;

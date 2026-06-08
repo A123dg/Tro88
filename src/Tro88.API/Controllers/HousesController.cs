@@ -129,16 +129,44 @@ public class HousesController : BaseApiController
             request.District,
             request.Description,
             mediaUrls,
-            request.Services);
+            request.Services.Select(s => new HouseServiceInput(s.ServiceId, s.Amount)).ToList());
 
         var result = await Mediator.Send(command);
         return Ok(ApiResponse<HouseDto>.Ok(result, SuccessMessages.CREATE_HOUSE_SUCCESS));
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateHouse(Guid id, [FromBody] UpdateHouseCommand command)
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> UpdateHouse(Guid id, [FromForm] UpdateHouseFormRequest request)
     {
-        command = command with { Id = id };
+        var totalUploadBytes = request.Files.Sum(file => file.Length);
+        if (totalUploadBytes > MaxHouseUploadBytes)
+        {
+            return BadRequest(ApiResponse<object>.Fail("Tổng dung lượng ảnh tối đa là 25MB"));
+        }
+
+        var mediaUrls = request.MediaUrls
+            .Where(url => !string.IsNullOrWhiteSpace(url))
+            .ToList();
+
+        foreach (var file in request.Files)
+        {
+            var url = await _storage.UploadImageAsync(
+                file.OpenReadStream(),
+                file.FileName,
+                "houses");
+            mediaUrls.Add(url);
+        }
+
+        var command = new UpdateHouseCommand(
+            id,
+            request.Name,
+            request.Address,
+            request.Province,
+            request.District,
+            request.Description,
+            mediaUrls);
+
         var result = await Mediator.Send(command);
         return Ok(ApiResponse<HouseDto>.Ok(result, SuccessMessages.UPDATE_HOUSE_SUCCESS));
     }
@@ -160,6 +188,12 @@ public class HousesController : BaseApiController
     }
 }
 
+public sealed class HouseServiceRequest
+{
+    public Guid ServiceId { get; set; }
+    public decimal Amount { get; set; }
+}
+
 public sealed class CreateHouseFormRequest
 {
     public string Name { get; set; } = default!;
@@ -169,7 +203,18 @@ public sealed class CreateHouseFormRequest
     public string? Description { get; set; }
     public List<string> MediaUrls { get; set; } = new();
     public List<IFormFile> Files { get; set; } = new();
-    public List<string> Services { get; set; } = new();
+    public List<HouseServiceRequest> Services { get; set; } = new();
+}
+
+public sealed class UpdateHouseFormRequest
+{
+    public string Name { get; set; } = default!;
+    public string Address { get; set; } = default!;
+    public string? Province { get; set; }
+    public string? District { get; set; }
+    public string? Description { get; set; }
+    public List<string> MediaUrls { get; set; } = new();
+    public List<IFormFile> Files { get; set; } = new();
 }
 
 public sealed class CreateContactLogRequest

@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react'
 import { Form, Input, Select, InputNumber, Card, Button, Progress, Flex, Row, Col, Typography } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, EnvironmentOutlined, HomeOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from '@tanstack/react-router'
-import { useHousesQuery, useProvincesQuery, useWardsQuery, useHouseDetailQuery } from '../services/query'
-import { useUpdateHouseMutation } from '../services/mutation'
+import { useHousesQuery } from '../services/query'
+import { useDeleteHouseMutation } from '../services/mutation'
 import  useDebounce  from '../../../../shared/hooks/useDebounce'
 import { PageHeader, Badge, statusVariant, houseStatusLabel, normalizeHouse, SkeletonGrid, EmptyState } from '../../shared'
-import ModalForm from '../../../../shared/components/modal-form/ModalForm'
+import { useNotification } from '../../../../hooks/useNotification'
 
 const { Title, Paragraph, Text } = Typography
 
@@ -26,12 +26,17 @@ export function HousesPage() {
   const debounce = useDebounce(300)
   const debouncePrice = useDebounce(500)
 
-  const [editingHouseId, setEditingHouseId] = useState<string | null>(null)
-  const [provinceValue, setProvinceValue] = useState<string | undefined>()
-  const [wardValue, setWardValue] = useState<string | undefined>()
-  const [editForm] = Form.useForm()
-
   const isTenant = localStorage.getItem('authRole') === 'Tenant'
+  const { showSuccessNotify, showErrorNotify } = useNotification()
+
+  const deleteMutation = useDeleteHouseMutation({
+    onSuccess: () => {
+      showSuccessNotify('Xóa nhà trọ thành công')
+    },
+    onError: (error: any) => {
+      showErrorNotify(error?.message || 'Không thể xóa nhà trọ')
+    }
+  })
 
   const query = useHousesQuery({
     page: 1,
@@ -53,18 +58,7 @@ export function HousesPage() {
     debouncePrice(() => setDebouncedMaxPrice(value))
   }
 
-  const provinces = useProvincesQuery()
-  const wards = useWardsQuery(provinceValue)
-  const detail = useHouseDetailQuery(editingHouseId, Boolean(editingHouseId))
-
-  const saveEdit = useUpdateHouseMutation({
-    onSuccess: () => {
-      setEditingHouseId(null)
-      editForm.resetFields()
-      setProvinceValue(undefined)
-      setWardValue(undefined)
-    }
-  })
+  // No edit state required
 
   const filtered = (query.data?.items ?? [])
     .map((house: any) => normalizeHouse(house))
@@ -73,38 +67,7 @@ export function HousesPage() {
       (status === 'all' || house.status === status)
     ))
 
-  useEffect(() => {
-    if (!detail.data) return
-    editForm.setFieldsValue({
-      name: detail.data.name,
-      address: detail.data.address,
-      province: detail.data.tinhThanhOption?.id ?? detail.data.province ?? undefined,
-      district: detail.data.xaPhuongOption?.id ?? detail.data.district ?? undefined,
-      description: detail.data.description ?? '',
-    })
-    setProvinceValue(detail.data.tinhThanhOption?.id ?? detail.data.province ?? undefined)
-    setWardValue(detail.data.xaPhuongOption?.id ?? detail.data.district ?? undefined)
-  }, [detail.data, editForm])
-
-  const closeEditModal = () => {
-    setEditingHouseId(null)
-    editForm.resetFields()
-    setProvinceValue(undefined)
-    setWardValue(undefined)
-  }
-
-  const submitEditModal = async () => {
-    if (!editingHouseId) return
-    const values = await editForm.validateFields()
-    saveEdit.mutate({
-      id: editingHouseId,
-      name: String(values.name ?? ''),
-      address: String(values.address ?? ''),
-      province: provinceValue,
-      district: wardValue,
-      description: values.description,
-    })
-  }
+  // No edit handlers required
 
   return (
     <div className="page">
@@ -211,10 +174,20 @@ export function HousesPage() {
                     </Button>,
                     ...(!isTenant
                       ? [
-                        <Button type="text" icon={<EditOutlined />} onClick={() => setEditingHouseId(house.id)}>
+                        <Button type="text" icon={<EditOutlined />} onClick={() => navigate({ to: `/houses/detail/${house.id}/edit` as any })}>
                           Sửa
                         </Button>,
-                        <Button type="text" danger icon={<DeleteOutlined />}>
+                        <Button
+                          type="text"
+                          danger
+                          icon={<DeleteOutlined />}
+                          loading={deleteMutation.isLoading}
+                          onClick={() => {
+                            if (window.confirm(`Bạn có chắc chắn muốn xóa nhà trọ "${house.name}"?`)) {
+                              deleteMutation.mutate(house.id)
+                            }
+                          }}
+                        >
                           Xóa
                         </Button>,
                       ]
@@ -248,93 +221,6 @@ export function HousesPage() {
         </Row>
       )}
 
-      <ModalForm
-        open={Boolean(editingHouseId)}
-        title="Sửa nhà trọ"
-        form={editForm}
-        formItems={[
-          {
-            label: 'Tên nhà trọ',
-            name: 'name',
-            component: <Input placeholder="Tên nhà trọ" />,
-            rules: [{ required: true, message: 'Vui lòng nhập tên nhà trọ' }],
-            span: 24,
-          },
-          {
-            label: 'Địa chỉ',
-            name: 'address',
-            component: <Input.TextArea rows={3} placeholder="Địa chỉ" />,
-            rules: [{ required: true, message: 'Vui lòng nhập địa chỉ' }],
-            span: 24,
-          },
-          {
-            label: 'Tỉnh/Thành phố',
-            name: 'province',
-            component: (
-              <Select
-                style={{ width: '100%' }}
-                showSearch
-                allowClear
-                placeholder={provinces.isLoading ? 'Đang tải tỉnh...' : 'Chọn tỉnh'}
-                optionFilterProp="label"
-                loading={provinces.isLoading}
-                disabled={provinces.isLoading}
-                value={provinceValue}
-                onChange={(val) => {
-                  setProvinceValue(val)
-                  setWardValue(undefined)
-                }}
-                options={[
-                  ...(provinces.data ?? []).map((p) => ({ value: p.value, label: p.label })),
-                  ...(provinceValue && detail.data?.tinhThanhOption && !(provinces.data ?? []).find(p => p.value === provinceValue)
-                    ? [{ value: provinceValue, label: detail.data.tinhThanhOption.name }]
-                    : []
-                  ),
-                ]}
-              />
-            ),
-            span: 12,
-          },
-          {
-            label: 'Xã/Phường',
-            name: 'district',
-            component: (
-              <Select
-                style={{ width: '100%' }}
-                showSearch
-                allowClear
-                placeholder={!provinceValue ? 'Chọn tỉnh trước' : wards.isLoading ? 'Đang tải xã/phường...' : 'Chọn xã/phường'}
-                optionFilterProp="label"
-                loading={wards.isLoading}
-                disabled={!provinceValue || wards.isLoading}
-                value={wardValue}
-                onChange={(val) => setWardValue(val)}
-                options={[
-                  ...(wards.data ?? []).map((w) => ({ value: w.value, label: w.label })),
-                  ...(wardValue && detail.data?.xaPhuongOption && !(wards.data ?? []).find(w => w.value === wardValue)
-                    ? [{ value: wardValue, label: detail.data.xaPhuongOption.name }]
-                    : []
-                  ),
-                ]}
-              />
-            ),
-            span: 12,
-          },
-          {
-            label: 'Mô tả',
-            name: 'description',
-            component: <Input.TextArea rows={4} placeholder="Mô tả" />,
-            span: 24,
-          },
-        ]}
-        isLoadingGetDetail={detail.isLoading}
-        loading={saveEdit.isLoading}
-        onCancel={closeEditModal}
-        onOk={submitEditModal}
-        okText="Lưu thay đổi"
-        cancelText="Hủy"
-        layout="vertical"
-      />
     </div>
   )
 }

@@ -18,7 +18,7 @@ import {
 import dayjs from 'dayjs'
 import { CustomDatePicker } from '../../../shared/components/custom-datepicker'
 
-export function StatisticsPage() {
+export const StatisticsPage = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<'All' | 'Paid' | 'Debt'>('All')
 
@@ -45,9 +45,9 @@ export function StatisticsPage() {
   const filteredInvoices = useMemo(() => {
     return invoices.filter((item) => {
       const matchesSearch = 
-        item.tenant.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.room.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.code.toLowerCase().includes(searchTerm.toLowerCase())
+        (item.tenant?.toLowerCase() ?? '').includes(searchTerm.toLowerCase()) ||
+        (item.room?.toLowerCase() ?? '').includes(searchTerm.toLowerCase()) ||
+        (item.code?.toLowerCase() ?? '').includes(searchTerm.toLowerCase())
 
       if (statusFilter === 'Paid') {
         return matchesSearch && item.status === 'Paid'
@@ -145,5 +145,3 @@ export function StatisticsPage() {
     </main>
   )
 }
-
-

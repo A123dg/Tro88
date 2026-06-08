@@ -79,9 +79,19 @@ export interface NotificationDto {
   createdAt: string
 }
 
+export interface ServiceDto {
+  id: string
+  name: string
+  feeType: string
+  unit?: string | null
+  isActive: boolean
+  createdAt: string
+}
+
 export interface ServiceFeeDto {
   id: string
   houseId: string
+  serviceId: string
   name: string
   feeType: string
   amount: number

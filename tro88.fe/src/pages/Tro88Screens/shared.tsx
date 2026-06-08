@@ -184,35 +184,11 @@ export const QK = {
   statistics: ['statistics'] as const,
 }
 
-export const houses: House[] = [
-  { id: 'h1', name: 'Tro88 An Phú', address: '12 Nguyễn Văn Hưởng, TP Thủ Đức', active: true, rooms: 18, occupied: 15 },
-  { id: 'h2', name: 'Tro88 Bình Thạnh', address: '88 Xô Viết Nghệ Tĩnh, Bình Thạnh', active: true, rooms: 12, occupied: 9 },
-  { id: 'h3', name: 'Tro88 Tân Bình', address: '45 Cộng Hòa, Tân Bình', active: false, rooms: 10, occupied: 0 },
-]
-
-export const rooms: Room[] = [
-  { id: 'r101', houseId: 'h1', roomNumber: '101', floor: 1, area: 24, maxOccupants: 2, monthlyRent: 3500000, depositAmount: 3500000, status: 'Occupied', electricityUnitPrice: 3800, waterUnitPrice: 18000, description: 'Phòng sáng, có ban công và máy lạnh.' },
-  { id: 'r102', houseId: 'h1', roomNumber: '102', floor: 1, area: 22, maxOccupants: 2, monthlyRent: 3200000, depositAmount: 3200000, status: 'Available', electricityUnitPrice: 3800, waterUnitPrice: 18000, description: 'Phòng mới sơn, gần khu giặt.' },
-  { id: 'r203', houseId: 'h2', roomNumber: '203', floor: 2, area: 28, maxOccupants: 3, monthlyRent: 4200000, depositAmount: 4200000, status: 'Maintenance', electricityUnitPrice: 4000, waterUnitPrice: 20000, description: 'Đang sửa hệ thống nước.' },
-]
-
-export const contracts: Contract[] = [
-  { id: 'c1', code: 'CTR-2026-001', tenant: 'Nguyễn Minh Anh', room: '101', startDate: '2026-01-01', endDate: '2026-12-31', rent: 3500000, deposit: 3500000, paymentDay: 5, status: 'Active' },
-  { id: 'c2', code: 'CTR-2026-002', tenant: 'Trần Hoàng Nam', room: '102', startDate: '2026-06-01', endDate: '2027-05-31', rent: 3200000, deposit: 3200000, paymentDay: 8, status: 'Draft' },
-  { id: 'c3', code: 'CTR-2025-011', tenant: 'Lê Thu Hà', room: '203', startDate: '2025-05-01', endDate: '2026-05-31', rent: 4200000, deposit: 4200000, paymentDay: 3, status: 'Expired' },
-]
-
-export const invoices: Invoice[] = [
-  { id: 'i1', code: 'INV-05-001', room: '101', tenant: 'Nguyễn Minh Anh', month: 5, year: 2026, rent: 3500000, electricity: 456000, water: 126000, service: 150000, dueDate: '2026-06-05', status: 'Unpaid' },
-  { id: 'i2', code: 'INV-05-002', room: '102', tenant: 'Trần Hoàng Nam', month: 5, year: 2026, rent: 3200000, electricity: 360000, water: 108000, service: 150000, dueDate: '2026-06-08', status: 'Paid' },
-  { id: 'i3', code: 'INV-04-006', room: '203', tenant: 'Lê Thu Hà', month: 4, year: 2026, rent: 4200000, electricity: 500000, water: 160000, service: 180000, dueDate: '2026-05-03', status: 'Overdue' },
-]
-
-export const maintenance: Maintenance[] = [
-  { id: 'm1', room: '101', title: 'Máy lạnh không lạnh', tenant: 'Nguyễn Minh Anh', category: 'Điện lạnh', priority: 'Soon', status: 'New', time: '2 giờ trước' },
-  { id: 'm2', room: '203', title: 'Rò nước lavabo', tenant: 'Lê Thu Hà', category: 'Nước', priority: 'Urgent', status: 'InProgress', time: 'Hôm qua' },
-  { id: 'm3', room: '102', title: 'Thay ổ khóa cửa', tenant: 'Trần Hoàng Nam', category: 'Cửa', priority: 'Normal', status: 'Done', time: '3 ngày trước' },
-]
+export const houses: House[] = []
+export const rooms: Room[] = []
+export const contracts: Contract[] = []
+export const invoices: Invoice[] = []
+export const maintenance: Maintenance[] = []
 
 export function ok<T>(data: T): Promise<ApiResponse<T>> {
   return Promise.resolve({ code: 200, success: true, message: 'OK', data })
@@ -282,7 +258,20 @@ export function houseStatusLabel(status?: string, active?: boolean) {
   return active ? 'Hoạt động' : 'Không hoạt động'
 }
 
-export function normalizeHouse(house: House) {
+export const normalizeHouse = (house: House | undefined | null) => {
+  if (!house) {
+    return {
+      id: '',
+      name: '',
+      address: '',
+      totalRooms: 0,
+      occupiedRooms: 0,
+      isActive: false,
+      status: 'Inactive',
+      mediaUrls: [],
+      description: '',
+    }
+  }
   const totalRooms = house.totalRooms ?? house.rooms ?? 0
   const occupiedRooms = house.occupiedRooms ?? house.occupied ?? 0
   const isActive = house.isActive ?? house.active ?? house.status === 'Active'
@@ -305,7 +294,6 @@ export function PageHeader({ title, subtitle, action }: { title: string; subtitl
   return (
     <header className="page-header">
       <div>
-        <div className="breadcrumb">Tro88 / {title}</div>
         <h1>{title}</h1>
         {subtitle ? <p>{subtitle}</p> : null}
       </div>
@@ -402,10 +390,6 @@ export function AreaChartLite() {
 }
 
 
-export function UtilityTable() {
-  return <DataTable headers={['Phòng', 'Điện cũ', 'Điện mới', 'Tiêu thụ', 'Nước cũ', 'Nước mới', 'Tiêu thụ', 'Ghi chú']} rows={rooms.map((room, index) => [room.roomNumber, 120 + index * 10, <input defaultValue={150 + index * 11} />, 30 + index, 20 + index, <input defaultValue={27 + index} />, 7, index === 2 ? 'Tăng bất thường' : ''])} />
-}
-
 export function MaintenanceCard({ item }: { item: Maintenance }) {
   return <Card className="maintenance-card"><div className="card-heading"><Badge variant="info">Phòng {item.room}</Badge><Badge variant={item.priority === 'Urgent' ? 'danger' : item.priority === 'Soon' ? 'warning' : 'success'}>{item.priority}</Badge></div><h3>{item.title}</h3><p>{item.tenant} • {item.time}</p><Select defaultValue="Kỹ thuật A" options={[{ value: 'Kỹ thuật A', label: 'Kỹ thuật A' }, { value: 'Kỹ thuật B', label: 'Kỹ thuật B' }]} /><Link to={`/maintenance/${item.id}`}>Xem chi tiết</Link></Card>
 }
@@ -444,4 +428,6 @@ export function SimplePage({ title, subtitle, chart = false }: { title: string; 
 export function SimpleFormPage({ title, fields }: { title: string; fields: string[] }) {
   return <main className="page"><PageHeader title={title} /><FormShell>{fields.map((field) => <input key={field} placeholder={field} />)}</FormShell></main>
 }
+
+export const UtilityTable = () => null;
 

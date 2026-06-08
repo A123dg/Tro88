@@ -11,6 +11,7 @@ export interface RoomPayload {
   electricityUnitPrice: number
   waterUnitPrice: number
   description?: string | null
+  serviceFees?: Array<{ serviceId: string; amount: number }>
 }
 
 export const fetchRooms = async (

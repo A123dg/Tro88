@@ -47,12 +47,15 @@ public sealed class GetRoomsQueryHandler
         var total = await query.CountAsync(ct);
         var totalPage = (int)Math.Ceiling(total / (double)request.PageSize);
 
-        var items = await query
+        var itemsList = await query
+            .Include(r => r.RoomServiceFees)
+            .ThenInclude(rs => rs.Service)
             .OrderBy(r => r.RoomNumber)
             .Skip((request.Page - 1) * request.PageSize)
             .Take(request.PageSize)
-            .Select(r => RoomDto.FromEntity(r))
             .ToListAsync(ct);
+
+        var items = itemsList.Select(r => RoomDto.FromEntity(r)).ToList();
 
         return new PagedResult<RoomDto>
         {

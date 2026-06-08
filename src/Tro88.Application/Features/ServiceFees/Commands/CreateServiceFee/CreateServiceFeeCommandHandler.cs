@@ -8,23 +8,18 @@ using Tro88.Domain.Exceptions;
 
 namespace Tro88.Application.Features.ServiceFees.Commands.CreateServiceFee;
 
-public sealed class CreateServiceFeeCommandHandler
-    : IRequestHandler<CreateServiceFeeCommand, ServiceFeeDto>
+public class CreateServiceFeeCommandHandler : IRequestHandler<CreateServiceFeeCommand, ServiceFeeDto>
 {
     private readonly IApplicationDbContext _db;
     private readonly ICurrentUserService _currentUser;
 
-    public CreateServiceFeeCommandHandler(
-        IApplicationDbContext db,
-        ICurrentUserService currentUser)
+    public CreateServiceFeeCommandHandler(IApplicationDbContext db, ICurrentUserService currentUser)
     {
         _db = db;
         _currentUser = currentUser;
     }
 
-    public async Task<ServiceFeeDto> Handle(
-        CreateServiceFeeCommand request,
-        CancellationToken ct)
+    public async Task<ServiceFeeDto> Handle(CreateServiceFeeCommand request, CancellationToken ct)
     {
         var house = await _db.Houses
             .FirstOrDefaultAsync(h => h.Id == request.HouseId && !h.IsDeleted, ct)
@@ -33,16 +28,36 @@ public sealed class CreateServiceFeeCommandHandler
         if (house.OwnerId != _currentUser.UserId)
             throw new ForbiddenException(ErrorMessages.ACCESS_DENIED);
 
-        var serviceFee = ServiceFee.Create(
-            request.HouseId,
-            request.Name,
-            request.FeeType,
-            request.Amount,
-            request.Unit);
+        var serviceExists = await _db.Services
+            .AnyAsync(s => s.Id == request.ServiceId && s.IsActive, ct);
+        if (!serviceExists)
+            throw new NotFoundException("Service not found in global catalog or is inactive");
 
+        // Check if already configured for this house
+        var existing = await _db.ServiceFees
+            .FirstOrDefaultAsync(sf => sf.HouseId == request.HouseId && sf.ServiceId == request.ServiceId, ct);
+
+        if (existing != null)
+        {
+            existing.Update(request.Amount);
+            if (!existing.IsActive)
+                existing.Toggle(); // Reactivate if it was toggled off
+            await _db.SaveChangesAsync(ct);
+
+            var updatedFee = await _db.ServiceFees
+                .Include(sf => sf.Service)
+                .FirstAsync(sf => sf.Id == existing.Id, ct);
+            return ServiceFeeDto.FromEntity(updatedFee);
+        }
+
+        var serviceFee = ServiceFee.Create(request.HouseId, request.ServiceId, request.Amount);
         _db.ServiceFees.Add(serviceFee);
         await _db.SaveChangesAsync(ct);
 
-        return ServiceFeeDto.FromEntity(serviceFee);
+        var savedFee = await _db.ServiceFees
+            .Include(sf => sf.Service)
+            .FirstAsync(sf => sf.Id == serviceFee.Id, ct);
+
+        return ServiceFeeDto.FromEntity(savedFee);
     }
 }

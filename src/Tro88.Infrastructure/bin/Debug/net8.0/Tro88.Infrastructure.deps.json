@@ -1543,12 +1543,18 @@
           "Tro88.Domain": "1.0.0"
         },
         "runtime": {
-          "Tro88.Application.dll": {}
+          "Tro88.Application.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "Tro88.Domain/1.0.0": {
         "runtime": {
-          "Tro88.Domain.dll": {}
+          "Tro88.Domain.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       }
     }

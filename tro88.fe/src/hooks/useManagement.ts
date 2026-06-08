@@ -7,12 +7,14 @@ import {
   fetchMaintenanceRequests,
   fetchNotifications,
   fetchServiceFees,
+  fetchServices,
   fetchUtilityReadings,
   markAllNotificationsRead,
   markInvoicePaid,
   markNotificationRead,
   sendInvoice,
   terminateContract,
+  toggleService,
   toggleServiceFee,
   updateMaintenanceStatus,
 } from '../services/managementService'
@@ -24,6 +26,7 @@ export const MANAGEMENT_KEYS = {
   maintenance: (filters?: ListFilters) => ['maintenance', filters] as const,
   notifications: (filters?: ListFilters) => ['notifications', filters] as const,
   serviceFees: (filters?: ListFilters) => ['service-fees', filters] as const,
+  services: (filters?: ListFilters) => ['services', filters] as const,
   utilityReadings: (filters?: ListFilters) => ['utility-readings', filters] as const,
   auditLogs: (filters?: ListFilters) => ['audit-logs', filters] as const,
 }
@@ -42,6 +45,9 @@ export const useNotifications = (filters?: ListFilters) =>
 
 export const useServiceFees = (filters?: ListFilters) =>
   useQuery(MANAGEMENT_KEYS.serviceFees(filters), () => fetchServiceFees(filters), { keepPreviousData: true })
+
+export const useServices = (filters?: ListFilters) =>
+  useQuery(MANAGEMENT_KEYS.services(filters), () => fetchServices(filters), { keepPreviousData: true })
 
 export const useUtilityReadings = (filters?: ListFilters) =>
   useQuery(MANAGEMENT_KEYS.utilityReadings(filters), () => fetchUtilityReadings(filters), { keepPreviousData: true })
@@ -89,4 +95,9 @@ export function useNotificationActions() {
 export function useServiceFeeActions() {
   const queryClient = useQueryClient()
   return useMutation(toggleServiceFee, { onSuccess: () => queryClient.invalidateQueries('service-fees') })
+}
+
+export function useServiceActions() {
+  const queryClient = useQueryClient()
+  return useMutation(toggleService, { onSuccess: () => queryClient.invalidateQueries('services') })
 }

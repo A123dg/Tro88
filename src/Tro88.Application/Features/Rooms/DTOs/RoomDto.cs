@@ -2,6 +2,8 @@ using Tro88.Domain.Entities;
 
 namespace Tro88.Application.Features.Rooms.DTOs;
 
+public record RoomServiceFeeDto(Guid ServiceId, string Name, decimal Amount);
+
 public sealed record RoomDto(
     Guid Id,
     Guid HouseId,
@@ -15,7 +17,8 @@ public sealed record RoomDto(
     decimal ElectricityUnitPrice,
     decimal WaterUnitPrice,
     string? Description,
-    List<string> ImageUrls)
+    List<string> ImageUrls,
+    List<RoomServiceFeeDto> ServiceFees)
 {
     public static RoomDto FromEntity(Room r)
         => new(
@@ -31,5 +34,6 @@ public sealed record RoomDto(
             r.ElectricityUnitPrice,
             r.WaterUnitPrice,
             r.Description,
-            r.Images.Select(i => i.Url).ToList());
+            r.Images.Select(i => i.Url).ToList(),
+            r.RoomServiceFees?.Select(rs => new RoomServiceFeeDto(rs.ServiceId, rs.Service?.Name ?? string.Empty, rs.Amount)).ToList() ?? new List<RoomServiceFeeDto>());
 };

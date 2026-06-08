@@ -795,7 +795,7 @@ namespace Tro88.Infrastructure.Migrations
                     b.ToTable("RoomImages", (string)null);
                 });
 
-            modelBuilder.Entity("Tro88.Domain.Entities.ServiceFee", b =>
+            modelBuilder.Entity("Tro88.Domain.Entities.RoomServiceFee", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -811,13 +811,45 @@ namespace Tro88.Infrastructure.Migrations
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("RoomId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ServiceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ServiceId");
+
+                    b.HasIndex("RoomId", "ServiceId")
+                        .IsUnique();
+
+                    b.ToTable("RoomServiceFees", (string)null);
+                });
+
+            modelBuilder.Entity("Tro88.Domain.Entities.Service", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("FeeType")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)");
-
-                    b.Property<Guid>("HouseId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -839,7 +871,98 @@ namespace Tro88.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("HouseId");
+                    b.ToTable("Services", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            FeeType = "Usage",
+                            IsActive = true,
+                            Name = "Điện",
+                            Unit = "kWh"
+                        },
+                        new
+                        {
+                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            FeeType = "Usage",
+                            IsActive = true,
+                            Name = "Nước",
+                            Unit = "m³"
+                        },
+                        new
+                        {
+                            Id = new Guid("33333333-3333-3333-3333-333333333333"),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            FeeType = "Fixed",
+                            IsActive = true,
+                            Name = "Wifi",
+                            Unit = "Tháng"
+                        },
+                        new
+                        {
+                            Id = new Guid("44444444-4444-4444-4444-444444444444"),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            FeeType = "Fixed",
+                            IsActive = true,
+                            Name = "Gửi xe",
+                            Unit = "Xe"
+                        },
+                        new
+                        {
+                            Id = new Guid("55555555-5555-5555-5555-555555555555"),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            FeeType = "Fixed",
+                            IsActive = true,
+                            Name = "Rác",
+                            Unit = "Tháng"
+                        });
+                });
+
+            modelBuilder.Entity("Tro88.Domain.Entities.ServiceFee", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,0)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("HouseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("ServiceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ServiceId");
+
+                    b.HasIndex("HouseId", "ServiceId")
+                        .IsUnique();
 
                     b.ToTable("ServiceFees", (string)null);
                 });
@@ -1221,6 +1344,25 @@ namespace Tro88.Infrastructure.Migrations
                     b.Navigation("Room");
                 });
 
+            modelBuilder.Entity("Tro88.Domain.Entities.RoomServiceFee", b =>
+                {
+                    b.HasOne("Tro88.Domain.Entities.Room", "Room")
+                        .WithMany("RoomServiceFees")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Tro88.Domain.Entities.Service", "Service")
+                        .WithMany()
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Room");
+
+                    b.Navigation("Service");
+                });
+
             modelBuilder.Entity("Tro88.Domain.Entities.ServiceFee", b =>
                 {
                     b.HasOne("Tro88.Domain.Entities.House", "House")
@@ -1229,7 +1371,15 @@ namespace Tro88.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Tro88.Domain.Entities.Service", "Service")
+                        .WithMany()
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("House");
+
+                    b.Navigation("Service");
                 });
 
             modelBuilder.Entity("Tro88.Domain.Entities.TenantInRoom", b =>
@@ -1293,6 +1443,8 @@ namespace Tro88.Infrastructure.Migrations
                     b.Navigation("Contracts");
 
                     b.Navigation("Images");
+
+                    b.Navigation("RoomServiceFees");
 
                     b.Navigation("UtilityReadings");
                 });

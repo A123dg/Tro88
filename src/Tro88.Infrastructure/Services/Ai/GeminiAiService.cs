@@ -16,6 +16,7 @@ public class GeminiAiService : IAiService
     private readonly GeminiSettings _settings;
     private readonly IAiToolManager _toolManager;
     private readonly ILogger<GeminiAiService> _logger;
+    private readonly ICurrentUserService _currentUser;
 
     private static readonly string[] _dangerousPatterns =
     {
@@ -32,12 +33,14 @@ public class GeminiAiService : IAiService
         IHttpClientFactory factory,
         IOptions<GeminiSettings> settings,
         IAiToolManager toolManager,
-        ILogger<GeminiAiService> logger)
+        ILogger<GeminiAiService> logger,
+        ICurrentUserService currentUser)
     {
         _http = factory.CreateClient("Gemini");
         _settings = settings.Value;
         _toolManager = toolManager;
         _logger = logger;
+        _currentUser = currentUser;
     }
 
     public async Task<AiChatResult> ChatAsync(
@@ -76,6 +79,7 @@ public class GeminiAiService : IAiService
             var response = await CallGeminiAsync(requestBody, ct);
 
             var parsed = ParseGeminiResponse(response);
+            parsed.UserId = _currentUser.UserId;
 
             if (!parsed.HasFunctionCall)
             {

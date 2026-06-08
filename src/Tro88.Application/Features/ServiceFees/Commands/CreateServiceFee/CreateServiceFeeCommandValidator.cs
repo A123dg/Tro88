@@ -12,13 +12,12 @@ public class CreateServiceFeeCommandValidator
             .NotEmpty()
             .WithMessage(ErrorMessages.COMMON_422);
 
-        RuleFor(x => x.Name)
+        RuleFor(x => x.ServiceId)
             .NotEmpty()
-            .WithMessage(ErrorMessages.COMMON_422)
-            .MaximumLength(100);
+            .WithMessage(ErrorMessages.COMMON_422);
 
         RuleFor(x => x.Amount)
-            .GreaterThan(0)
+            .GreaterThanOrEqualTo(0)
             .WithMessage(ErrorMessages.COMMON_422);
     }
 }

@@ -28,6 +28,8 @@ public sealed class GetRoomByIdQueryHandler
         var room = await _db.Rooms
             .Include(r => r.House)
             .Include(r => r.Images)
+            .Include(r => r.RoomServiceFees)
+            .ThenInclude(rs => rs.Service)
             .FirstOrDefaultAsync(r => r.Id == request.Id, ct);
 
         if (room is null)

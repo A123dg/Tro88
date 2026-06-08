@@ -51,6 +51,16 @@ public class Invoice : SoftDeleteEntity
         };
     }
 
+    public void UpdateCharges(decimal rent, decimal electricity, decimal water, decimal services)
+    {
+        RentAmount = rent;
+        ElectricityAmount = electricity;
+        WaterAmount = water;
+        ServiceAmount = services;
+        TotalAmount = rent + electricity + water + services;
+    }
+
+
     public void MarkAsPaid()
     {
         if (Status == InvoiceStatus.Paid)

@@ -69,7 +69,6 @@ export function DataPage<T extends { id: string }>({
     <main className="area-page">
       <header className="area-header">
         <div>
-          <nav className="breadcrumb">{breadcrumb}</nav>
           <h1>{title}</h1>
           <p>{subtitle}</p>
         </div>

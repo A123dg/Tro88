@@ -26,6 +26,7 @@ public sealed class GetServiceFeesQueryHandler
     {
         var query = _db.ServiceFees
             .Include(sf => sf.House)
+            .Include(sf => sf.Service)
             .AsQueryable();
 
         if (_currentUser.Role == "Owner")
@@ -42,7 +43,7 @@ public sealed class GetServiceFeesQueryHandler
         var total = await query.CountAsync(ct);
 
         var items = await query
-            .OrderBy(sf => sf.Name)
+            .OrderBy(sf => sf.Service.Name)
             .Skip((request.Page - 1) * request.PageSize)
             .Take(request.PageSize)
             .ToListAsync(ct);

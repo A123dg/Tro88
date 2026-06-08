@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Form, Input, Select, Checkbox, Button, Upload, Flex, Card, Typography, Alert } from 'antd'
+import { Form, Input, Select, Checkbox, Button, Upload, Flex, Card, Typography, Alert, InputNumber } from 'antd'
 import { UploadOutlined, ArrowLeftOutlined, SaveOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from '@tanstack/react-router'
 import { useProvincesQuery, useWardsQuery, useHouseDetailQuery } from '../services/query'
 import { useCreateHouseMutation, useUpdateHouseMutation } from '../services/mutation'
+import { useServices } from '../../../../hooks/useManagement'
 import { PageHeader } from '../../shared'
+import { ImageManager } from '../../../../shared/components/ImageManager'
 
 const { Title, Paragraph } = Typography
 
@@ -19,6 +21,9 @@ export function HouseFormPage() {
   const [wardValue, setWardValue] = useState<string | undefined>()
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [submitError, setSubmitError] = useState('')
+  const [existingMediaUrls, setExistingMediaUrls] = useState<string[]>([])
+  const [selectedServices, setSelectedServices] = useState<Array<{ serviceId: string; amount: number }>>([])
+  const servicesQuery = useServices({ page: 1, pageSize: 100, isActive: true })
 
   const provinces = useProvincesQuery()
   const wards = useWardsQuery(provinceValue)
@@ -48,6 +53,9 @@ export function HouseFormPage() {
     })
     setProvinceValue(houseDetail.data.tinhThanhOption?.id ?? houseDetail.data.province ?? undefined)
     setWardValue(houseDetail.data.xaPhuongOption?.id ?? houseDetail.data.district ?? undefined)
+    if (houseDetail.data.mediaUrls) {
+      setExistingMediaUrls(houseDetail.data.mediaUrls)
+    }
   }, [houseDetail.data, form])
 
   const onFinish = async (values: any) => {
@@ -59,7 +67,8 @@ export function HouseFormPage() {
       district: wardValue,
       description: values.description,
       files: selectedFiles,
-      services: values.services,
+      mediaUrls: existingMediaUrls,
+      services: selectedServices,
     }
 
     if (isEdit && houseId) {
@@ -76,11 +85,11 @@ export function HouseFormPage() {
       <PageHeader
         title={isEdit ? 'Sửa nhà trọ' : 'Thêm nhà trọ'}
         subtitle="Thông tin cơ bản, trạng thái duyệt và ảnh đại diện."
-        action={
-          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate({ to: redirectPath })}>
-            Quay lại
-          </Button>
-        }
+        // action={
+        //   <Button icon={<ArrowLeftOutlined />} onClick={() => navigate({ to: redirectPath })}>
+        //     Quay lại
+        //   </Button>
+        // }
       />
 
       <Card style={{ borderRadius: '16px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)' }}>
@@ -158,6 +167,13 @@ export function HouseFormPage() {
             </Paragraph>
           )}
 
+          {isEdit && (
+            <ImageManager
+              urls={existingMediaUrls}
+              onRemove={(url) => setExistingMediaUrls(existingMediaUrls.filter((u) => u !== url))}
+            />
+          )}
+
           <Form.Item label="Hình ảnh nhà trọ">
             <Upload
               beforeUpload={(file) => {
@@ -180,16 +196,45 @@ export function HouseFormPage() {
           </Form.Item>
 
           {!isEdit && (
-            <Form.Item label="Tiện ích dịch vụ" name="services">
-              <Checkbox.Group>
-                <Flex gap="16px" wrap="wrap">
-                  {['Wifi', 'Bãi xe', 'Camera', 'Máy giặt', 'Thang máy'].map((item) => (
-                    <Checkbox key={item} value={item}>
-                      {item}
-                    </Checkbox>
-                  ))}
-                </Flex>
-              </Checkbox.Group>
+            <Form.Item label="Tiện ích dịch vụ & cấu hình giá mặc định (VNĐ)">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {(servicesQuery.data?.items ?? []).map((service) => {
+                  const isChecked = selectedServices.some(s => s.serviceId === service.id);
+                  return (
+                    <Card key={service.id} size="small" style={{ width: '100%', borderRadius: '8px' }}>
+                      <Flex justify="space-between" align="center" wrap="wrap" gap="12px">
+                        <Checkbox
+                          checked={isChecked}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedServices([...selectedServices, { serviceId: service.id, amount: service.name === 'Điện' ? 3800 : service.name === 'Nước' ? 18000 : 0 }])
+                            } else {
+                              setSelectedServices(selectedServices.filter(s => s.serviceId !== service.id))
+                            }
+                          }}
+                        >
+                          <strong>{service.name}</strong> {service.unit ? `(${service.unit})` : ''}
+                        </Checkbox>
+                        <Flex align="center" gap="8px">
+                          <span>Mức phí:</span>
+                          <InputNumber
+                            min={0}
+                            disabled={!isChecked}
+                            value={selectedServices.find(s => s.serviceId === service.id)?.amount ?? (service.name === 'Điện' ? 3800 : service.name === 'Nước' ? 18000 : 0)}
+                            onChange={(val) => {
+                              setSelectedServices(selectedServices.map(s => s.serviceId === service.id ? { ...s, amount: Number(val ?? 0) } : s))
+                            }}
+                            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                            parser={(value) => parseFloat(value?.replace(/\$\s?|(,*)/g, '') || '0')}
+                            style={{ width: '150px' }}
+                            addonAfter="đ"
+                          />
+                        </Flex>
+                      </Flex>
+                    </Card>
+                  );
+                })}
+              </div>
             </Form.Item>
           )}
 

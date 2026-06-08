@@ -22,6 +22,7 @@ public class Room : SoftDeleteEntity
     public ICollection<RoomImage> Images { get; private set; } = new List<RoomImage>();
     public ICollection<Contract> Contracts { get; private set; } = new List<Contract>();
     public ICollection<UtilityReading> UtilityReadings { get; private set; } = new List<UtilityReading>();
+    public ICollection<RoomServiceFee> RoomServiceFees { get; private set; } = new List<RoomServiceFee>();
 
     private Room() { }
 

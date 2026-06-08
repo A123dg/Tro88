@@ -3,6 +3,8 @@ using Tro88.Application.Features.Rooms.DTOs;
 
 namespace Tro88.Application.Features.Rooms.Commands.CreateRoom;
 
+public record RoomServiceFeeInput(Guid ServiceId, decimal Amount);
+
 public sealed record CreateRoomCommand(
     Guid HouseId,
     string RoomNumber,
@@ -13,4 +15,5 @@ public sealed record CreateRoomCommand(
     decimal DepositAmount,
     decimal ElectricityUnitPrice,
     decimal WaterUnitPrice,
-    string? Description = null) : IRequest<RoomDto>;
+    string? Description = null,
+    List<RoomServiceFeeInput>? ServiceFees = null) : IRequest<RoomDto>;

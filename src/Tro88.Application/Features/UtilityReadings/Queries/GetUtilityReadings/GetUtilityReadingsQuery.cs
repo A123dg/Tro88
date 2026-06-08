@@ -5,6 +5,7 @@ using Tro88.Application.Features.UtilityReadings.DTOs;
 namespace Tro88.Application.Features.UtilityReadings.Queries.GetUtilityReadings;
 
 public record GetUtilityReadingsQuery(
+    Guid? HouseId,
     Guid? RoomId,
     string? Keyword,
     int? Month,

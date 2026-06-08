@@ -1,12 +1,11 @@
-import { useState, useEffect } from 'react'
-import { Form, Input, Card, Button, Flex, Row, Col, Typography } from 'antd'
-import { EditOutlined, ArrowLeftOutlined, HomeOutlined } from '@ant-design/icons'
+import { Card, Button, Flex, Row, Col, Typography, Image } from 'antd'
+import { EditOutlined, ArrowLeftOutlined, DeleteOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from '@tanstack/react-router'
 import { useHouseDetailQuery } from '../services/query'
-import { useUpdateHouseMutation } from '../services/mutation'
+import { useDeleteHouseMutation } from '../services/mutation'
 import { HouseRoomsTable } from '../components/HouseRoomsTable'
 import { PageHeader, Badge, statusVariant, houseStatusLabel, normalizeHouse, houses } from '../../shared'
-import ModalForm from '../../../../shared/components/modal-form/ModalForm'
+import { useNotification } from '../../../../hooks/useNotification'
 
 const { Title, Paragraph, Text } = Typography
 
@@ -18,44 +17,23 @@ export function HouseDetailPage() {
   const isTenant = localStorage.getItem('authRole') === 'Tenant'
   const fallbackHouse = normalizeHouse(houses.find((item) => item.id === houseId) ?? houses[0])
 
-  const [editOpen, setEditOpen] = useState(false)
-  const [editForm] = Form.useForm()
-
   const detail = useHouseDetailQuery(houseId, Boolean(houseId))
   const house = normalizeHouse(detail.data ?? fallbackHouse)
 
-  const saveEdit = useUpdateHouseMutation({
-    onSuccess: () => {
-      setEditOpen(false)
-      editForm.resetFields()
-    },
-  })
-
-  useEffect(() => {
-    if (!detail.data) return
-    editForm.setFieldsValue({
-      name: detail.data.name,
-      address: detail.data.address,
-      province: detail.data.province ?? undefined,
-      district: detail.data.district ?? undefined,
-      description: detail.data.description ?? '',
-    })
-  }, [detail.data, editForm])
-
-  const submitEditModal = async () => {
-    const values = await editForm.validateFields()
-    saveEdit.mutate({
-      id: houseId!,
-      name: String(values.name ?? ''),
-      address: String(values.address ?? ''),
-      province: values.province,
-      district: values.district,
-      description: values.description,
-    })
-  }
-
   const ownerId = localStorage.getItem('authUserId')
   const redirectPath = ownerId ? `/houses/${ownerId}` : '/houses'
+
+  const { showSuccessNotify, showErrorNotify } = useNotification()
+
+  const deleteMutation = useDeleteHouseMutation({
+    onSuccess: () => {
+      showSuccessNotify('Xóa nhà trọ thành công')
+      navigate({ to: redirectPath })
+    },
+    onError: (error: any) => {
+      showErrorNotify(error?.message || 'Không thể xóa nhà trọ')
+    }
+  })
 
   return (
     <div className="page">
@@ -68,14 +46,28 @@ export function HouseDetailPage() {
               Danh sách
             </Button>
             {!isTenant && (
-              <Button
-                type="primary"
-                icon={<EditOutlined />}
-                onClick={() => setEditOpen(true)}
-                style={{ background: '#f4845f', borderColor: '#f4845f' }}
-              >
-                Sửa thông tin
-              </Button>
+              <Flex gap="12px">
+                <Button
+                  type="primary"
+                  icon={<EditOutlined />}
+                  onClick={() => navigate({ to: `/houses/detail/${houseId}/edit` as any })}
+                  style={{ background: '#f4845f', borderColor: '#f4845f' }}
+                >
+                  Sửa thông tin
+                </Button>
+                <Button
+                  danger
+                  icon={<DeleteOutlined />}
+                  loading={deleteMutation.isLoading}
+                  onClick={() => {
+                    if (window.confirm(`Bạn có chắc chắn muốn xóa nhà trọ "${house.name}"?`)) {
+                      deleteMutation.mutate(houseId!)
+                    }
+                  }}
+                >
+                  Xóa nhà trọ
+                </Button>
+              </Flex>
             )}
           </Flex>
         }
@@ -112,38 +104,32 @@ export function HouseDetailPage() {
         </Col>
       </Row>
 
+      {house.mediaUrls && house.mediaUrls.length > 0 && (
+        <Card title="Hình ảnh nhà trọ" style={{ borderRadius: '12px', marginBottom: '24px' }}>
+          <Image.PreviewGroup>
+            <Flex gap="12px" wrap="wrap">
+              {house.mediaUrls.map((url) => (
+                <Image
+                  key={url}
+                  src={url}
+                  alt="House image"
+                  width={150}
+                  height={100}
+                  style={{ objectFit: 'cover', borderRadius: '8px' }}
+                />
+              ))}
+            </Flex>
+          </Image.PreviewGroup>
+        </Card>
+      )}
+
       {house.description && (
         <Card title="Mô tả nhà trọ" style={{ borderRadius: '12px', marginBottom: '24px' }}>
           <Paragraph style={{ margin: 0 }}>{house.description}</Paragraph>
         </Card>
       )}
 
-      <Card title="Danh sách phòng" style={{ borderRadius: '12px' }}>
-        <HouseRoomsTable houseId={houseId!} />
-      </Card>
-
-      <ModalForm
-        open={editOpen}
-        title="Sửa nhà trọ"
-        form={editForm}
-        formItems={[
-          { label: 'Tên nhà trọ', name: 'name', component: <Input placeholder="Tên nhà trọ" />, rules: [{ required: true, message: 'Vui lòng nhập tên nhà trọ' }], span: 24 },
-          { label: 'Địa chỉ', name: 'address', component: <Input.TextArea rows={3} placeholder="Địa chỉ" />, rules: [{ required: true, message: 'Vui lòng nhập địa chỉ' }], span: 24 },
-          { label: 'Tỉnh', name: 'province', component: <Input placeholder="Tỉnh" />, span: 12 },
-          { label: 'Xã/phường', name: 'district', component: <Input placeholder="Xã/phường" />, span: 12 },
-          { label: 'Mô tả', name: 'description', component: <Input.TextArea rows={4} placeholder="Mô tả" />, span: 24 },
-        ]}
-        isLoadingGetDetail={detail.isLoading}
-        loading={saveEdit.isLoading}
-        onCancel={() => {
-          setEditOpen(false)
-          editForm.resetFields()
-        }}
-        onOk={submitEditModal}
-        okText="Lưu thay đổi"
-        cancelText="Hủy"
-        layout="vertical"
-      />
+      <HouseRoomsTable houseId={houseId!} />
     </div>
   )
 }

@@ -18,10 +18,10 @@ public class RecordUtilityReadingCommandValidator
             .GreaterThan(2000)
             .WithMessage(ErrorMessages.COMMON_422);
         RuleFor(x => x.ElectricityNew)
-            .GreaterThanOrEqualTo(x => x.ElectricityOld)
+            .GreaterThanOrEqualTo(0)
             .WithMessage(ErrorMessages.COMMON_422);
         RuleFor(x => x.WaterNew)
-            .GreaterThanOrEqualTo(x => x.WaterOld)
+            .GreaterThanOrEqualTo(0)
             .WithMessage(ErrorMessages.COMMON_422);
     }
 }

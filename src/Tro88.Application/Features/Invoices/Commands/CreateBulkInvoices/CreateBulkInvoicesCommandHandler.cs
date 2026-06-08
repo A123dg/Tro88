@@ -39,6 +39,11 @@ public sealed class CreateBulkInvoicesCommandHandler
                 !c.IsDeleted)
             .ToListAsync(ct);
 
+        var roomIds = activeContracts.Select(c => c.RoomId).Distinct().ToList();
+        var allRoomServiceFees = await _db.RoomServiceFees
+            .Where(rs => roomIds.Contains(rs.RoomId))
+            .ToListAsync(ct);
+
         var invoices = new List<InvoiceDto>();
 
         foreach (var contract in activeContracts)
@@ -52,9 +57,20 @@ public sealed class CreateBulkInvoicesCommandHandler
             if (existingInvoice != null)
                 continue;
 
-            var serviceAmount = contract.Room.House.ServiceFees
-                .Where(sf => sf.IsActive)
-                .Sum(sf => sf.Amount);
+            var roomFees = allRoomServiceFees.Where(rs => rs.RoomId == contract.RoomId).ToList();
+            decimal serviceAmount = 0;
+            foreach (var houseFee in contract.Room.House.ServiceFees.Where(sf => sf.IsActive))
+            {
+                var roomOverride = roomFees.FirstOrDefault(rs => rs.ServiceId == houseFee.ServiceId);
+                if (roomOverride != null)
+                {
+                    serviceAmount += roomOverride.Amount;
+                }
+                else
+                {
+                    serviceAmount += houseFee.Amount;
+                }
+            }
 
             var dueDate = new DateTime(request.Year, request.Month, contract.PaymentDayOfMonth);
             if (dueDate < DateTime.UtcNow)
