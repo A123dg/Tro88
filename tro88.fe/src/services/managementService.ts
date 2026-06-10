@@ -10,6 +10,7 @@ import {
   ServiceFeeDto,
   ServiceDto,
   UtilityReadingDto,
+  OwnerTenantDto,
 } from '../types/management.types'
 import { api } from './apiClient'
 
@@ -145,3 +146,11 @@ export const bulkRecordReadings = (payload: BulkRecordReadingsPayload) =>
   api.post<unknown, ApiResponse<UtilityReadingDto[]>>('/UtilityReadings/bulk', payload)
 
 export const fetchAuditLogs = (filters?: ListFilters) => fetchPaged<AuditLogDto>('/AuditLogs', filters)
+
+export const fetchOwnerTenants = (filters?: ListFilters) => {
+  const queryFilters = {
+    ...filters,
+    search: filters?.keyword,
+  }
+  return fetchPaged<OwnerTenantDto>('/Users/owner-tenants', queryFilters)
+}

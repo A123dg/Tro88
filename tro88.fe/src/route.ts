@@ -1,7 +1,5 @@
 import { createRoute, createRouter, redirect, Outlet } from '@tanstack/react-router'
 import { rootRoute } from './rootRoute'
-
-// Page Components
 import { AuditLogsPage } from './pages/Admin/AuditLogs/AuditLogsPage'
 import { SystemAdminPage } from './pages/Admin/SystemAdmin/SystemAdminPage'
 import { AdminUsersPage } from './pages/Admin/Users/UsersPage'
@@ -93,7 +91,7 @@ const ownerLoginRoute = createRoute({ getParentRoute: () => authLayoutRoute, pat
 const adminLoginRoute = createRoute({ getParentRoute: () => authLayoutRoute, path: '/login/admin', component: AdminLoginPage })
 const registerRoute = createRoute({ getParentRoute: () => authLayoutRoute, path: '/register', component: RegisterPage })
 const forgotPasswordRoute = createRoute({ getParentRoute: () => authLayoutRoute, path: '/forgot-password', component: ForgotPasswordPage })
-const completeProfileRoute = createRoute({ getParentRoute: () => authLayoutRoute, path: '/complete-profile', component: CompleteProfilePage })
+const completeProfileRoute = createRoute({ getParentRoute: () => rootRoute, path: '/complete-profile', component: CompleteProfilePage })
 const googleCallbackRoute = createRoute({ getParentRoute: () => authLayoutRoute, path: '/auth/google/callback', component: GoogleCallbackPage })
 
 // 3. ADMIN LAYOUT & ROUTES
@@ -196,9 +194,9 @@ const routeTree = rootRoute.addChildren([
     adminLoginRoute,
     registerRoute,
     forgotPasswordRoute,
-    completeProfileRoute,
     googleCallbackRoute
   ]),
+  completeProfileRoute,
 
   // Admin Layout Groups
   adminLayoutRoute.addChildren([

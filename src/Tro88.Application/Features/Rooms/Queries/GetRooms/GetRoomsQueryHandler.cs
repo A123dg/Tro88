@@ -50,6 +50,11 @@ public sealed class GetRoomsQueryHandler
         var itemsList = await query
             .Include(r => r.RoomServiceFees)
             .ThenInclude(rs => rs.Service)
+            .Include(r => r.Contracts.Where(c => c.Status == Tro88.Domain.Enums.ContractStatus.Active && !c.IsDeleted))
+                .ThenInclude(c => c.Tenant)
+            .Include(r => r.Contracts.Where(c => c.Status == Tro88.Domain.Enums.ContractStatus.Active && !c.IsDeleted))
+                .ThenInclude(c => c.TenantInRooms.Where(tr => tr.Status == "staying"))
+                .ThenInclude(tr => tr.User)
             .OrderBy(r => r.RoomNumber)
             .Skip((request.Page - 1) * request.PageSize)
             .Take(request.PageSize)

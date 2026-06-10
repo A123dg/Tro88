@@ -17,6 +17,7 @@ import {
   toggleService,
   toggleServiceFee,
   updateMaintenanceStatus,
+  fetchOwnerTenants,
 } from '../services/managementService'
 import { ListFilters } from '../types/management.types'
 
@@ -29,6 +30,7 @@ export const MANAGEMENT_KEYS = {
   services: (filters?: ListFilters) => ['services', filters] as const,
   utilityReadings: (filters?: ListFilters) => ['utility-readings', filters] as const,
   auditLogs: (filters?: ListFilters) => ['audit-logs', filters] as const,
+  ownerTenants: (filters?: ListFilters) => ['owner-tenants', filters] as const,
 }
 
 export const useInvoices = (filters?: ListFilters) =>
@@ -36,6 +38,9 @@ export const useInvoices = (filters?: ListFilters) =>
 
 export const useContracts = (filters?: ListFilters) =>
   useQuery(MANAGEMENT_KEYS.contracts(filters), () => fetchContracts(filters), { keepPreviousData: true })
+
+export const useOwnerTenants = (filters?: ListFilters) =>
+  useQuery(MANAGEMENT_KEYS.ownerTenants(filters), () => fetchOwnerTenants(filters), { keepPreviousData: true })
 
 export const useMaintenanceRequests = (filters?: ListFilters) =>
   useQuery(MANAGEMENT_KEYS.maintenance(filters), () => fetchMaintenanceRequests(filters), { keepPreviousData: true })

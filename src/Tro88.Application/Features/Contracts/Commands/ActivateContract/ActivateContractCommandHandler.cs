@@ -71,7 +71,7 @@ public sealed class ActivateContractCommandHandler
                 contract.Room.ChangeStatus(Domain.Enums.RoomStatus.Occupied);
 
                 // Add tenant to room
-                var occupant = TenantInRoom.Create(contract.Id, contract.TenantId, contract.StartDate);
+                var occupant = TenantInRoom.Create(contract.Id, contract.TenantId, contract.RoomId, contract.Room.HouseId, contract.StartDate);
                 _db.TenantInRooms.Add(occupant);
 
                 // Fetch owner to send email

@@ -30,6 +30,11 @@ public sealed class GetRoomByIdQueryHandler
             .Include(r => r.Images)
             .Include(r => r.RoomServiceFees)
             .ThenInclude(rs => rs.Service)
+            .Include(r => r.Contracts.Where(c => c.Status == Tro88.Domain.Enums.ContractStatus.Active && !c.IsDeleted))
+                .ThenInclude(c => c.Tenant)
+            .Include(r => r.Contracts.Where(c => c.Status == Tro88.Domain.Enums.ContractStatus.Active && !c.IsDeleted))
+                .ThenInclude(c => c.TenantInRooms.Where(tr => tr.Status == "staying"))
+                .ThenInclude(tr => tr.User)
             .FirstOrDefaultAsync(r => r.Id == request.Id, ct);
 
         if (room is null)

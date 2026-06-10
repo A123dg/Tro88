@@ -4,6 +4,15 @@ export enum RoomStatus {
   Maintenance = 'Maintenance',
 }
 
+export interface RoomOccupantDto {
+  userId: string
+  fullName: string
+  email?: string | null
+  phoneNumber?: string | null
+  checkIn: string
+  relationType: string
+}
+
 export interface RoomDto {
   id: string
   houseId: string
@@ -19,6 +28,7 @@ export interface RoomDto {
   description?: string
   imageUrls: string[]
   serviceFees: RoomServiceFeeDto[]
+  occupants?: RoomOccupantDto[]
   // Additional fields for tenant room search
   houseName?: string
   address?: string

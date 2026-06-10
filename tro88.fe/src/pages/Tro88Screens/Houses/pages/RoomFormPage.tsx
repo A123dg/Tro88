@@ -15,7 +15,21 @@ export function RoomFormPage() {
     onSuccess: () => navigate({ to: '/houses/detail/h1/rooms' as any })
   })
 
-  const roomData = isEdit ? (rooms.find((r) => r.id === roomId) ?? rooms[0]) : null
+  const fallbackRoom = {
+    id: '',
+    houseId: '',
+    roomNumber: '',
+    floor: 1,
+    area: 24,
+    maxOccupants: 2,
+    monthlyRent: 3500000,
+    depositAmount: 3500000,
+    description: '',
+    electricityUnitPrice: 3800,
+    waterUnitPrice: 18000,
+    status: 'Available',
+  }
+  const roomData = isEdit ? (rooms.find((r) => r.id === roomId) ?? fallbackRoom as any) : null
 
   const onFinish = () => {
     save.mutate()

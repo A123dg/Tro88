@@ -127,3 +127,18 @@ export interface AuditLogDto {
   ipAddress?: string | null
   createdAt: string
 }
+
+export interface OwnerTenantDto {
+  id: string
+  fullName: string
+  phoneNumber?: string | null
+  email?: string | null
+  roomNumber: string
+  houseName: string
+  startDate: string
+  endDate?: string | null
+  monthlyRent: number
+  depositAmount: number
+  relationType: string
+}
+

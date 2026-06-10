@@ -10,7 +10,7 @@ function getDefaultRedirect(role?: string) {
   return '/dashboard'
 }
 
-export function CompleteProfilePage() {
+function CompleteProfilePageInner() {
   const [user, setUser] = useState<UserDto | null>(null)
   const [fullName, setFullName] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
@@ -85,6 +85,14 @@ export function CompleteProfilePage() {
           </form>
         )}
       </section>
+    </main>
+  )
+}
+
+export function CompleteProfilePage() {
+  return (
+    <main className="auth-layout">
+      <CompleteProfilePageInner />
     </main>
   )
 }

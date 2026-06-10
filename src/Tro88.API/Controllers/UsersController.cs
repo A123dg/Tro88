@@ -208,7 +208,89 @@ public class UsersController : BaseApiController
 
         return Ok(ApiResponse<UserDto>.Ok(UserDto.FromEntity(user)));
     }
+
+    [HttpGet("owner-tenants")]
+    public async Task<IActionResult> GetOwnerTenants([FromQuery] GetOwnerTenantsRequest request)
+    {
+        var ownerId = _currentUser.UserId;
+        var page = request.Page <= 0 ? 1 : request.Page;
+        var pageSize = request.PageSize <= 0 ? 10 : request.PageSize;
+
+        // Query occupants directly from TenantInRooms using HouseId/RoomId association
+        // Query occupants directly from TenantInRooms using HouseId/RoomId association
+        var occupants = await _db.TenantInRooms
+            .Include(tr => tr.User)
+            .Include(tr => tr.Room)
+            .Include(tr => tr.House)
+            .Include(tr => tr.Contract)
+            .Where(tr => tr.House != null && tr.House.OwnerId == ownerId && tr.Status == "staying")
+            .ToListAsync();
+
+        var tenantList = occupants.Select(tr => new OwnerTenantDto(
+            tr.User.Id,
+            tr.User.FullName,
+            tr.User.PhoneNumber,
+            tr.User.Email,
+            tr.Room?.RoomNumber ?? "Chưa có",
+            tr.House?.Name ?? "Chưa có",
+            tr.CheckIn,
+            tr.Contract?.EndDate,
+            tr.Contract?.MonthlyRent ?? 0,
+            tr.Contract?.DepositAmount ?? 0,
+            tr.Contract != null && tr.UserId == tr.Contract.TenantId ? "Chủ hợp đồng" : "Thành viên phòng"
+        )).ToList();
+
+        // Apply search/keyword filtering if present
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var keyword = request.Search.Trim().ToLowerInvariant();
+            tenantList = tenantList.Where(t =>
+                t.FullName.ToLower().Contains(keyword) ||
+                (t.PhoneNumber != null && t.PhoneNumber.Contains(keyword)) ||
+                (t.Email != null && t.Email.ToLower().Contains(keyword)) ||
+                t.RoomNumber.ToLower().Contains(keyword) ||
+                t.HouseName.ToLower().Contains(keyword)
+            ).ToList();
+        }
+
+        var total = tenantList.Count;
+        var paginated = tenantList
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        return Ok(ApiResponse<List<OwnerTenantDto>>.Ok(
+            paginated,
+            metaData: new MetaData
+            {
+                Page = page,
+                PageSize = pageSize,
+                Total = total,
+                TotalPage = (int)Math.Ceiling(total / (double)pageSize)
+            }));
+    }
 }
+
+public sealed class GetOwnerTenantsRequest
+{
+    public string? Search { get; set; }
+    public int Page { get; set; } = 1;
+    public int PageSize { get; set; } = 10;
+}
+
+public sealed record OwnerTenantDto(
+    Guid Id,
+    string FullName,
+    string? PhoneNumber,
+    string? Email,
+    string RoomNumber,
+    string HouseName,
+    DateTime StartDate,
+    DateTime? EndDate,
+    decimal MonthlyRent,
+    decimal DepositAmount,
+    string RelationType
+);
 
 public sealed class GetUsersRequest
 {

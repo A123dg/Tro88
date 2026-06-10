@@ -16,8 +16,24 @@ export function RoomDetailPage() {
   const isTenant = localStorage.getItem('authRole') === 'Tenant'
   const [activeTab, setActiveTab] = useState('info')
 
-  const roomQuery = useQuery(['room-detail', roomId], () => read(`/Rooms/${roomId}`, rooms[0]))
-  const room = roomQuery.data ?? rooms[0]
+  const fallbackRoom = {
+    id: '',
+    houseId: '',
+    roomNumber: '',
+    floor: 0,
+    area: 0,
+    maxOccupants: 0,
+    monthlyRent: 0,
+    depositAmount: 0,
+    status: 'Available',
+    electricityUnitPrice: 0,
+    waterUnitPrice: 0,
+    description: '',
+    imageUrls: [],
+  }
+
+  const roomQuery = useQuery(['room-detail', roomId], () => read(`/Rooms/${roomId}`, fallbackRoom as any))
+  const room = roomQuery.data ?? fallbackRoom
 
   const contractsQuery = useQuery(
     ['room-contracts', roomId],

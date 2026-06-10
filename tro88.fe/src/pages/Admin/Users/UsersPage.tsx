@@ -8,6 +8,7 @@ import { createUser, deleteUser, fetchUsers, SaveUserPayload, updateUser, UserFi
 import { UserDto } from '../../../types/app.types'
 import ModalForm from '../../../shared/components/modal-form/ModalForm'
 import { CustomDatePicker } from '../../../shared/components/custom-datepicker'
+import dayjs from 'dayjs'
 
 const roleOptions = [
   { value: '', label: 'Tất cả vai trò' },
@@ -16,11 +17,15 @@ const roleOptions = [
   { value: 'Tenant', label: 'Tenant' },
 ]
 
+interface UserFormValues extends Omit<SaveUserPayload, 'dateOfBirth'> {
+  dateOfBirth?: dayjs.Dayjs
+}
+
 export function AdminUsersPage() {
   const [filters, setFilters] = useUrlListFilters<UserFilters>({ page: 1, pageSize: 10 })
   const [editingUser, setEditingUser] = useState<UserDto | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
-  const [form] = Form.useForm<SaveUserPayload>()
+  const [form] = Form.useForm<UserFormValues>()
 
   const query = useQuery(['admin-users', filters], () => fetchUsers(filters), { keepPreviousData: true })
   const saveUser = useMutation((payload: SaveUserPayload) => (payload.id ? updateUser(payload) : createUser(payload)), {
@@ -50,7 +55,7 @@ export function AdminUsersPage() {
       phoneNumber: user.phoneNumber,
       role: user.role as SaveUserPayload['role'],
       nationalId: user.nationalId ?? undefined,
-      dateOfBirth: user.dateOfBirth ? user.dateOfBirth.slice(0, 10) : undefined,
+      dateOfBirth: user.dateOfBirth ? dayjs(user.dateOfBirth) : undefined,
       isActive: user.isActive,
       password: '',
     })
@@ -104,7 +109,7 @@ export function AdminUsersPage() {
       id: editingUser?.id,
       phoneNumber: values.phoneNumber ?? '',
       nationalId: values.nationalId || undefined,
-      dateOfBirth: values.dateOfBirth || undefined,
+      dateOfBirth: values.dateOfBirth ? values.dateOfBirth.toISOString() : undefined,
       password: values.password || undefined,
       isActive: values.isActive ?? true,
     })

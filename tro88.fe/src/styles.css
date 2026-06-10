@@ -760,6 +760,7 @@ input,
   border-radius: 12px;
   background: #fff;
   min-height: 32px;
+  width: 100%;
 }
 
 .ant-picker .ant-picker-input>input {
@@ -1902,8 +1903,8 @@ input,
 
 .filter-bar .ant-input,
 .filter-bar input,
-.page .ant-input,
-.page input,
+.page .ant-input:not(textarea):not(.card *):not(form *):not(.ant-form *),
+.page input:not(textarea):not(.card *):not(form *):not(.ant-form *):not(.ant-picker *):not(.ant-input-number *),
 .area-page .ant-input,
 .area-page input {
   height: 36px !important;
@@ -1912,7 +1913,6 @@ input,
   border-radius: 8px !important;
   width: 220px !important;
 }
-
 .filter-bar .ant-input-group-wrapper,
 .page .ant-input-group-wrapper,
 .area-page .ant-input-group-wrapper,

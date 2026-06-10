@@ -11,6 +11,11 @@ export function CustomDatePicker(props: DatePickerProps) {
       format={props.format ?? 'DD/MM/YYYY'}
       style={props.style}
       getPopupContainer={props.getPopupContainer ?? (() => document.body)}
+      panelRender={(panel) => (
+        <div style={{ width: '200px' }}>
+          {panel}
+        </div>
+      )}
     />
   )
 }

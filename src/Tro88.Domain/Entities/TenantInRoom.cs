@@ -7,21 +7,27 @@ public class TenantInRoom : AuditableEntity
 {
     public Guid ContractId { get; private set; }
     public Guid UserId { get; private set; }
+    public Guid? RoomId { get; private set; }
+    public Guid? HouseId { get; private set; }
     public DateTime CheckIn { get; private set; }
     public DateTime? CheckOut { get; private set; }
     public string Status { get; private set; } = default!;
 
     public Contract Contract { get; private set; } = default!;
     public User User { get; private set; } = default!;
+    public Room? Room { get; private set; }
+    public House? House { get; private set; }
 
     private TenantInRoom() { }
 
     public static TenantInRoom Create(
-        Guid contractId, Guid userId, DateTime checkIn)
+        Guid contractId, Guid userId, Guid? roomId, Guid? houseId, DateTime checkIn)
         => new()
         {
             ContractId = contractId,
             UserId = userId,
+            RoomId = roomId,
+            HouseId = houseId,
             CheckIn = checkIn,
             Status = "staying"
         };

@@ -29,7 +29,17 @@ public class TenantInRoomConfiguration : IEntityTypeConfiguration<TenantInRoom>
             .WithMany(u => u.TenantInRooms)
             .HasForeignKey(t => t.UserId)
             .OnDelete(DeleteBehavior.Restrict);
+        b.HasOne(t => t.Room)
+            .WithMany()
+            .HasForeignKey(t => t.RoomId)
+            .OnDelete(DeleteBehavior.Restrict);
+        b.HasOne(t => t.House)
+            .WithMany()
+            .HasForeignKey(t => t.HouseId)
+            .OnDelete(DeleteBehavior.Restrict);
         b.HasIndex(t => new { t.ContractId, t.UserId });
         b.HasIndex(t => t.Status);
+        b.HasIndex(t => t.RoomId);
+        b.HasIndex(t => t.HouseId);
     }
 }
