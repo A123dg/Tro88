@@ -13,7 +13,7 @@ const ownerNav = [
   { to: '/contracts', label: 'Hợp đồng', icon: FileText },
   { to: '/invoices', label: 'Hóa đơn', icon: CreditCard },
   { to: '/utility-readings', label: 'Điện nước', icon: Zap },
-  { to: '/maintenance', label: 'Bảo trì', icon: Wrench },
+  { to: '/maintenance', label: 'Báo cáo bảo trì', icon: Wrench },
   { to: '/service-fees', label: 'Dịch vụ', icon: Settings },
   { to: '/statistics', label: 'Thống kê', icon: ChartBar },
 ]

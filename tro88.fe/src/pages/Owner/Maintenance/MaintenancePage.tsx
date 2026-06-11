@@ -15,7 +15,7 @@ export function MaintenancePage() {
 
   return (
     <DataPage<MaintenanceRequestDto>
-      title="Quản lý bảo trì"
+      title="Báo cáo bảo trì"
       subtitle="Theo dõi yêu cầu sửa chữa, phân loại ưu tiên và trạng thái xử lý."
       breadcrumb="Tro88 / Bảo trì"
       items={query.data?.items ?? []}

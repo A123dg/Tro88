@@ -24,6 +24,9 @@ public class GetMaintenanceRequestsQueryHandler : IRequestHandler<GetMaintenance
         if (request.RoomId.HasValue)
             query = query.Where(m => m.RoomId == request.RoomId);
 
+        if (request.RequestedByUserId.HasValue)
+            query = query.Where(m => m.RequestedByUserId == request.RequestedByUserId);
+
         if (!string.IsNullOrEmpty(request.Status))
             query = query.Where(m => m.Status == Enum.Parse<MaintenanceStatus>(request.Status));
 

@@ -12,7 +12,7 @@ interface ProfileFormProps {
 interface ProfileFormData {
   fullName: string
   phoneNumber: string
-  citizenId: string
+  nationalId: string
   dateOfBirth: string
 }
 
@@ -28,7 +28,7 @@ export function ProfileForm({ user, isGoogleLogin = false }: ProfileFormProps) {
   const [formData, setFormData] = useState<ProfileFormData>({
     fullName: user.fullName || '',
     phoneNumber: user.phoneNumber || '',
-    citizenId: user.citizenId || '',
+    nationalId: user.nationalId || '',
     dateOfBirth: user.dateOfBirth || ''
   })
 
@@ -36,7 +36,7 @@ export function ProfileForm({ user, isGoogleLogin = false }: ProfileFormProps) {
     setFormData({
       fullName: user.fullName || '',
       phoneNumber: user.phoneNumber || '',
-      citizenId: user.citizenId || '',
+      nationalId: user.nationalId || '',
       dateOfBirth: user.dateOfBirth || ''
     })
   }, [user])
@@ -47,7 +47,7 @@ export function ProfileForm({ user, isGoogleLogin = false }: ProfileFormProps) {
         return value.trim().length < 2 ? 'Tối thiểu 2 ký tự' : ''
       case 'phoneNumber':
         return value.trim() && !phonePattern.test(value.trim()) ? 'Số điện thoại không hợp lệ' : ''
-      case 'citizenId':
+      case 'nationalId':
         return value.trim() && !citizenPattern.test(value.trim()) ? 'CCCD/CMND không hợp lệ' : ''
       default:
         return ''
@@ -69,7 +69,7 @@ export function ProfileForm({ user, isGoogleLogin = false }: ProfileFormProps) {
     const nextErrors: ProfileFieldErrors = {
       fullName: validateField('fullName', formData.fullName),
       phoneNumber: validateField('phoneNumber', formData.phoneNumber),
-      citizenId: validateField('citizenId', formData.citizenId)
+      nationalId: validateField('nationalId', formData.nationalId)
     }
 
     setErrors(nextErrors)
@@ -78,11 +78,17 @@ export function ProfileForm({ user, isGoogleLogin = false }: ProfileFormProps) {
       return
     }
 
+    // Format DD/MM/YYYY or ISO to YYYY-MM-DD
+    const parts = formData.dateOfBirth.split('/')
+    const formattedDob = parts.length === 3 
+      ? `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`
+      : formData.dateOfBirth ? dayjs(formData.dateOfBirth).format('YYYY-MM-DD') : ''
+
     const data = {
       fullName: formData.fullName.trim(),
       phoneNumber: formData.phoneNumber.trim(),
-      citizenId: formData.citizenId.trim(),
-      dateOfBirth: formData.dateOfBirth
+      nationalId: formData.nationalId.trim(),
+      dateOfBirth: formattedDob || undefined
     }
 
     updateProfile.mutate(data, {
@@ -94,6 +100,18 @@ export function ProfileForm({ user, isGoogleLogin = false }: ProfileFormProps) {
   }
 
   const isLoading = updateProfile.isLoading
+
+  const getDayjsValue = (dateStr: string) => {
+    if (!dateStr) return null
+    const parts = dateStr.split('/')
+    if (parts.length === 3) {
+      const d = dayjs(`${parts[2]}-${parts[1]}-${parts[0]}`)
+      if (d.isValid()) return d
+    }
+    const d2 = dayjs(dateStr)
+    if (d2.isValid()) return d2
+    return null
+  }
 
   return (
     <form className="profile-form" onSubmit={onSubmit} noValidate>
@@ -142,9 +160,9 @@ export function ProfileForm({ user, isGoogleLogin = false }: ProfileFormProps) {
               value={user.email || ''}
               disabled={true}
             />
-            {isGoogleLogin && (
+            {/* {isGoogleLogin && (
               <span className="field-hint">Email không thể thay đổi khi đăng nhập Google</span>
-            )}
+            )} */}
           </div>
         </div>
       </section>
@@ -189,20 +207,20 @@ export function ProfileForm({ user, isGoogleLogin = false }: ProfileFormProps) {
             <label className="form-label">CCCD/CMND</label>
             <input
               type="text"
-              className={`form-input ${errors.citizenId ? 'error' : ''}`}
+              className={`form-input ${errors.nationalId ? 'error' : ''}`}
               placeholder="Nhập số CCCD/CMND"
-              value={formData.citizenId}
-              onChange={handleFieldChange('citizenId')}
-              aria-invalid={Boolean(errors.citizenId)}
+              value={formData.nationalId}
+              onChange={handleFieldChange('nationalId')}
+              aria-invalid={Boolean(errors.nationalId)}
             />
-            {errors.citizenId && (
+            {errors.nationalId && (
               <span className="form-error">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="12" cy="12" r="10" />
                   <line x1="12" y1="8" x2="12" y2="12" />
                   <line x1="12" y1="16" x2="12.01" y2="16" />
                 </svg>
-                {errors.citizenId}
+                {errors.nationalId}
               </span>
             )}
           </div>
@@ -212,9 +230,10 @@ export function ProfileForm({ user, isGoogleLogin = false }: ProfileFormProps) {
             <div className="date-input-wrapper">
               <CustomDatePicker
                 className="form-input"
-                value={formData.dateOfBirth ? dayjs(formData.dateOfBirth) : null}
+                value={getDayjsValue(formData.dateOfBirth)}
                 onChange={(_date, dateString) => setFormData((current) => ({ ...current, dateOfBirth: dateString ? (typeof dateString === 'string' ? dateString : dateString[0]) : '' }))}
                 placeholder="Chọn ngày sinh"
+                disabledDate={(current) => current && current > dayjs().endOf('day')}
               />
             </div>
           </div>
@@ -222,14 +241,14 @@ export function ProfileForm({ user, isGoogleLogin = false }: ProfileFormProps) {
       </section>
 
       <div className="form-footer">
-        <div className="footer-hint">
+        {/* <div className="footer-hint">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="12" cy="12" r="10" />
             <line x1="12" y1="16" x2="12" y2="12" />
             <line x1="12" y1="8" x2="12.01" y2="8" />
           </svg>
           * Thông tin sẽ được cập nhật ngay lập tức
-        </div>
+        </div> */}
 
         <button
           type="submit"

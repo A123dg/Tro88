@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Tro88.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b6614592188cfb2e4239e9ed1656fc2ea33ccbe9")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+68882c42efb7f36fbb9de98d747b5f7e9a003bed")]
 [assembly: System.Reflection.AssemblyProductAttribute("Tro88.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Tro88.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

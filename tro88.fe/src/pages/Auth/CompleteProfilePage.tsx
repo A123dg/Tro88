@@ -32,11 +32,32 @@ function CompleteProfilePageInner() {
       .finally(() => setLoading(false))
   }, [])
 
+
+
+  const getDayjsValue = (dateStr: string) => {
+    if (!dateStr) return null
+    const parts = dateStr.split('/')
+    if (parts.length === 3) {
+      const d = dayjs(`${parts[2]}-${parts[1]}-${parts[0]}`)
+      if (d.isValid()) return d
+    }
+    const d2 = dayjs(dateStr)
+    if (d2.isValid()) return d2
+    return null
+  }
+
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setError('')
     setSaving(true)
-    updateCurrentUser({ fullName, phoneNumber, dateOfBirth })
+
+    // Format DD/MM/YYYY or ISO to YYYY-MM-DD
+    const parts = dateOfBirth.split('/')
+    const formattedDob = parts.length === 3 
+      ? `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`
+      : dateOfBirth ? dayjs(dateOfBirth).format('YYYY-MM-DD') : ''
+
+    updateCurrentUser({ fullName, phoneNumber, dateOfBirth: formattedDob || undefined })
       .then((response) => {
         localStorage.setItem('authFullName', response.data.fullName)
         window.location.href = getDefaultRedirect(response.data.role)
@@ -59,7 +80,7 @@ function CompleteProfilePageInner() {
           <h1>Thông tin cá nhân</h1>
           <p>Cập nhật họ tên, số điện thoại và ngày sinh trước khi tiếp tục.</p>
         </header>
-
+ 
         {loading ? <p>Đang tải hồ sơ...</p> : (
           <form className="login-form" onSubmit={submit}>
             <label>
@@ -76,7 +97,12 @@ function CompleteProfilePageInner() {
             </label>
             <label>
               Ngày sinh
-              <CustomDatePicker value={dateOfBirth ? dayjs(dateOfBirth) : null} onChange={(_date, dateString) => setDateOfBirth(dateString ? (typeof dateString === 'string' ? dateString : dateString[0]) : '')} placeholder="Chọn ngày sinh" />
+              <CustomDatePicker 
+                value={getDayjsValue(dateOfBirth)} 
+                onChange={(_date, dateString) => setDateOfBirth(dateString ? (typeof dateString === 'string' ? dateString : dateString[0]) : '')} 
+                placeholder="Chọn ngày sinh" 
+                disabledDate={(current) => current && current > dayjs().endOf('day')}
+              />
             </label>
             {error ? <p className="login-error">{error}</p> : null}
             <button className="app-button app-button--primary app-button--full" type="submit" disabled={saving}>

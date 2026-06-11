@@ -44,6 +44,7 @@ async function fetchPaged<T>(path: string, filters?: ListFilters): Promise<Paged
 export const fetchInvoices = (filters?: ListFilters) => fetchPaged<InvoiceDto>('/Invoices', filters)
 export const markInvoicePaid = (id: string) => api.patch<unknown, ApiResponse<InvoiceDto>>(`/Invoices/${id}/mark-paid`)
 export const sendInvoice = (id: string) => api.post<unknown, ApiResponse<object>>(`/Invoices/${id}/send`)
+export const notifyInvoicePayment = (id: string) => api.patch<unknown, ApiResponse<InvoiceDto>>(`/Invoices/${id}/notify-payment`)
 
 export interface CreateContractPayload {
   roomId: string
@@ -65,8 +66,35 @@ export const terminateContract = (id: string, reason: string) =>
 
 export const fetchMaintenanceRequests = (filters?: ListFilters) =>
   fetchPaged<MaintenanceRequestDto>('/Maintenance', filters)
+export const fetchMaintenanceById = async (id: string): Promise<MaintenanceRequestDto> => {
+  const response = await api.get<unknown, ApiResponse<MaintenanceRequestDto>>(`/Maintenance/${id}`)
+  return response.data
+}
 export const updateMaintenanceStatus = (id: string, status: string, resolutionNote?: string) =>
   api.patch<unknown, ApiResponse<MaintenanceRequestDto>>(`/Maintenance/${id}/status`, { status, resolutionNote })
+
+export interface CreateMaintenanceRequestPayload {
+  roomId: string
+  title: string
+  description: string
+  category: string
+  priority: string
+  files?: File[]
+}
+
+export const createMaintenanceRequest = (payload: CreateMaintenanceRequestPayload) => {
+  const form = new FormData()
+  form.append('roomId', payload.roomId)
+  form.append('title', payload.title)
+  form.append('description', payload.description)
+  form.append('category', payload.category)
+  form.append('priority', payload.priority)
+  payload.files?.forEach((file) => form.append('files', file))
+
+  return api.post<unknown, ApiResponse<MaintenanceRequestDto>>('/Maintenance', form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+}
 
 export const fetchNotifications = (filters?: ListFilters) => fetchPaged<NotificationDto>('/Notifications', filters)
 export const markNotificationRead = (id: string) =>

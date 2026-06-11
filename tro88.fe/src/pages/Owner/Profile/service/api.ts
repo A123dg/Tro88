@@ -12,20 +12,12 @@ interface EmptyApiResponse {
   data?: unknown
 }
 
-export const fetchCurrentUser = async () => {
-  const response = await api.get<unknown, ProfileApiResponse<UserProfile>>('/Users/me')
-  if (!response.success) {
-    throw new Error(response.message)
-  }
-  return response.data
-}
-
 export interface UserProfile {
   id: string
   fullName: string
   email: string
   phoneNumber?: string
-  citizenId?: string
+  nationalId?: string
   dateOfBirth?: string
   role: string
   isActive: boolean
@@ -36,13 +28,21 @@ export interface UserProfile {
 export interface UpdateProfileRequest {
   fullName?: string
   phoneNumber?: string
-  citizenId?: string
+  nationalId?: string
   dateOfBirth?: string
 }
 
 export interface ChangePasswordRequest {
   currentPassword: string
   newPassword: string
+}
+
+export const fetchCurrentUser = async () => {
+  const response = await api.get<unknown, ProfileApiResponse<UserProfile>>('/Users/me')
+  if (!response.success) {
+    throw new Error(response.message)
+  }
+  return response.data
 }
 
 export const updateProfile = async (data: UpdateProfileRequest) => {

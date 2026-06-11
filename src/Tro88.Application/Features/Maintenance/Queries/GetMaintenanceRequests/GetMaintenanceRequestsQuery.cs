@@ -8,4 +8,5 @@ public record GetMaintenanceRequestsQuery(
     int Page = 1,
     int PageSize = 10,
     Guid? RoomId = null,
-    string? Status = null) : IRequest<PagedResult<MaintenanceRequestDto>>;
+    string? Status = null,
+    Guid? RequestedByUserId = null) : IRequest<PagedResult<MaintenanceRequestDto>>;

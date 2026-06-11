@@ -7,6 +7,7 @@ import { api } from '../../../services/apiClient'
 import { queryClient } from '../../../queryClient'
 import { createAiConversation, fetchAiConversation, fetchAiConversations, sendAiMessage } from '../../../services/aiAgentService'
 import { createHouse, fetchHouseDetail, updateHouse } from '../../../services/houseService'
+import { fetchInvoices, notifyInvoicePayment } from '../../../services/managementService'
 import ModalForm from '../../../shared/components/modal-form/ModalForm'
 import { useNotification } from '../../../hooks/useNotification'
 import {
@@ -109,39 +110,83 @@ export function InvoiceBulkPage() {
 }
 
 export function MyInvoicesPage() {
-  const invoice = invoices[0]
-  const { showSuccessNotify } = useNotification()
-  const [status, setStatus] = useState(invoice.status)
+  const { showSuccessNotify, showErrorNotify } = useNotification()
+
+  const { data: invoicesData, isLoading, refetch } = useQuery(
+    ['tenant-invoices'],
+    () => fetchInvoices(),
+    {
+      keepPreviousData: true,
+    }
+  )
+
+  const list = invoicesData?.items ?? []
+  const invoice = list[0]
+
+  const notifyMutation = useMutation(
+    (id: string) => notifyInvoicePayment(id),
+    {
+      onSuccess: () => {
+        showSuccessNotify('Đã gửi thông báo chuyển khoản thành công! Chờ chủ trọ xác nhận.')
+        refetch()
+      },
+      onError: (error: any) => {
+        showErrorNotify(error?.message || 'Có lỗi xảy ra khi thông báo chuyển khoản.')
+      }
+    }
+  )
+
+  if (isLoading) {
+    return (
+      <section className="tenant-page">
+        <h1>Hóa đơn của tôi</h1>
+        <Card className="tenant-room-card" style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
+          Đang tải thông tin...
+        </Card>
+      </section>
+    )
+  }
+
+  if (!invoice) {
+    return (
+      <section className="tenant-page">
+        <h1>Hóa đơn của tôi</h1>
+        <EmptyState title="Không có hóa đơn" description="Hiện tại bạn chưa có hóa đơn nào." />
+      </section>
+    )
+  }
+
+  const status = invoice.status
 
   const handleNotifyTransfer = () => {
-    invoice.status = 'WaitingConfirm'
-    setStatus('WaitingConfirm')
-    showSuccessNotify('Đã gửi thông báo chuyển khoản thành công! Chờ chủ trọ xác nhận.')
+    notifyMutation.mutate(invoice.id)
   }
 
   return (
     <section className="tenant-page">
       <h1>Hóa đơn của tôi</h1>
       <Card className="tenant-room-card">
-        <Badge variant={statusVariant(status)}>{status}</Badge>
-        <strong className="money danger">{formatVND(total(invoice))}</strong>
+        <Badge variant={statusVariant(status as any)}>{status}</Badge>
+        <strong className="money danger">{formatVND(invoice.totalAmount)}</strong>
         <p>Hạn TT: {formatDate(invoice.dueDate)}</p>
         <details open>
           <summary>Chi tiết</summary>
-          <p>Tiền thuê {formatVND(invoice.rent)}</p>
-          <p>Điện {formatVND(invoice.electricity)}</p>
-          <p>Nước {formatVND(invoice.water)}</p>
-          <p>Dịch vụ {formatVND(invoice.service)}</p>
+          <p>Tiền thuê {formatVND(invoice.rentAmount)}</p>
+          <p>Điện {formatVND(invoice.electricityAmount)}</p>
+          <p>Nước {formatVND(invoice.waterAmount)}</p>
+          <p>Dịch vụ {formatVND(invoice.serviceAmount)}</p>
         </details>
-        {status === 'Unpaid' || status === 'Overdue' ? (
-          <Button full onClick={handleNotifyTransfer}>Thông báo chuyển khoản</Button>
+        {(status === 'Unpaid' || status === 'Overdue') ? (
+          <Button full onClick={handleNotifyTransfer} loading={notifyMutation.isLoading}>
+            Thông báo chuyển khoản
+          </Button>
         ) : null}
       </Card>
       <Card>
         <h2>Lịch sử</h2>
-        {invoices.map((item) => (
+        {list.map((item) => (
           <details key={item.id}>
-            <summary>T{item.month}/{item.year} • {formatVND(total(item))} • {item.status}</summary>
+            <summary>T{item.billingMonth}/{item.billingYear} • {formatVND(item.totalAmount)} • {item.status}</summary>
             <Link to={`/my/invoices/${item.id}`}>Xem chi tiết</Link>
           </details>
         ))}

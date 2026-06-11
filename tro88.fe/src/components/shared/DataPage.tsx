@@ -40,7 +40,19 @@ export function formatDate(value?: string | null) {
 }
 
 export function StatusPill({ value }: { value: string }) {
-  return <span className={`status-pill status-pill--${value.toLowerCase()}`}>{value}</span>
+  const statusLabels: Record<string, string> = {
+    new: 'Mới tạo',
+    open: 'Mới tạo',
+    inprogress: 'Đang xử lý',
+    resolved: 'Đã hoàn thành',
+    done: 'Đã hoàn thành',
+    draft: 'Nháp',
+    active: 'Hiệu lực',
+    expired: 'Hết hạn',
+    terminated: 'Chấm dứt'
+  }
+  const displayVal = statusLabels[value.toLowerCase()] || value
+  return <span className={`status-pill status-pill--${value.toLowerCase()}`}>{displayVal}</span>
 }
 
 export function DataPage<T extends { id: string }>({

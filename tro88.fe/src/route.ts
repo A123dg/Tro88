@@ -31,6 +31,7 @@ import {
   InvoiceDetailPage,
   MaintenanceCreatePage,
   MaintenanceDetailPage,
+  MaintenancePage as TenantMaintenancePage,
   MyInvoicesPage,
   OwnerDashboardPage,
   RegisterPage,
@@ -121,7 +122,7 @@ const tenantContractsDetailRoute = createRoute({ getParentRoute: () => tenantLay
 const tenantInvoicesRoute = createRoute({ getParentRoute: () => tenantLayoutRoute, path: '/my/invoices', component: MyInvoicesPage })
 const tenantInvoicesDetailRoute = createRoute({ getParentRoute: () => tenantLayoutRoute, path: '/my/invoices/$id', component: InvoiceDetailPage })
 const tenantServiceFeesRoute = createRoute({ getParentRoute: () => tenantLayoutRoute, path: '/my/service-fees', component: TenantServiceFeesPage })
-const tenantMaintenanceRoute = createRoute({ getParentRoute: () => tenantLayoutRoute, path: '/my/maintenance', component: MaintenancePage })
+const tenantMaintenanceRoute = createRoute({ getParentRoute: () => tenantLayoutRoute, path: '/my/maintenance', component: TenantMaintenancePage })
 const tenantMaintenanceCreateRoute = createRoute({ getParentRoute: () => tenantLayoutRoute, path: '/my/maintenance/create', component: MaintenanceCreatePage })
 const tenantMaintenanceDetailRoute = createRoute({ getParentRoute: () => tenantLayoutRoute, path: '/my/maintenance/$id', component: MaintenanceDetailPage })
 const tenantNotificationsRoute = createRoute({ getParentRoute: () => tenantLayoutRoute, path: '/my/notifications', component: NotificationsPage })

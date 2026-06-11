@@ -12,6 +12,7 @@ export interface ListFilters {
   module?: string
   action?: string
   keyword?: string
+  requestedByUserId?: string
 }
 
 export interface InvoiceDto {
@@ -63,6 +64,7 @@ export interface MaintenanceRequestDto {
   category: string
   priority: string
   status: string
+  imageUrls: string[]
   resolutionNote?: string | null
   resolvedAt?: string | null
   createdAt: string
