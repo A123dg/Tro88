@@ -1,12 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
-using Tro88.Application.Common.Constants;
-using Tro88.Application.Common.Interfaces;
-using Tro88.Application.Common.Models;
-using Tro88.Application.Features.Auth.Commands.Login;
-using Tro88.Application.Features.Auth.Commands.RefreshToken;
-using Tro88.Application.Features.Auth.Commands.Register;
-using Tro88.Application.Features.Auth.Commands.GoogleLogin;
-using Tro88.Application.Features.Auth.Commands.Logout;
+using Tro88.Application.Constants;
+using Tro88.Application.Interfaces.Services;
+using Tro88.Application.Common;
+using Tro88.Application.Services;
 
 namespace Tro88.API.Controllers;
 
@@ -208,3 +204,4 @@ public sealed record GoogleCallbackRequest(
     string Code,
     string RedirectUri,
     string? State = null);
+

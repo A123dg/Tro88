@@ -43,3 +43,4 @@ public class TenantInRoomConfiguration : IEntityTypeConfiguration<TenantInRoom>
         b.HasIndex(t => t.HouseId);
     }
 }
+

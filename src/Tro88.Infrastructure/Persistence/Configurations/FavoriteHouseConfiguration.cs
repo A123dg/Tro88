@@ -38,3 +38,4 @@ public class FavoriteHouseConfiguration : IEntityTypeConfiguration<FavoriteHouse
             .OnDelete(DeleteBehavior.Cascade);
     }
 }
+

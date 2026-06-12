@@ -1,14 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Tro88.Application.Common.Constants;
-using Tro88.Application.Common.Interfaces;
-using Tro88.Application.Common.Models;
-using Tro88.Application.Features.Users.Commands.ChangePassword;
-using Tro88.Application.Features.Users.Commands.UpdateProfile;
-using Tro88.Application.Features.Users.Commands.UploadAvatar;
-using Tro88.Application.Features.Users.DTOs;
-using Tro88.Application.Features.Users.Queries.GetCurrentUser;
+using Tro88.Application.Constants;
+using Tro88.Application.Interfaces.Services;
+using Tro88.Application.Common;
+using Tro88.Application.Services;
+using Tro88.Application.DTOs.Responses;
 using Tro88.Domain.Entities;
 using Tro88.Domain.Enums;
 using Tro88.Domain.Exceptions;
@@ -18,12 +15,12 @@ namespace Tro88.API.Controllers;
 [Authorize]
 public class UsersController : BaseApiController
 {
-    private readonly IApplicationDbContext _db;
+    private readonly IAppDbContext _db;
     private readonly IPasswordHasher _hasher;
     private readonly ICurrentUserService _currentUser;
 
     public UsersController(
-        IApplicationDbContext db,
+        IAppDbContext db,
         IPasswordHasher hasher,
         ICurrentUserService currentUser)
     {
@@ -323,3 +320,4 @@ public sealed class UpdateUserRequest
     public DateTime? DateOfBirth { get; set; }
     public bool IsActive { get; set; } = true;
 }
+

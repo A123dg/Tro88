@@ -37,3 +37,4 @@ public class NotificationConfiguration : IEntityTypeConfiguration<Notification>
         b.HasIndex(n => n.CreatedAt);
     }
 }
+

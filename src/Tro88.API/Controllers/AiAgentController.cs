@@ -1,15 +1,15 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Tro88.Application.Common.Constants;
-using Tro88.Application.Common.Models;
-using Tro88.Application.Features.AiAgent.Commands.CreateConversation;
-using Tro88.Application.Features.AiAgent.Commands.DeleteConversation;
-using Tro88.Application.Features.AiAgent.Commands.ExecuteAgentTask;
-using Tro88.Application.Features.AiAgent.Commands.SendMessage;
-using Tro88.Application.Features.AiAgent.DTOs;
-using Tro88.Application.Features.AiAgent.Queries.GetAgentTask;
-using Tro88.Application.Features.AiAgent.Queries.GetConversationById;
-using Tro88.Application.Features.AiAgent.Queries.GetConversations;
+using Tro88.Application.Constants;
+using Tro88.Application.Common;
+using Tro88.Application.Services.AiAgent.Commands.CreateConversation;
+using Tro88.Application.Services.AiAgent.Commands.DeleteConversation;
+using Tro88.Application.Services.AiAgent.Commands.ExecuteAgentTask;
+using Tro88.Application.Services.AiAgent.Commands.SendMessage;
+using Tro88.Application.Services.AiAgent.DTOs;
+using Tro88.Application.Services.AiAgent.Queries.GetAgentTask;
+using Tro88.Application.Services.AiAgent.Queries.GetConversationById;
+using Tro88.Application.Services.AiAgent.Queries.GetConversations;
 
 namespace Tro88.API.Controllers;
 
@@ -91,3 +91,4 @@ public class AiAgentController : BaseApiController
 }
 
 public record SendMessageRequest(string Content);
+

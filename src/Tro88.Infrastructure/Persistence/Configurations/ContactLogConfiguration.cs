@@ -39,3 +39,4 @@ public class ContactLogConfiguration : IEntityTypeConfiguration<ContactLog>
             .OnDelete(DeleteBehavior.Cascade);
     }
 }
+

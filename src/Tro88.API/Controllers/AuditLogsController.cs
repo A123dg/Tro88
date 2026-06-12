@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Tro88.Application.Common.Models;
-using Tro88.Application.Features.AuditLogs.DTOs;
-using Tro88.Application.Features.AuditLogs.Queries.GetAuditLogs;
+using Tro88.Application.Common;
+using Tro88.Application.DTOs.Responses;
+using Tro88.Application.Services;
 
 namespace Tro88.API.Controllers;
 
@@ -25,3 +25,4 @@ public class AuditLogsController : BaseApiController
             }));
     }
 }
+

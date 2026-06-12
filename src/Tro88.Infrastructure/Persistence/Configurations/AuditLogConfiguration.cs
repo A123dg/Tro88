@@ -30,3 +30,4 @@ public class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
         b.HasIndex(a => a.CreatedAt);
     }
 }
+

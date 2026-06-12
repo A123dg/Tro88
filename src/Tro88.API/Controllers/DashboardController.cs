@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Tro88.Application.Common.Models;
-using Tro88.Application.Features.Dashboard.Queries.GetAdminDashboard;
-using Tro88.Application.Features.Dashboard.Queries.GetOwnerDashboard;
-using Tro88.Application.Features.Dashboard.Queries.GetTenantDashboard;
+using Tro88.Application.Common;
+using Tro88.Application.Services;
 
 namespace Tro88.API.Controllers;
 
@@ -32,3 +30,4 @@ public class DashboardController : BaseApiController
         return Ok(ApiResponse<TenantDashboardDto>.Ok(result));
     }
 }
+

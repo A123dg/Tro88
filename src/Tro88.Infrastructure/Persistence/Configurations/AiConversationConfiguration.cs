@@ -25,3 +25,4 @@ public class AiConversationConfiguration
         b.HasIndex(c => c.UserId);
     }
 }
+

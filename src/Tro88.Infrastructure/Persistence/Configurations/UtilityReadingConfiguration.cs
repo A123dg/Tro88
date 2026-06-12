@@ -37,3 +37,4 @@ public class UtilityReadingConfiguration
         b.HasIndex(u => new { u.RoomId, u.Year, u.Month }).IsUnique();
     }
 }
+

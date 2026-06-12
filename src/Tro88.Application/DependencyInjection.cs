@@ -2,7 +2,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Tro88.Application.Common.Behaviors;
-using Tro88.Application.Common.Interfaces;
+using Tro88.Application.Interfaces.Services;
 
 namespace Tro88.Application;
 
@@ -29,3 +29,4 @@ public static class DependencyInjection
         return services;
     }
 }
+

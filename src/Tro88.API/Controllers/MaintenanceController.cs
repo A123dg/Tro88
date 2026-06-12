@@ -1,13 +1,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Tro88.Application.Common.Constants;
-using Tro88.Application.Common.Interfaces;
-using Tro88.Application.Common.Models;
+using Tro88.Application.Constants;
+using Tro88.Application.Interfaces.Services;
+using Tro88.Application.Common;
 using Tro88.Application.Features.Maintenance.Commands.AssignMaintenance;
-using Tro88.Application.Features.Maintenance.Commands.CreateMaintenanceRequest;
+using Tro88.Application.Services;
 using Tro88.Application.Features.Maintenance.Commands.UpdateMaintenanceStatus;
 using Tro88.Application.Features.Maintenance.Queries.GetMaintenanceById;
-using Tro88.Application.Features.Maintenance.Queries.GetMaintenanceRequests;
 
 namespace Tro88.API.Controllers;
 
@@ -94,4 +93,5 @@ public record CreateMaintenanceRequestFromForm(
     string Category,
     string Priority,
     List<IFormFile>? Files);
+
 

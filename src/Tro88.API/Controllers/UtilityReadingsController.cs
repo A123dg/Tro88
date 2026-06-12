@@ -1,13 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Tro88.Application.Common.Constants;
-using Tro88.Application.Common.Models;
-using Tro88.Application.Features.UtilityReadings.Commands.RecordUtilityReading;
-using Tro88.Application.Features.UtilityReadings.Commands.BulkRecordReadings;
-using Tro88.Application.Features.UtilityReadings.Queries.GetUtilityReadingById;
-using Tro88.Application.Features.UtilityReadings.DTOs;
-using Tro88.Application.Features.UtilityReadings.Queries.GetUtilityReadings;
-using Tro88.Application.Features.UtilityReadings.Queries.GetUtilityReadingPreview;
+using Tro88.Application.Constants;
+using Tro88.Application.Common;
+using Tro88.Application.Services;
+using Tro88.Application.DTOs.Responses;
 
 namespace Tro88.API.Controllers;
 

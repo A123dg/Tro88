@@ -1,0 +1,89 @@
+using MediatR;
+using Tro88.Application.Constants;
+using Tro88.Application.DTOs.Responses;
+using Tro88.Application.Interfaces.Services;
+using Tro88.Domain.Entities;
+using Tro88.Domain.Enums;
+using Tro88.Domain.Exceptions;
+
+namespace Tro88.Application.Services;
+
+public sealed record GoogleLoginCommand(
+    string IdToken,
+    string? Role = null) : IRequest<AuthResponseDto>
+{
+public sealed class Handler
+    : IRequestHandler<GoogleLoginCommand, AuthResponseDto>
+{
+    private readonly IAppDbContext _db;
+    private readonly IGoogleAuthService _google;
+    private readonly IJwtService _jwt;
+
+    public Handler(
+        IAppDbContext db,
+        IGoogleAuthService google,
+        IJwtService jwt)
+    {
+        _db = db;
+        _google = google;
+        _jwt = jwt;
+    }
+
+    public async Task<AuthResponseDto> Handle(
+        GoogleLoginCommand request,
+        CancellationToken ct)
+    {
+        var googleUser = await _google
+            .VerifyIdTokenAsync(request.IdToken, ct);
+
+        var user = await _db.Users
+            .FirstOrDefaultAsync(u =>
+                u.GoogleId == googleUser.GoogleId ||
+                u.Email == googleUser.Email,
+                ct);
+
+        var requestedRole = string.IsNullOrWhiteSpace(request.Role)
+            ? UserRole.Tenant
+            : Enum.Parse<UserRole>(request.Role, true);
+
+        if (user is null)
+        {
+            user = User.CreateFromGoogle(
+                googleUser.FullName,
+                googleUser.Email,
+                googleUser.GoogleId,
+                requestedRole);
+
+            if (!string.IsNullOrEmpty(googleUser.AvatarUrl))
+                user.UpdateAvatar(googleUser.AvatarUrl);
+
+            _db.Users.Add(user);
+        }
+        else if (user.GoogleId is null)
+        {
+            user.LinkGoogleAccount(googleUser.GoogleId);
+
+            if (!string.IsNullOrEmpty(googleUser.AvatarUrl))
+                user.UpdateAvatar(googleUser.AvatarUrl);
+        }
+
+        var accessToken = _jwt.GenerateAccessToken(user);
+        var refreshToken = _jwt.GenerateRefreshToken();
+
+        user.UpdateRefreshToken(refreshToken,
+            DateTime.UtcNow.AddDays(30));
+
+        await _db.SaveChangesAsync(ct);
+
+        return new AuthResponseDto(
+            accessToken,
+            refreshToken,
+            user.Id,
+            user.FullName,
+            user.Email,
+            user.Role.ToString());
+    }
+}
+}
+
+

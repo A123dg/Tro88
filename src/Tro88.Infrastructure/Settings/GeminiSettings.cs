@@ -8,3 +8,4 @@ public class GeminiSettings
     public string BaseUrl { get; set; }
         = "https://generativelanguage.googleapis.com";
 }
+

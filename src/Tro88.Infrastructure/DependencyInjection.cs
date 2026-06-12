@@ -3,9 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
-using Tro88.Application.Common.Interfaces;
-using Tro88.Application.Features.AiAgent;
-using Tro88.Application.Features.AiAgent.Tools;
+using Tro88.Application.Interfaces.Services;
+using Tro88.Application.Services.AiAgent;
 using Tro88.Infrastructure.BackgroundServices;
 using Tro88.Infrastructure.Identity;
 using Tro88.Infrastructure.Persistence;
@@ -28,19 +27,19 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         // EF Core SQL Server
-        services.AddDbContext<ApplicationDbContext>(opt =>
+        services.AddDbContext<AppDbContext>(opt =>
             opt.UseSqlServer(
                 configuration.GetConnectionString("DefaultConnection"),
                 sql =>
                 {
                     sql.MigrationsAssembly(
-                        typeof(ApplicationDbContext).Assembly.FullName);
+                        typeof(AppDbContext).Assembly.FullName);
                     sql.EnableRetryOnFailure(5, TimeSpan.FromSeconds(30), null);
                     sql.CommandTimeout(30);
                 }));
 
-        services.AddScoped<IApplicationDbContext>(p =>
-            p.GetRequiredService<ApplicationDbContext>());
+        services.AddScoped<IAppDbContext>(p =>
+            p.GetRequiredService<AppDbContext>());
         services.AddScoped<AuditableEntityInterceptor>();
         services.AddScoped<DomainEventDispatchInterceptor>();
         services.AddSingleton(TimeProvider.System);
@@ -135,3 +134,4 @@ public static class DependencyInjection
     private static string? FirstNonEmpty(params string?[] values)
         => values.FirstOrDefault(v => !string.IsNullOrWhiteSpace(v));
 }
+

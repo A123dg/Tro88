@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Tro88.Application.Common.Interfaces;
+using Tro88.Application.Interfaces.Services;
 using Tro88.Domain.Entities;
 
 namespace Tro88.Infrastructure.Services.Auth;

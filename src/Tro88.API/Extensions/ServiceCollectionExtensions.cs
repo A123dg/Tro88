@@ -2,7 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Tro88.Application.Common.Interfaces;
+using Tro88.Application.Interfaces.Services;
 using Tro88.Infrastructure.Services.Auth;
 
 namespace Tro88.API.Extensions;

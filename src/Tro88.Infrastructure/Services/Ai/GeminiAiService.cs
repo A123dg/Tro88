@@ -3,9 +3,9 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
-using Tro88.Application.Common.Interfaces;
-using Tro88.Application.Common.Interfaces.AI;
-using Tro88.Application.Common.Models.AI;
+using Tro88.Application.Interfaces.Services;
+using Tro88.Application.Interfaces.Services.AI;
+using Tro88.Application.Common.AI;
 using Tro88.Infrastructure.Settings;
 
 namespace Tro88.Infrastructure.Services.Ai;

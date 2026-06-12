@@ -1,14 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Tro88.Application.Common.Constants;
-using Tro88.Application.Common.Models;
-using Tro88.Application.Features.Rooms.Commands.CreateRoom;
-using Tro88.Application.Features.Rooms.Commands.UpdateRoom;
-using Tro88.Application.Features.Rooms.Commands.DeleteRoom;
-using Tro88.Application.Features.Rooms.Commands.ChangeRoomStatus;
-using Tro88.Application.Features.Rooms.Commands.UploadRoomImage;
-using Tro88.Application.Features.Rooms.Queries.GetRooms;
-using Tro88.Application.Features.Rooms.Queries.GetRoomById;
+using Tro88.Application.Constants;
+using Tro88.Application.Common;
+using Tro88.Application.Services;
 
 namespace Tro88.API.Controllers;
 
@@ -77,3 +71,4 @@ public class RoomsController : BaseApiController
         return Ok(ApiResponse<string>.Ok(result));
     }
 }
+

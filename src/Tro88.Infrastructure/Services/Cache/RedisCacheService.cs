@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
-using Tro88.Application.Common.Interfaces;
+using Tro88.Application.Interfaces.Services;
 
 namespace Tro88.Infrastructure.Services.Cache;
 
@@ -74,3 +74,4 @@ public class RedisSettings
 {
     public int DefaultExpiryMinutes { get; set; } = 30;
 }
+

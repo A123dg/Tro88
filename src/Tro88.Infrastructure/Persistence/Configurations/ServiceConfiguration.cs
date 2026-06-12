@@ -34,3 +34,4 @@ public class ServiceConfiguration : IEntityTypeConfiguration<Service>
         );
     }
 }
+

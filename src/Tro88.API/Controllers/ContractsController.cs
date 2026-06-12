@@ -1,12 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Tro88.Application.Common.Constants;
-using Tro88.Application.Common.Models;
-using Tro88.Application.Features.Contracts.Commands.CreateContract;
+using Tro88.Application.Constants;
+using Tro88.Application.Common;
+using Tro88.Application.Services;
 using Tro88.Application.Features.Contracts.Commands.ActivateContract;
-using Tro88.Application.Features.Contracts.Commands.TerminateContract;
-using Tro88.Application.Features.Contracts.Queries.GetContracts;
-using Tro88.Application.Features.Contracts.DTOs;
+using Tro88.Application.DTOs.Responses;
 using Tro88.Application.Features.Contracts.Queries.GetContractById;
 using Tro88.Application.Features.Contracts.Queries.GetContractTenants;
 
@@ -66,3 +64,4 @@ public class ContractsController : BaseApiController
         return Ok(ApiResponse<List<TenantInRoomDto>>.Ok(result));
     }
 }
+

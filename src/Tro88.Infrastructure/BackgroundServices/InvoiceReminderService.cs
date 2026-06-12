@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Tro88.Application.Common.Interfaces;
+using Tro88.Application.Interfaces.Services;
 using Tro88.Domain.Enums;
 
 namespace Tro88.Infrastructure.BackgroundServices;
@@ -41,7 +41,7 @@ public class InvoiceReminderService : BackgroundService
     private async Task ProcessAsync(CancellationToken ct)
     {
         await using var scope = _scopeFactory.CreateAsyncScope();
-        var db = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
+        var db = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
         var notificationService = scope.ServiceProvider
             .GetRequiredService<INotificationService>();
@@ -79,3 +79,4 @@ public class InvoiceReminderService : BackgroundService
             "Sent reminders for {Count} invoices", dueSoon.Count);
     }
 }
+

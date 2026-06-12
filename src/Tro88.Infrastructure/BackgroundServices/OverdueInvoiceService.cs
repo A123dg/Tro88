@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Tro88.Application.Common.Interfaces;
+using Tro88.Application.Interfaces.Services;
 using Tro88.Domain.Enums;
 
 namespace Tro88.Infrastructure.BackgroundServices;
@@ -42,7 +42,7 @@ public class OverdueInvoiceService : BackgroundService
     {
         await using var scope = _scopeFactory.CreateAsyncScope();
         var db = scope.ServiceProvider
-            .GetRequiredService<IApplicationDbContext>();
+            .GetRequiredService<IAppDbContext>();
 
         var today = DateTime.UtcNow.Date;
         var overdueInvoices = await db.Invoices
@@ -63,3 +63,4 @@ public class OverdueInvoiceService : BackgroundService
             await db.SaveChangesAsync(ct);
     }
 }
+

@@ -1,4 +1,4 @@
-using Tro88.Application.Common.Interfaces;
+using Tro88.Application.Interfaces.Services;
 
 namespace Tro88.Infrastructure.Services.Auth;
 

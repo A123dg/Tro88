@@ -1,5 +1,5 @@
 using System.Text;
-using Tro88.Application.Common.Interfaces;
+using Tro88.Application.Interfaces.Services;
 using Tro88.Domain.Entities;
 
 namespace Tro88.Infrastructure.Services.Pdf;
@@ -25,3 +25,4 @@ public class PdfService : IPdfService
         return Task.FromResult(Encoding.UTF8.GetBytes(text));
     }
 }
+

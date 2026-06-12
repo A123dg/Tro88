@@ -51,3 +51,4 @@ public class ContractConfiguration : IEntityTypeConfiguration<Contract>
             .OnDelete(DeleteBehavior.Restrict);
     }
 }
+

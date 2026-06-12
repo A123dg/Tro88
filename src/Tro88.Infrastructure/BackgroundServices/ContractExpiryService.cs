@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using Tro88.Application.Common.Interfaces;
+using Tro88.Application.Interfaces.Services;
 using Tro88.Domain.Enums;
 
 namespace Tro88.Infrastructure.BackgroundServices;
@@ -40,7 +40,7 @@ public class ContractExpiryService : BackgroundService
     private async Task ProcessAsync(CancellationToken ct)
     {
         await using var scope = _scopeFactory.CreateAsyncScope();
-        var db = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
+        var db = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
 
         var today = DateTime.UtcNow.Date;
         var expired = await db.Contracts

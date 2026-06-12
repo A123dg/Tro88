@@ -1,12 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Tro88.Application.Common.Models;
-using Tro88.Application.Features.Services.Commands.CreateService;
-using Tro88.Application.Features.Services.Commands.UpdateService;
-using Tro88.Application.Features.Services.Commands.DeleteService;
-using Tro88.Application.Features.Services.Commands.ToggleService;
-using Tro88.Application.Features.Services.Queries.GetServices;
-using Tro88.Application.Features.Services.DTOs;
+using Tro88.Application.Common;
+using Tro88.Application.Services;
+using Tro88.Application.DTOs.Responses;
 
 namespace Tro88.API.Controllers;
 
@@ -57,3 +53,4 @@ public class ServicesController : BaseApiController
         return Ok(ApiResponse<ServiceDto>.Ok(result));
     }
 }
+

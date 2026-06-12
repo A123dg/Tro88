@@ -50,3 +50,4 @@ public class HouseConfiguration : IEntityTypeConfiguration<House>
             .OnDelete(DeleteBehavior.Restrict);
     }
 }
+

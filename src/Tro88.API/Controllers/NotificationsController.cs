@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Tro88.Application.Common.Constants;
-using Tro88.Application.Common.Models;
-using Tro88.Application.Features.Notifications.Commands.MarkNotificationRead;
-using Tro88.Application.Features.Notifications.Queries.GetNotifications;
+using Tro88.Application.Constants;
+using Tro88.Application.Common;
+using Tro88.Application.Services;
 
 namespace Tro88.API.Controllers;
 

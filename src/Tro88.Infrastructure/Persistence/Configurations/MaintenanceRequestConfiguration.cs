@@ -59,3 +59,4 @@ public class MaintenanceRequestConfiguration
         b.HasIndex(m => m.RoomId);
     }
 }
+

@@ -30,3 +30,4 @@ public class RoomServiceFeeConfiguration : IEntityTypeConfiguration<RoomServiceF
         b.HasIndex(r => new { r.RoomId, r.ServiceId }).IsUnique();
     }
 }
+

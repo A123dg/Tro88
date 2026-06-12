@@ -34,3 +34,4 @@ public class DomainEventDispatchInterceptor : SaveChangesInterceptor
         return base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 }
+

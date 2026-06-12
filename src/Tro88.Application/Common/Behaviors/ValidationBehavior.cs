@@ -1,6 +1,6 @@
 using FluentValidation;
 using MediatR;
-using Tro88.Application.Common.Constants;
+using Tro88.Application.Constants;
 
 namespace Tro88.Application.Common.Behaviors;
 

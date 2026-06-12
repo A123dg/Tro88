@@ -1,6 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
-using Tro88.Application.Common.Interfaces;
+using Tro88.Application.Interfaces.Services;
 
 namespace Tro88.Infrastructure.Identity;
 

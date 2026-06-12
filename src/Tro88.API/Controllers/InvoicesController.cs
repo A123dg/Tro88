@@ -1,13 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Tro88.Application.Common.Constants;
-using Tro88.Application.Common.Models;
-using Tro88.Application.Features.Invoices.Commands.CreateBulkInvoices;
-using Tro88.Application.Features.Invoices.Commands.CreateInvoice;
+using Tro88.Application.Constants;
+using Tro88.Application.Common;
+using Tro88.Application.Services;
 using Tro88.Application.Features.Invoices.Commands.MarkInvoiceAsPaid;
 using Tro88.Application.Features.Invoices.Commands.SendInvoice;
 using Tro88.Application.Features.Invoices.Queries.GetInvoicePdf;
-using Tro88.Application.Features.Invoices.Queries.GetInvoices;
 using Tro88.Application.Features.Invoices.Queries.GetInvoiceById;
 using Tro88.Application.Features.Invoices.Commands.NotifyInvoicePayment;
 

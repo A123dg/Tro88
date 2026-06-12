@@ -1,18 +1,18 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Tro88.Application.Common.Interfaces;
-using Tro88.Application.Features.Notifications.DTOs;
+using Tro88.Application.Interfaces.Services;
+using Tro88.Application.DTOs.Responses;
 using Tro88.Infrastructure.Hubs;
 
 namespace Tro88.Infrastructure.Services.Notification;
 
 public class NotificationService : INotificationService
 {
-    private readonly IApplicationDbContext _db;
+    private readonly IAppDbContext _db;
     private readonly IHubContext<NotificationHub> _hub;
 
     public NotificationService(
-        IApplicationDbContext db,
+        IAppDbContext db,
         IHubContext<NotificationHub> hub)
     {
         _db = db;
@@ -66,3 +66,4 @@ public class NotificationService : INotificationService
             await SendAsync(userId, title, body, type, referenceId, ct);
     }
 }
+

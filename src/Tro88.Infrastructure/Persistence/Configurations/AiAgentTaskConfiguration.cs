@@ -37,3 +37,4 @@ public class AiAgentTaskConfiguration : IEntityTypeConfiguration<AiAgentTask>
         b.HasIndex(t => t.Status);
     }
 }
+

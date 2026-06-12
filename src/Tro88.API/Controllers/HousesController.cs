@@ -1,20 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Tro88.Application.Common.Constants;
-using Tro88.Application.Common.Interfaces;
-using Tro88.Application.Common.Models;
-using Tro88.Application.Features.Houses.Commands.ChangeHouseStatus;
-using Tro88.Application.Features.Houses.Commands.CreateHouse;
-using Tro88.Application.Features.Houses.Commands.UpdateHouse;
-using Tro88.Application.Features.Houses.Commands.DeleteHouse;
-using Tro88.Application.Features.Houses.Queries.GetHouses;
-using Tro88.Application.Features.Houses.Queries.GetHouseById;
+using Tro88.Application.Constants;
+using Tro88.Application.Interfaces.Services;
+using Tro88.Application.Common;
+using Tro88.Application.Services;
 
-using Tro88.Application.Features.Houses.Queries.GetPublicHouseDetail;
-using Tro88.Application.Features.Houses.Queries.GetFavoriteHouses;
-using Tro88.Application.Features.Houses.Commands.CreateContactLog;
-using Tro88.Application.Features.Houses.Commands.ToggleFavoriteHouse;
-using Tro88.Application.Features.Houses.DTOs;
+using Tro88.Application.DTOs.Responses;
 
 namespace Tro88.API.Controllers;
 
@@ -221,3 +212,4 @@ public sealed class CreateContactLogRequest
 {
     public string ContactType { get; set; } = default!;
 }
+

@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Mail;
 using Microsoft.Extensions.Options;
-using Tro88.Application.Common.Interfaces;
+using Tro88.Application.Interfaces.Services;
 
 namespace Tro88.Infrastructure.Services.Email;
 
@@ -153,3 +153,4 @@ public class EmailService : IEmailService
         _logger.LogInformation("Email sent to {To}: {Subject}", toEmail, subject);
     }
 }
+

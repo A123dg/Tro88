@@ -1,12 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Tro88.Application.Common.Models;
-using Tro88.Application.Features.ServiceFees.Commands.CreateServiceFee;
-using Tro88.Application.Features.ServiceFees.Commands.UpdateServiceFee;
-using Tro88.Application.Common.Constants;
-using Tro88.Application.Features.ServiceFees.Commands.DeleteServiceFee;
-using Tro88.Application.Features.ServiceFees.Commands.ToggleServiceFee;
-using Tro88.Application.Features.ServiceFees.Queries.GetServiceFees;
+using Tro88.Application.Common;
+using Tro88.Application.Services;
+using Tro88.Application.Constants;
 
 namespace Tro88.API.Controllers;
 
@@ -58,3 +54,4 @@ public class ServiceFeesController : BaseApiController
             result, SuccessMessages.TOGGLE_SERVICE_FEE_SUCCESS));
     }
 }
+

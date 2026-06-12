@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Tro88.Application.Common.Interfaces;
+using Tro88.Application.Interfaces.Services;
 using Tro88.Domain.Exceptions;
 
 namespace Tro88.Infrastructure.Services.Auth;
@@ -143,3 +143,4 @@ public class GoogleAuthService : IGoogleAuthService
         public string? ErrorDescription { get; set; }
     }
 }
+

@@ -28,3 +28,4 @@ public class NotificationHub : Hub
         await base.OnDisconnectedAsync(exception);
     }
 }
+

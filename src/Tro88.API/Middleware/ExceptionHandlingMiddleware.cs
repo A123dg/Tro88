@@ -1,6 +1,6 @@
 using System.Text.Json;
-using Tro88.Application.Common.Constants;
-using Tro88.Application.Common.Models;
+using Tro88.Application.Constants;
+using Tro88.Application.Common;
 using Tro88.Domain.Exceptions;
 
 namespace Tro88.API.Middleware;
@@ -73,3 +73,4 @@ public class ExceptionHandlingMiddleware
         await context.Response.WriteAsJsonAsync(response);
     }
 }
+

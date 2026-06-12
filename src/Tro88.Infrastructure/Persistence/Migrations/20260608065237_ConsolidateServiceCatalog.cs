@@ -233,3 +233,4 @@ namespace Tro88.Infrastructure.Persistence.Migrations
         }
     }
 }
+

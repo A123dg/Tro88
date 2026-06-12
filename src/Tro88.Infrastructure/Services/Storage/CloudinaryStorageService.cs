@@ -1,7 +1,7 @@
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Microsoft.Extensions.Options;
-using Tro88.Application.Common.Interfaces;
+using Tro88.Application.Interfaces.Services;
 
 namespace Tro88.Infrastructure.Services.Storage;
 
@@ -62,3 +62,4 @@ public class CloudinaryStorageService : IStorageService
                 $"Cloudinary delete failed: {result.Result}");
     }
 }
+

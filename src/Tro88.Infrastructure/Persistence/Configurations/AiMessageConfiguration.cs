@@ -25,3 +25,4 @@ public class AiMessageConfiguration : IEntityTypeConfiguration<AiMessage>
         b.HasIndex(m => m.ConversationId);
     }
 }
+

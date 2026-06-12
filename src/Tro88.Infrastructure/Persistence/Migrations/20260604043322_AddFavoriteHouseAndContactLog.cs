@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -97,3 +97,4 @@ namespace Tro88.Infrastructure.Persistence.Migrations
         }
     }
 }
+

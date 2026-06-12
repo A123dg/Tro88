@@ -30,3 +30,4 @@ public class ServiceFeeConfiguration : IEntityTypeConfiguration<ServiceFee>
         b.HasIndex(s => new { s.HouseId, s.ServiceId }).IsUnique();
     }
 }
+
