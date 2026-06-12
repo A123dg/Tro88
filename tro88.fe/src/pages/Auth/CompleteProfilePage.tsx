@@ -1,8 +1,11 @@
-import { FormEvent, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { fetchCurrentUser, updateCurrentUser } from '../../services/userService'
 import { UserDto } from '../../types/app.types'
 import dayjs from 'dayjs'
+import { Form, Input, Button, Card, Typography, Spin, Alert } from 'antd'
 import { CustomDatePicker } from '../../shared/components/custom-datepicker'
+
+const { Title, Paragraph, Text } = Typography
 
 function getDefaultRedirect(role?: string) {
   if (role === 'Tenant') return '/my/rooms'
@@ -12,52 +15,38 @@ function getDefaultRedirect(role?: string) {
 
 function CompleteProfilePageInner() {
   const [user, setUser] = useState<UserDto | null>(null)
-  const [fullName, setFullName] = useState('')
-  const [phoneNumber, setPhoneNumber] = useState('')
-  const [dateOfBirth, setDateOfBirth] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [form] = Form.useForm()
 
   useEffect(() => {
     fetchCurrentUser()
       .then((response) => {
         const current = response.data
         setUser(current)
-        setFullName(current.fullName ?? '')
-        setPhoneNumber(current.phoneNumber ?? '')
-        setDateOfBirth(current.dateOfBirth ? current.dateOfBirth.slice(0, 10) : '')
+        form.setFieldsValue({
+          fullName: current.fullName ?? '',
+          email: current.email ?? '',
+          phoneNumber: current.phoneNumber ?? '',
+          dateOfBirth: current.dateOfBirth ? dayjs(current.dateOfBirth) : null
+        })
       })
       .catch(() => setError('Không thể tải thông tin tài khoản.'))
       .finally(() => setLoading(false))
-  }, [])
+  }, [form])
 
-
-
-  const getDayjsValue = (dateStr: string) => {
-    if (!dateStr) return null
-    const parts = dateStr.split('/')
-    if (parts.length === 3) {
-      const d = dayjs(`${parts[2]}-${parts[1]}-${parts[0]}`)
-      if (d.isValid()) return d
-    }
-    const d2 = dayjs(dateStr)
-    if (d2.isValid()) return d2
-    return null
-  }
-
-  const submit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  const onFinish = (values: any) => {
     setError('')
     setSaving(true)
 
-    // Format DD/MM/YYYY or ISO to YYYY-MM-DD
-    const parts = dateOfBirth.split('/')
-    const formattedDob = parts.length === 3 
-      ? `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`
-      : dateOfBirth ? dayjs(dateOfBirth).format('YYYY-MM-DD') : ''
+    const formattedDob = values.dateOfBirth ? values.dateOfBirth.format('YYYY-MM-DD') : ''
 
-    updateCurrentUser({ fullName, phoneNumber, dateOfBirth: formattedDob || undefined })
+    updateCurrentUser({
+      fullName: values.fullName,
+      phoneNumber: values.phoneNumber,
+      dateOfBirth: formattedDob || undefined
+    })
       .then((response) => {
         localStorage.setItem('authFullName', response.data.fullName)
         window.location.href = getDefaultRedirect(response.data.role)
@@ -67,58 +56,95 @@ function CompleteProfilePageInner() {
   }
 
   return (
-    <main className="complete-profile-page">
-      <section className="login-panel complete-profile-card">
-        <div className="login-panel__brand">
-          <span>88</span>
-          <div>
-            <strong>Tro88</strong>
-            <small>Hoàn thiện hồ sơ</small>
-          </div>
+    <Card 
+      className="complete-profile-card"
+      style={{ width: '100%', maxWidth: '480px', borderRadius: '16px', boxShadow: '0 4px 24px rgba(0,0,0,0.08)' }}
+    >
+      <div className="login-panel__brand" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+        <span style={{ fontSize: '28px', fontWeight: 'bold', color: '#f4845f' }}>88</span>
+        <div>
+          <Title level={4} style={{ margin: 0, color: '#f4845f' }}>Tro88</Title>
+          <Text type="secondary"><small>Hoàn thiện hồ sơ</small></Text>
         </div>
-        <header>
-          <h1>Thông tin cá nhân</h1>
-          <p>Cập nhật họ tên, số điện thoại và ngày sinh trước khi tiếp tục.</p>
-        </header>
- 
-        {loading ? <p>Đang tải hồ sơ...</p> : (
-          <form className="login-form" onSubmit={submit}>
-            <label>
-              Họ tên
-              <input value={fullName} onChange={(event) => setFullName(event.target.value)} required />
-            </label>
-            <label>
-              Email
-              <input value={user?.email ?? ''} disabled />
-            </label>
-            <label>
-              Số điện thoại
-              <input value={phoneNumber} onChange={(event) => setPhoneNumber(event.target.value)} required />
-            </label>
-            <label>
-              Ngày sinh
-              <CustomDatePicker 
-                value={getDayjsValue(dateOfBirth)} 
-                onChange={(_date, dateString) => setDateOfBirth(dateString ? (typeof dateString === 'string' ? dateString : dateString[0]) : '')} 
-                placeholder="Chọn ngày sinh" 
-                disabledDate={(current) => current && current > dayjs().endOf('day')}
-              />
-            </label>
-            {error ? <p className="login-error">{error}</p> : null}
-            <button className="app-button app-button--primary app-button--full" type="submit" disabled={saving}>
-              {saving ? 'Đang lưu...' : 'Tiếp tục'}
-            </button>
-          </form>
-        )}
-      </section>
-    </main>
+      </div>
+      <header style={{ marginBottom: '24px' }}>
+        <Title level={3} style={{ marginTop: 0, marginBottom: '8px' }}>Thông tin cá nhân</Title>
+        <Paragraph type="secondary">Cập nhật họ tên, số điện thoại và ngày sinh trước khi tiếp tục.</Paragraph>
+      </header>
+
+      {loading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
+          <Spin size="large" tip="Đang tải hồ sơ..." />
+        </div>
+      ) : (
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={onFinish}
+          requiredMark="optional"
+        >
+          <Form.Item
+            label="Họ tên"
+            name="fullName"
+            rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
+          >
+            <Input size="large" placeholder="Nhập họ và tên" />
+          </Form.Item>
+
+          <Form.Item
+            label="Email"
+            name="email"
+          >
+            <Input size="large" disabled />
+          </Form.Item>
+
+          <Form.Item
+            label="Số điện thoại"
+            name="phoneNumber"
+            rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}
+          >
+            <Input size="large" placeholder="Nhập số điện thoại" />
+          </Form.Item>
+
+          <Form.Item
+            label="Ngày sinh"
+            name="dateOfBirth"
+          >
+            <CustomDatePicker 
+              style={{ width: '100%' }}
+              size="large"
+              placeholder="Chọn ngày sinh" 
+              disabledDate={(current) => current && current > dayjs().endOf('day')}
+            />
+          </Form.Item>
+
+          {error && (
+            <Alert message={error} type="error" showIcon style={{ marginBottom: '16px' }} />
+          )}
+
+          <Form.Item style={{ marginBottom: 0 }}>
+            <Button 
+              type="primary" 
+              htmlType="submit" 
+              loading={saving} 
+              block 
+              size="large"
+              style={{ background: '#f4845f', borderColor: '#f4845f' }}
+            >
+              Tiếp tục
+            </Button>
+          </Form.Item>
+        </Form>
+      )}
+    </Card>
   )
 }
 
 export function CompleteProfilePage() {
   return (
-    <main className="auth-layout">
+    <main className="auth-layout" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fafafa' }}>
       <CompleteProfilePageInner />
     </main>
   )
 }
+

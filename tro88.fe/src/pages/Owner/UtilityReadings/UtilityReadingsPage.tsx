@@ -12,6 +12,7 @@ import { fetchHouses } from '../../../services/houseService'
 import { useNotification } from '../../../hooks/useNotification'
 import { useMutation, useQuery } from 'react-query'
 import dayjs from 'dayjs'
+import { ThunderboltOutlined, InfoCircleOutlined } from '@ant-design/icons'
 
 export const UtilityReadingsPage = () => {
   const currentYear = new Date().getFullYear()
@@ -351,7 +352,7 @@ export const UtilityReadingsPage = () => {
                   {/* Electricity section */}
                   <Col span={12}>
                     <Card
-                      title={<span style={{ color: '#1890ff', fontWeight: 'bold' }}>⚡ Số điện (kWh)</span>}
+                      title={<span style={{ color: '#1890ff', fontWeight: 'bold' }}><ThunderboltOutlined style={{ marginRight: '6px' }} />Số điện (kWh)</span>}
                       bordered
                       style={{ borderRadius: '8px' }}
                     >
@@ -397,7 +398,7 @@ export const UtilityReadingsPage = () => {
                   {/* Water section */}
                   <Col span={12}>
                     <Card
-                      title={<span style={{ color: '#52c41a', fontWeight: 'bold' }}>💧 Số nước (m³)</span>}
+                      title={<span style={{ color: '#52c41a', fontWeight: 'bold' }}><InfoCircleOutlined style={{ marginRight: '6px' }} />Số nước (m³)</span>}
                       bordered
                       style={{ borderRadius: '8px' }}
                     >
