@@ -26,6 +26,8 @@ const publicApi = axios.create({
 
 async function fetchPublicHouses(minPrice?: number, maxPrice?: number) {
   const params = new URLSearchParams()
+  params.append('status', 'Active')
+  params.append('pageSize', '100')
   if (minPrice !== undefined) params.append('minPrice', String(minPrice))
   if (maxPrice !== undefined) params.append('maxPrice', String(maxPrice))
   const qs = params.toString()
@@ -290,11 +292,11 @@ export function PortalPage() {
 
         <section className="portal-feature-strip">
           <article>
-            <strong>Owner</strong>
+            <strong>Chủ trọ</strong>
             <p>Duyệt nhà, quản lý phòng, hóa đơn và vận hành.</p>
           </article>
           <article>
-            <strong>Tenant</strong>
+            <strong>Người thuê</strong>
             <p>Xem hóa đơn, dịch vụ và gửi phản ánh bảo trì.</p>
           </article>
         </section>

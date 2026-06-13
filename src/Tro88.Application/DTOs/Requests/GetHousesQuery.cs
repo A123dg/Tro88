@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Tro88.Application.Common;
 using Tro88.Application.DTOs.Responses;
 using Tro88.Application.Interfaces.Services;
+using Tro88.Domain.Enums;
 
 namespace Tro88.Application.Services;
 
@@ -13,7 +14,8 @@ public sealed record GetHousesQuery(
     string? Keyword = null,
     Guid? OwnerId = null,
     decimal? MinPrice = null,
-    decimal? MaxPrice = null) : IRequest<PagedResult<HouseDto>>
+    decimal? MaxPrice = null,
+    string? Status = null) : IRequest<PagedResult<HouseDto>>
 {
 public sealed class Handler
     : IRequestHandler<GetHousesQuery, PagedResult<HouseDto>>
@@ -36,6 +38,12 @@ public sealed class Handler
         var query = _db.Houses
             .Include(h => h.Rooms)
             .AsQueryable();
+
+        if (!string.IsNullOrEmpty(request.Status))
+        {
+            if (Enum.TryParse<HouseStatus>(request.Status, true, out var status))
+                query = query.Where(h => h.Status == status);
+        }
 
         if (request.OwnerId.HasValue)
         {
