@@ -1,6 +1,7 @@
+// Component: Owner/Rooms/RoomsPage
 import { Select, Input } from 'antd'
 import { useEffect, useState } from 'react'
-import { RoomFilters, RoomSort, RoomStatus, RoomStats } from '../../types/room.types'
+import { RoomFilters, RoomSort, RoomStatus, RoomStats } from '../../../types/room.types'
 
 interface RoomFilterBarProps {
   filters: RoomFilters

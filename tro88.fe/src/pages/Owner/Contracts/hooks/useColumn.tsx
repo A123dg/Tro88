@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { DataColumn, formatCurrency, formatDate, StatusPill } from '../../../../components/shared/DataPage'
+import { DataColumn, formatCurrency, formatDate, StatusPill } from '../../../../shared/components/DataPage'
 import { ContractDto } from '../service/types'
 import { navigateTo } from '../../../Tro88Screens/shared'
 
@@ -10,7 +10,7 @@ interface UseColumnProps {
 
 export function useColumn({ handleActivate, handleTerminate }: UseColumnProps) {
   const isTenant = localStorage.getItem('authRole') === 'Tenant'
-  
+
   const columns = useMemo<Array<DataColumn<ContractDto>>>(
     () => [
       { key: 'code', title: 'Mã hợp đồng', render: (item) => <strong>{item.contractCode}</strong> },

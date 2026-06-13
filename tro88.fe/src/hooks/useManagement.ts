@@ -60,49 +60,159 @@ export const useUtilityReadings = (filters?: ListFilters) =>
 export const useAuditLogs = (filters?: ListFilters) =>
   useQuery(MANAGEMENT_KEYS.auditLogs(filters), () => fetchAuditLogs(filters), { keepPreviousData: true })
 
+import { useNotification } from './useNotification'
+
 export function useInvoiceActions() {
   const queryClient = useQueryClient()
+  const { showSuccessNotify, showErrorNotify } = useNotification()
   return {
-    markPaid: useMutation(markInvoicePaid, { onSuccess: () => queryClient.invalidateQueries('invoices') }),
-    send: useMutation(sendInvoice),
+    markPaid: useMutation(markInvoicePaid, {
+      onSuccess: (response) => {
+        if (!response.success) {
+          showErrorNotify(response.message || 'Không thể đánh dấu hóa đơn đã thanh toán')
+          return
+        }
+        queryClient.invalidateQueries('invoices')
+        showSuccessNotify('Đánh dấu hóa đơn đã thanh toán thành công')
+      },
+      onError: (error: any) => {
+        showErrorNotify(error?.message || 'Không thể đánh dấu hóa đơn đã thanh toán')
+      }
+    }),
+    send: useMutation(sendInvoice, {
+      onSuccess: (response) => {
+        if (!response.success) {
+          showErrorNotify(response.message || 'Không thể gửi hóa đơn')
+          return
+        }
+        showSuccessNotify('Gửi hóa đơn thành công')
+      },
+      onError: (error: any) => {
+        showErrorNotify(error?.message || 'Không thể gửi hóa đơn')
+      }
+    }),
   }
 }
 
 export function useContractActions() {
   const queryClient = useQueryClient()
+  const { showSuccessNotify, showErrorNotify } = useNotification()
   return {
-    activate: useMutation(activateContract, { onSuccess: () => queryClient.invalidateQueries('contracts') }),
+    activate: useMutation(activateContract, {
+      onSuccess: (response) => {
+        if (!response.success) {
+          showErrorNotify(response.message || 'Không thể kích hoạt hợp đồng')
+          return
+        }
+        queryClient.invalidateQueries('contracts')
+        showSuccessNotify('Kích hoạt hợp đồng thành công')
+      },
+      onError: (error: any) => {
+        showErrorNotify(error?.message || 'Không thể kích hoạt hợp đồng')
+      }
+    }),
     terminate: useMutation(({ id, reason }: { id: string; reason: string }) => terminateContract(id, reason), {
-      onSuccess: () => queryClient.invalidateQueries('contracts'),
+      onSuccess: (response) => {
+        if (!response.success) {
+          showErrorNotify(response.message || 'Không thể chấm dứt hợp đồng')
+          return
+        }
+        queryClient.invalidateQueries('contracts')
+        showSuccessNotify('Chấm dứt hợp đồng thành công')
+      },
+      onError: (error: any) => {
+        showErrorNotify(error?.message || 'Không thể chấm dứt hợp đồng')
+      }
     }),
   }
 }
 
 export function useMaintenanceActions() {
   const queryClient = useQueryClient()
+  const { showSuccessNotify, showErrorNotify } = useNotification()
   return useMutation(
     ({ id, status, resolutionNote }: { id: string; status: string; resolutionNote?: string }) =>
       updateMaintenanceStatus(id, status, resolutionNote),
-    { onSuccess: () => queryClient.invalidateQueries('maintenance') },
+    {
+      onSuccess: (response) => {
+        if (!response.success) {
+          showErrorNotify(response.message || 'Không thể cập nhật trạng thái bảo trì')
+          return
+        }
+        queryClient.invalidateQueries('maintenance')
+        showSuccessNotify('Cập nhật trạng thái bảo trì thành công')
+      },
+      onError: (error: any) => {
+        showErrorNotify(error?.message || 'Không thể cập nhật trạng thái bảo trì')
+      }
+    },
   )
 }
 
 export function useNotificationActions() {
   const queryClient = useQueryClient()
+  const { showSuccessNotify, showErrorNotify } = useNotification()
   return {
-    markRead: useMutation(markNotificationRead, { onSuccess: () => queryClient.invalidateQueries('notifications') }),
+    markRead: useMutation(markNotificationRead, {
+      onSuccess: (response) => {
+        if (!response.success) {
+          showErrorNotify(response.message || 'Không thể đánh dấu đã đọc')
+          return
+        }
+        queryClient.invalidateQueries('notifications')
+      },
+      onError: (error: any) => {
+        showErrorNotify(error?.message || 'Không thể đánh dấu đã đọc')
+      }
+    }),
     markAllRead: useMutation(markAllNotificationsRead, {
-      onSuccess: () => queryClient.invalidateQueries('notifications'),
+      onSuccess: (response) => {
+        if (!response.success) {
+          showErrorNotify(response.message || 'Không thể đánh dấu tất cả đã đọc')
+          return
+        }
+        queryClient.invalidateQueries('notifications')
+        showSuccessNotify('Đánh dấu tất cả thông báo đã đọc thành công')
+      },
+      onError: (error: any) => {
+        showErrorNotify(error?.message || 'Không thể đánh dấu tất cả đã đọc')
+      }
     }),
   }
 }
 
 export function useServiceFeeActions() {
   const queryClient = useQueryClient()
-  return useMutation(toggleServiceFee, { onSuccess: () => queryClient.invalidateQueries('service-fees') })
+  const { showSuccessNotify, showErrorNotify } = useNotification()
+  return useMutation(toggleServiceFee, {
+    onSuccess: (response) => {
+      if (!response.success) {
+        showErrorNotify(response.message || 'Không thể cập nhật phí dịch vụ')
+        return
+      }
+      queryClient.invalidateQueries('service-fees')
+      showSuccessNotify('Cập nhật trạng thái phí dịch vụ thành công')
+    },
+    onError: (error: any) => {
+      showErrorNotify(error?.message || 'Không thể cập nhật phí dịch vụ')
+    }
+  })
 }
 
 export function useServiceActions() {
   const queryClient = useQueryClient()
-  return useMutation(toggleService, { onSuccess: () => queryClient.invalidateQueries('services') })
+  const { showSuccessNotify, showErrorNotify } = useNotification()
+  return useMutation(toggleService, {
+    onSuccess: (response) => {
+      if (!response.success) {
+        showErrorNotify(response.message || 'Không thể cập nhật dịch vụ')
+        return
+      }
+      queryClient.invalidateQueries('services')
+      showSuccessNotify('Cập nhật trạng thái dịch vụ thành công')
+    },
+    onError: (error: any) => {
+      showErrorNotify(error?.message || 'Không thể cập nhật dịch vụ')
+    }
+  })
 }

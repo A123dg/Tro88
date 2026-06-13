@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Button, Form, Input, Select, Switch, Modal } from 'antd'
 import { useMutation, useQuery } from 'react-query'
-import { DataColumn, DataPage, formatDate, StatusPill } from '../../../components/shared/DataPage'
+import { DataColumn, DataPage, formatDate, StatusPill } from '../../../shared/components/DataPage'
 import { useUrlListFilters } from '../../../hooks/useUrlListFilters'
 import { queryClient } from '../../../queryClient'
 import { createUser, deleteUser, fetchUsers, SaveUserPayload, updateUser, UserFilters } from '../../../services/userService'
@@ -9,6 +9,8 @@ import { UserDto } from '../../../types/app.types'
 import ModalForm from '../../../shared/components/modal-form/ModalForm'
 import { CustomDatePicker } from '../../../shared/components/custom-datepicker'
 import dayjs from 'dayjs'
+
+import { useNotification } from '../../../hooks/useNotification'
 
 const roleOptions = [
   { value: '', label: 'Tất cả vai trò' },
@@ -26,18 +28,37 @@ export function AdminUsersPage() {
   const [editingUser, setEditingUser] = useState<UserDto | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [form] = Form.useForm<UserFormValues>()
+  const { showSuccessNotify, showErrorNotify } = useNotification()
 
   const query = useQuery(['admin-users', filters], () => fetchUsers(filters), { keepPreviousData: true })
   const saveUser = useMutation((payload: SaveUserPayload) => (payload.id ? updateUser(payload) : createUser(payload)), {
-    onSuccess: () => {
+    onSuccess: (response) => {
+      if (!response.success) {
+        showErrorNotify(response.message || 'Không thể lưu người dùng')
+        return
+      }
       queryClient.invalidateQueries('admin-users')
       setModalOpen(false)
       setEditingUser(null)
       form.resetFields()
+      showSuccessNotify('Lưu thông tin người dùng thành công')
     },
+    onError: (error: any) => {
+      showErrorNotify(error?.message || 'Không thể lưu người dùng')
+    }
   })
   const removeUser = useMutation(deleteUser, {
-    onSuccess: () => queryClient.invalidateQueries('admin-users'),
+    onSuccess: (response) => {
+      if (!response.success) {
+        showErrorNotify(response.message || 'Không thể xóa người dùng')
+        return
+      }
+      queryClient.invalidateQueries('admin-users')
+      showSuccessNotify('Xóa người dùng thành công')
+    },
+    onError: (error: any) => {
+      showErrorNotify(error?.message || 'Không thể xóa người dùng')
+    }
   })
 
   const openCreate = () => {

@@ -1,4 +1,5 @@
-import { EmptyRoomIllustration } from '../../illustrations/EmptyRoomIllustration'
+// Component: RoomGrid, Owner/Rooms/RoomsPage
+import { EmptyRoomIllustration } from '../../../illustrations/EmptyRoomIllustration'
 
 export function EmptyState() {
   return (

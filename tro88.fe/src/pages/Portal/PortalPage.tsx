@@ -8,8 +8,7 @@ import {
   Status, houseStatusLabel, houses,
   normalizeHouse, statusVariant, formatVND,
 } from '../Tro88Screens/shared'
-import  useDebounce  from '../../shared/hooks/useDebounce'
-import { AIChatWidget } from '../../components/shared/AIChatWidget'
+import useDebounce from '../../shared/hooks/useDebounce'
 import {
   SearchOutlined,
   DollarOutlined,
@@ -280,8 +279,8 @@ export function PortalPage() {
               Theo dõi nhà, phòng, hợp đồng, hóa đơn và phản ánh bảo trì trong một trải nghiệm rõ ràng cho cả chủ trọ và người thuê.
             </p>
             <div className="portal-actions">
-              <a className="app-button app-button--primary" href={ownerHref}>Đăng ký Owner</a>
-              <a className="app-button app-button--outline" href={tenantHref}>Đăng ký Tenant</a>
+              <a className="app-button app-button--primary" href={ownerHref}>Đăng nhập với vai trò chủ trọ</a>
+              <a className="app-button app-button--outline" href={tenantHref}>Đăng nhập với vai trò người thuê</a>
             </div>
           </div>
           <figure className="portal-illustration">
@@ -303,7 +302,6 @@ export function PortalPage() {
         <HouseListSection onViewDetail={handleViewDetail} />
       </div>
 
-      <AIChatWidget />
 
       {/* House Detail Modal */}
       <Modal

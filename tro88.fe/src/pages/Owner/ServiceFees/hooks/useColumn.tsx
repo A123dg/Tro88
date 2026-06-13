@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { DataColumn, formatCurrency, formatDate, StatusPill } from '../../../../components/shared/DataPage'
+import { DataColumn, formatCurrency, formatDate, StatusPill } from '../../../../shared/components/DataPage'
 import { ServiceFeeDto } from '../service/types'
 
 interface UseColumnProps {

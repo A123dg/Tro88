@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Link } from '@tanstack/react-router'
-import { DataColumn, formatDate, StatusPill } from '../../../../components/shared/DataPage'
+import { DataColumn, formatDate, StatusPill } from '../../../../shared/components/DataPage'
 import { MaintenanceRequestDto } from '../service/types'
 
 interface UseColumnProps {

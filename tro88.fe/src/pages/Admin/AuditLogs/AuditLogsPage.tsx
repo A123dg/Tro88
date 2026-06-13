@@ -1,4 +1,4 @@
-import { DataPage } from '../../../components/shared/DataPage'
+import { DataPage } from '../../../shared/components/DataPage'
 import { useUrlListFilters } from '../../../hooks/useUrlListFilters'
 import { useAuditLogs } from './hooks'
 import { useColumn } from './hooks/useColumn'

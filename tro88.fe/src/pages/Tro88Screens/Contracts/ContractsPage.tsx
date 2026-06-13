@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import { Button } from 'antd'
 import { useMutation } from 'react-query'
 import { queryClient } from '../../../queryClient'
 import {
-  Badge, DataTable, Link, PageHeader, contracts, formatDate, formatVND, statusVariant, QK, ok
+  Badge, Button, DataTable, Link, PageHeader, contracts, formatDate, formatVND, statusVariant, QK, ok
 } from '../shared'
 
 export function ContractsPage() {

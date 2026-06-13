@@ -1,3 +1,4 @@
+// Component: App, PortalPage
 import { useEffect, useRef, useState } from 'react'
 import {
   createAiConversation,
@@ -5,7 +6,7 @@ import {
   fetchAiConversations,
   sendAiMessage,
 } from '../../services/aiAgentService'
-import { AiConversationDto } from '../../types/aiAgent.types'
+import { AiConversationDto, AiMessageDto } from '../../types/aiAgent.types'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -70,10 +71,10 @@ export function AIChatWidget() {
     try {
       const conversation = await fetchAiConversation(id)
       const history = (conversation.messages ?? [])
-        .filter((message): message is typeof message & { role: 'user' | 'assistant' } => (
+        .filter((message: AiMessageDto): message is AiMessageDto & { role: 'user' | 'assistant' } => (
           message.role === 'user' || message.role === 'assistant'
         ))
-        .map((message) => ({ role: message.role, content: message.content }))
+        .map((message: AiMessageDto) => ({ role: message.role as 'user' | 'assistant', content: message.content }))
 
       setConversationId(id)
       setMessages(history.length ? history : [
@@ -245,17 +246,6 @@ export function AIChatWidget() {
             <div ref={messagesEndRef} />
           </div>
 
-          <div className="ai-chat-prompts">
-            {suggestedPrompts.map((prompt) => (
-              <button
-                key={prompt}
-                onClick={() => setInput(prompt)}
-                className="ai-chat-prompt-chip"
-              >
-                {prompt}
-              </button>
-            ))}
-          </div>
 
           <div className="ai-chat-input-wrap">
             <textarea
@@ -297,28 +287,28 @@ function SparkleChatIcon() {
           <stop offset="100%" stopColor="#ff9966" />
         </linearGradient>
       </defs>
-      
+
       {/* Speech bubble path with gap on top-right for the sparkle */}
-      <path 
-        d="M 14 4 H 5 C 3.9 4 3 4.9 3 6 V 14 C 3 15.1 3.9 16 5 16 H 7 V 19 L 10.5 16 H 17 C 18.1 16 19 15.1 19 14 V 11" 
-        fill="none" 
+      <path
+        d="M 14 4 H 5 C 3.9 4 3 4.9 3 6 V 14 C 3 15.1 3.9 16 5 16 H 7 V 19 L 10.5 16 H 17 C 18.1 16 19 15.1 19 14 V 11"
+        fill="none"
       />
-      
+
       {/* Horizontal text lines representing chat */}
       <line x1="6" y1="8" x2="13" y2="8" strokeWidth="2.2" />
       <line x1="6" y1="11" x2="10" y2="11" strokeWidth="2.2" />
-      
+
       {/* Big Sparkle Star at top-right */}
-      <path 
-        d="M 19 4.5 C 19 7 17 8 16 8 C 17 8 19 9 19 11.5 C 19 9 21 8 22 8 C 21 8 19 7 19 4.5 Z" 
-        fill="url(#aiChatIconStarGrad)" 
+      <path
+        d="M 19 4.5 C 19 7 17 8 16 8 C 17 8 19 9 19 11.5 C 19 9 21 8 22 8 C 21 8 19 7 19 4.5 Z"
+        fill="url(#aiChatIconStarGrad)"
         stroke="none"
       />
-      
+
       {/* Small Sparkle Star above the bubble */}
-      <path 
-        d="M 15.5 1 C 15.5 2.1 14.7 2.5 14.2 2.5 C 14.7 2.5 15.5 2.9 15.5 4 C 15.5 2.9 16.3 2.5 16.8 2.5 C 16.3 2.5 15.5 2.1 15.5 1 Z" 
-        fill="url(#aiChatIconSmallStarGrad)" 
+      <path
+        d="M 15.5 1 C 15.5 2.1 14.7 2.5 14.2 2.5 C 14.7 2.5 15.5 2.9 15.5 4 C 15.5 2.9 16.3 2.5 16.8 2.5 C 16.3 2.5 15.5 2.1 15.5 1 Z"
+        fill="url(#aiChatIconSmallStarGrad)"
         stroke="none"
       />
     </svg>

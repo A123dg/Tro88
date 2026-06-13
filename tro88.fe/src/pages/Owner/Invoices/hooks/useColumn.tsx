@@ -1,16 +1,32 @@
 import { useMemo } from 'react'
-import { DataColumn, formatCurrency, formatDate, StatusPill } from '../../../../components/shared/DataPage'
+import { DataColumn, formatCurrency, formatDate, StatusPill } from '../../../../shared/components/DataPage'
 import { InvoiceDto } from '../service/types'
 
 interface UseColumnProps {
   handleSend: (id: string) => void
   handleMarkPaid: (id: string) => void
+  onViewDetail: (item: InvoiceDto) => void
 }
 
-export function useColumn({ handleSend, handleMarkPaid }: UseColumnProps) {
+export function useColumn({ handleSend, handleMarkPaid, onViewDetail }: UseColumnProps) {
   const columns = useMemo<Array<DataColumn<InvoiceDto>>>(
     () => [
-      { key: 'code', title: 'Mã hóa đơn', render: (item) => <strong>{item.invoiceCode}</strong> },
+      {
+        key: 'code',
+        title: 'Mã hóa đơn',
+        render: (item) => (
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault()
+              onViewDetail(item)
+            }}
+            style={{ fontWeight: 'bold', color: '#f4845f' }}
+          >
+            {item.invoiceCode}
+          </a>
+        ),
+      },
       { key: 'period', title: 'Kỳ', render: (item) => `${item.billingMonth}/${item.billingYear}` },
       { key: 'amount', title: 'Tổng tiền', render: (item) => formatCurrency(item.totalAmount) },
       { key: 'dueDate', title: 'Hạn thanh toán', render: (item) => formatDate(item.dueDate) },
@@ -30,7 +46,7 @@ export function useColumn({ handleSend, handleMarkPaid }: UseColumnProps) {
         ),
       },
     ],
-    [handleMarkPaid, handleSend],
+    [handleMarkPaid, handleSend, onViewDetail],
   )
 
   return { columns }

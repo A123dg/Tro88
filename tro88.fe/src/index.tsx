@@ -6,7 +6,7 @@ import { StyleProvider, px2remTransformer } from '@ant-design/cssinjs'
 import { QueryClientProvider } from 'react-query'
 import { queryClient } from './queryClient'
 import { router } from './route'
-import MyErrorBoundary from './components/shared/ErrorBoundary'
+import MyErrorBoundary from './shared/components/ErrorBoundary'
 import 'antd/dist/reset.css'
 import './styles.css'
 

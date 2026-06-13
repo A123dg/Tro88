@@ -28,23 +28,43 @@ function houseStatusLabel(status?: string, isActive?: boolean) {
   return isActive ? 'Đang hoạt động' : 'Không hoạt động'
 }
 
+import { useNotification } from '../../../hooks/useNotification'
+
 export function SystemAdminPage() {
   const [housePage, setHousePage] = useState(1)
   const [housePageSize, setHousePageSize] = useState(10)
   const [keyword, setKeyword] = useState('')
   const dashboard = useAdminDashboard()
   const houses = useHouses({ page: housePage, pageSize: housePageSize, keyword })
+  const { showSuccessNotify, showErrorNotify } = useNotification()
+
   const approveHouse = useMutation((id: string) => changeHouseStatus(id, 'Active'), {
-    onSuccess: () => {
+    onSuccess: (response) => {
+      if (!response.success) {
+        showErrorNotify(response.message || 'Không thể duyệt nhà trọ')
+        return
+      }
       queryClient.invalidateQueries(['houses'])
       queryClient.invalidateQueries(['dashboard', 'admin'])
+      showSuccessNotify('Duyệt nhà trọ thành công')
     },
+    onError: (error: any) => {
+      showErrorNotify(error?.message || 'Không thể duyệt nhà trọ')
+    }
   })
   const rejectHouse = useMutation((id: string) => changeHouseStatus(id, 'Inactive'), {
-    onSuccess: () => {
+    onSuccess: (response) => {
+      if (!response.success) {
+        showErrorNotify(response.message || 'Không thể từ chối nhà trọ')
+        return
+      }
       queryClient.invalidateQueries(['houses'])
       queryClient.invalidateQueries(['dashboard', 'admin'])
+      showSuccessNotify('Từ chối nhà trọ thành công')
     },
+    onError: (error: any) => {
+      showErrorNotify(error?.message || 'Không thể từ chối nhà trọ')
+    }
   })
   const data = dashboard.data
 

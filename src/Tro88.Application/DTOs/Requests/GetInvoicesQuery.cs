@@ -12,38 +12,55 @@ public record GetInvoicesQuery(
     Guid? ContractId = null,
     Guid? RoomId = null) : IRequest<PagedResult<InvoiceDto>>
 {
-public class Handler : IRequestHandler<GetInvoicesQuery, PagedResult<InvoiceDto>>
-{
-    private readonly IAppDbContext _db;
-
-    public Handler(IAppDbContext db) => _db = db;
-
-    public async Task<PagedResult<InvoiceDto>> Handle(GetInvoicesQuery request, CancellationToken ct)
+    public class Handler : IRequestHandler<GetInvoicesQuery, PagedResult<InvoiceDto>>
     {
-        var query = _db.Invoices
-            .Include(i => i.LineItems)
-            .AsQueryable();
+        private readonly IAppDbContext _db;
+        private readonly ICurrentUserService _currentUser;
 
-        if (request.ContractId.HasValue)
-            query = query.Where(i => i.ContractId == request.ContractId);
+        public Handler(IAppDbContext db, ICurrentUserService currentUser)
+        {
+            _db = db;
+            _currentUser = currentUser;
+        }
 
-        if (request.RoomId.HasValue)
-            query = query.Where(i => i.RoomId == request.RoomId);
+        public async Task<PagedResult<InvoiceDto>> Handle(GetInvoicesQuery request, CancellationToken ct)
+        {
+            var query = _db.Invoices
+                .Include(i => i.LineItems)
+                .Include(i => i.Contract)
+                    .ThenInclude(c => c.Room)
+                        .ThenInclude(r => r.House)
+                .AsQueryable();
 
-        var total = await query.CountAsync(ct);
-        var items = await query
-            .OrderByDescending(i => i.CreatedAt)
-            .Skip((request.Page - 1) * request.PageSize)
-            .Take(request.PageSize)
-            .ToListAsync(ct);
+            if (string.Equals(_currentUser.Role, "Owner", StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.Where(i => i.Contract.OwnerId == _currentUser.UserId);
+            }
+            else if (string.Equals(_currentUser.Role, "Tenant", StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.Where(i => i.Contract.TenantId == _currentUser.UserId);
+            }
 
-        return new PagedResult<InvoiceDto>(
-            items.Select(InvoiceDto.FromEntity).ToList(),
-            total,
-            request.Page,
-            request.PageSize);
+            if (request.ContractId.HasValue)
+                query = query.Where(i => i.ContractId == request.ContractId);
+
+            if (request.RoomId.HasValue)
+                query = query.Where(i => i.RoomId == request.RoomId);
+
+            var total = await query.CountAsync(ct);
+            var items = await query
+                .OrderByDescending(i => i.CreatedAt)
+                .Skip((request.Page - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .ToListAsync(ct);
+
+            return new PagedResult<InvoiceDto>(
+                items.Select(InvoiceDto.FromEntity).ToList(),
+                total,
+                request.Page,
+                request.PageSize);
+        }
     }
-}
 }
 
 

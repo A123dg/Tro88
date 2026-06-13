@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { DataColumn, formatDate } from '../../../../components/shared/DataPage'
+import { DataColumn, formatDate } from '../../../../shared/components/DataPage'
 import { UtilityReadingDto } from '../service/types'
 
 export function useColumn() {

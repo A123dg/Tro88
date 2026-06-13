@@ -16,11 +16,14 @@ import {
 import { ListFilters, ServiceDto } from '../../../types/management.types'
 import { useUrlListFilters } from '../../../hooks/useUrlListFilters'
 
+import { useNotification } from '../../../hooks/useNotification'
+
 export function AdminServiceFeesPage() {
   const [filters, setFilters] = useUrlListFilters<ListFilters>({ page: 1, pageSize: 10 })
   const [editingService, setEditingService] = useState<ServiceDto | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [form] = Form.useForm<SaveServicePayload>()
+  const { showSuccessNotify, showErrorNotify } = useNotification()
 
   // Fetch Global Services
   const query = useQuery(['admin-services', filters], () => fetchServices(filters), {
@@ -30,21 +33,49 @@ export function AdminServiceFeesPage() {
   const saveService = useMutation(
     (payload: SaveServicePayload) => (payload.id ? updateService(payload) : createService(payload)),
     {
-      onSuccess: () => {
+      onSuccess: (response) => {
+        if (!response.success) {
+          showErrorNotify(response.message || 'Không thể lưu dịch vụ')
+          return
+        }
         queryClient.invalidateQueries('admin-services')
         setModalOpen(false)
         setEditingService(null)
         form.resetFields()
+        showSuccessNotify('Lưu thông tin dịch vụ thành công')
       },
+      onError: (error: any) => {
+        showErrorNotify(error?.message || 'Không thể lưu dịch vụ')
+      }
     }
   )
 
   const removeService = useMutation(deleteService, {
-    onSuccess: () => queryClient.invalidateQueries('admin-services'),
+    onSuccess: (response) => {
+      if (!response.success) {
+        showErrorNotify(response.message || 'Không thể xóa dịch vụ')
+        return
+      }
+      queryClient.invalidateQueries('admin-services')
+      showSuccessNotify('Xóa dịch vụ thành công')
+    },
+    onError: (error: any) => {
+      showErrorNotify(error?.message || 'Không thể xóa dịch vụ')
+    }
   })
 
   const toggleServiceMut = useMutation(toggleService, {
-    onSuccess: () => queryClient.invalidateQueries('admin-services'),
+    onSuccess: (response) => {
+      if (!response.success) {
+        showErrorNotify(response.message || 'Không thể thay đổi trạng thái dịch vụ')
+        return
+      }
+      queryClient.invalidateQueries('admin-services')
+      showSuccessNotify('Thay đổi trạng thái dịch vụ thành công')
+    },
+    onError: (error: any) => {
+      showErrorNotify(error?.message || 'Không thể thay đổi trạng thái dịch vụ')
+    }
   })
 
   const openCreate = () => {

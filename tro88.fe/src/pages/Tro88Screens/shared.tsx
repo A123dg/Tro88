@@ -235,8 +235,8 @@ export function Card({ children, className = '', style }: { children: ReactNode;
   return <section className={`card ${className}`} style={style}>{children}</section>
 }
 
-export function Button({ children, variant = 'primary', full = false, loading = false, onClick, type = 'button' }: { children: ReactNode; variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'; full?: boolean; loading?: boolean; onClick?: () => void; type?: 'button' | 'submit' }) {
-  return <button type={type} className={`app-button app-button--${variant} ${full ? 'app-button--full' : ''}`} disabled={loading} onClick={onClick}>{loading ? 'Đang xử lý...' : children}</button>
+export function Button({ children, variant = 'primary', full = false, loading = false, disabled = false, onClick, type = 'button' }: { children: ReactNode; variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'; full?: boolean; loading?: boolean; disabled?: boolean; onClick?: () => void; type?: 'button' | 'submit' }) {
+  return <button type={type} className={`app-button app-button--${variant} ${full ? 'app-button--full' : ''}`} disabled={loading || disabled} onClick={onClick}>{loading ? 'Đang xử lý...' : children}</button>
 }
 
 export function Badge({ children, variant = 'gray' }: { children: ReactNode; variant?: 'success' | 'warning' | 'danger' | 'info' | 'gray' }) {

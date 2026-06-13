@@ -1,4 +1,5 @@
-import { RoomStatus } from '../../types/room.types'
+// Component: RoomCard, Owner/Rooms/RoomsPage
+import { RoomStatus } from '../../../types/room.types'
 
 const statusLabels: Record<RoomStatus, string> = {
   [RoomStatus.Available]: 'Trống',

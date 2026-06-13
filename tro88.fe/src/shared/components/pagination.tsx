@@ -1,3 +1,4 @@
+// Component: pagination
 import { ReactNode } from 'react'
 import { MetaData } from '../../types/room.types'
 

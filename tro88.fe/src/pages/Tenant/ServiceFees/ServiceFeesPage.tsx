@@ -1,5 +1,5 @@
 import { Select } from 'antd'
-import { DataColumn, DataPage, formatCurrency, formatDate, StatusPill } from '../../../components/shared/DataPage'
+import { DataColumn, DataPage, formatCurrency, formatDate, StatusPill } from '../../../shared/components/DataPage'
 import { useUrlListFilters } from '../../../hooks/useUrlListFilters'
 import { useServiceFees } from '../../Owner/ServiceFees/hooks'
 import { ListFilters, ServiceFeeDto } from '../../Owner/ServiceFees/service/types'

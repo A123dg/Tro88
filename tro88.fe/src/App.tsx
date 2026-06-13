@@ -3,8 +3,8 @@ import { ReactNode, useLayoutEffect } from 'react'
 import { getZoomRatio } from './utils/getZoomRatio'
 import { Bell, Building2, ChartBar, CreditCard, FileText, Home, LogOut, Receipt, Settings, User, Wrench, Zap } from './icons'
 import { clearAuth, logout } from './services/authService'
-import { NotificationDropdown } from './components/shared/NotificationDropdown'
-import { AIChatWidget } from './components/shared/AIChatWidget'
+import { NotificationDropdown } from './shared/components/NotificationDropdown'
+import { AIChatWidget } from './shared/components/AIChatWidget'
 
 const ownerNav = [
   { to: '/dashboard', label: 'Tổng quan', icon: Home },
@@ -109,7 +109,7 @@ export const OwnerLayout = () => {
         </header>
         <Outlet />
       </div>
-      <AIChatWidget />
+      {role === 'Owner' && <AIChatWidget />}
     </div>
   )
 }

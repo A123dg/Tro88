@@ -281,7 +281,7 @@ export function ContractCreatePage() {
               <CustomDatePicker
                 style={{ width: '100%' }}
                 value={startDate ? dayjs(startDate) : null}
-                onChange={(date) => setStartDate(date ? date.format('YYYY-MM-DD') : '')}
+                onChange={(date) => setStartDate(date && !Array.isArray(date) ? date.format('YYYY-MM-DD') : '')}
               />
             </div>
             <div>
@@ -300,7 +300,7 @@ export function ContractCreatePage() {
               <CustomDatePicker
                 style={{ width: '100%' }}
                 value={endDate ? dayjs(endDate) : null}
-                onChange={(date) => setEndDate(date ? date.format('YYYY-MM-DD') : '')}
+                onChange={(date) => setEndDate(date && !Array.isArray(date) ? date.format('YYYY-MM-DD') : '')}
               />
             </div>
             <div>

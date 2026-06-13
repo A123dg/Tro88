@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { Select, Form, InputNumber, Button } from 'antd'
 import { useQuery, useMutation } from 'react-query'
 import { queryClient } from '../../../queryClient'
-import { DataPage } from '../../../components/shared/DataPage'
+import { DataPage } from '../../../shared/components/DataPage'
 import { useUrlListFilters } from '../../../hooks/useUrlListFilters'
 import { useServiceFeeActions, useServiceFees } from './hooks'
 import { useServices } from '../../../hooks/useManagement'
@@ -16,7 +16,7 @@ import { fetchHouses } from '../../../services/houseService'
 export function ServiceFeesPage() {
   const [filters, setFilters] = useUrlListFilters<ListFilters>({ page: 1, pageSize: 10 })
   const houseId = filters.houseId || localStorage.getItem('selectedHouseId') || ''
-  
+
   // Fetch list of houses for the owner
   const housesQuery = useQuery('owner-houses-list', () => fetchHouses({ page: 1, pageSize: 100 }))
   const housesList = housesQuery.data?.items ?? []
@@ -154,8 +154,8 @@ export function ServiceFeesPage() {
                 placeholder="Chọn loại dịch vụ"
                 disabled={Boolean(editingFee)}
                 options={
-                  editingFee 
-                    ? [{ value: editingFee.serviceId, label: editingFee.name }] 
+                  editingFee
+                    ? [{ value: editingFee.serviceId, label: editingFee.name }]
                     : availableServices.map(s => ({ value: s.id, label: `${s.name} ${s.unit ? `(${s.unit})` : ''}` }))
                 }
               />

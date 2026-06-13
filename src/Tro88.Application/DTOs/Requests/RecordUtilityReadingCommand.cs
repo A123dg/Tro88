@@ -87,8 +87,6 @@ public sealed class Handler
         }
 
         // Generate/Update Invoice
-        var startOfBillingMonth = new DateTime(request.Year, request.Month, 1);
-        var endOfBillingMonth = new DateTime(request.Year, request.Month, DateTime.DaysInMonth(request.Year, request.Month));
         var contract = await _db.Contracts
             .Include(c => c.Room)
             .ThenInclude(r => r.House)
@@ -96,8 +94,6 @@ public sealed class Handler
             .FirstOrDefaultAsync(c =>
                 c.RoomId == request.RoomId &&
                 c.Status == ContractStatus.Active &&
-                c.StartDate <= endOfBillingMonth &&
-                c.EndDate >= startOfBillingMonth &&
                 !c.IsDeleted, ct);
 
         if (contract != null)

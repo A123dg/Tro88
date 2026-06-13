@@ -1,5 +1,6 @@
+// Component: Owner/Rooms/RoomsPage
 import { useEffect, useState } from 'react'
-import { RoomStats } from '../../types/room.types'
+import { RoomStats } from '../../../types/room.types'
 
 interface StatCardProps {
   color: string

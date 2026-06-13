@@ -1,4 +1,5 @@
-import { RoomDto, RoomStatus } from '../../types/room.types'
+// Component: Owner/Rooms/RoomsPage
+import { RoomDto, RoomStatus } from '../../../types/room.types'
 import { EmptyState } from './EmptyState'
 import { RoomCard } from './RoomCard'
 

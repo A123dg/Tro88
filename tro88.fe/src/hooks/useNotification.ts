@@ -1,6 +1,8 @@
 import { App } from 'antd'
 import React, { type ReactNode } from 'react'
 
+import { ERROR_CODE_MSG } from '../constant/serverErrorMsg'
+
 export const useNotification = () => {
   const { notification } = App.useApp()
 
@@ -9,12 +11,20 @@ export const useNotification = () => {
   }
 
   const showErrorNotify = (msg: string) => {
-    let formattedMsg: ReactNode = msg
-    if (typeof msg === 'string' && msg.includes('\n')) {
+    let translatedMsg = msg
+    if (typeof msg === 'string') {
+      const cleaned = msg.trim()
+      if (ERROR_CODE_MSG[cleaned]) {
+        translatedMsg = ERROR_CODE_MSG[cleaned]
+      }
+    }
+
+    let formattedMsg: ReactNode = translatedMsg
+    if (typeof translatedMsg === 'string' && translatedMsg.includes('\n')) {
       formattedMsg = React.createElement(
         'div',
         { style: { display: 'flex', flexDirection: 'column', gap: '4px' } },
-        msg.split('\n').map((line, idx) => React.createElement('div', { key: idx }, line)),
+        translatedMsg.split('\n').map((line, idx) => React.createElement('div', { key: idx }, line)),
       )
     }
 

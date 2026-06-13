@@ -1,3 +1,4 @@
+// Component: App
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { Bell, CreditCard, FileText, Wrench } from '../../icons'
@@ -222,9 +223,9 @@ export function NotificationDropdown() {
             ) : null}
 
             {!isLoading
-              ? notifications.map((item) => (
-                  <NotificationItem key={item.id} item={item} onRead={markRead} onClose={() => setOpen(false)} />
-                ))
+              ? notifications.map((item: NotificationDto) => (
+                <NotificationItem key={item.id} item={item} onRead={markRead} onClose={() => setOpen(false)} />
+              ))
               : null}
           </div>
 

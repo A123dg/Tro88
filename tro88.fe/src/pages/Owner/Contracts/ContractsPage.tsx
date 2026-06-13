@@ -1,5 +1,5 @@
 import { Select } from 'antd'
-import { DataPage } from '../../../components/shared/DataPage'
+import { DataPage } from '../../../shared/components/DataPage'
 import { useUrlListFilters } from '../../../hooks/useUrlListFilters'
 import { useContractActions, useContracts } from './hooks'
 import { useColumn } from './hooks/useColumn'

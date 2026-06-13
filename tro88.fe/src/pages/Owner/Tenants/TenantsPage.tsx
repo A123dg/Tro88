@@ -1,6 +1,6 @@
 import { Input, Tag } from 'antd'
 import { useEffect, useState } from 'react'
-import { DataPage, formatDate, formatCurrency } from '../../../components/shared/DataPage'
+import { DataPage, formatDate, formatCurrency } from '../../../shared/components/DataPage'
 import { useUrlListFilters } from '../../../hooks/useUrlListFilters'
 import { useOwnerTenants } from '../../../hooks/useManagement'
 import { OwnerTenantDto, ListFilters } from '../../../types/management.types'

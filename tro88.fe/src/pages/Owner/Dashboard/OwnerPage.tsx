@@ -111,22 +111,34 @@ function HouseCard({ house, onEdit, onSelect }: { house: HouseDto; onEdit: (id: 
   )
 }
 
+import { useNotification } from '../../../hooks/useNotification'
+
 function OwnerHousesSection({ onOpenRooms }: { onOpenRooms: () => void }) {
   const [search, setSearch] = useState('')
   const [editingHouseId, setEditingHouseId] = useState<string | null>(null)
   const [editForm] = Form.useForm()
   const houses = useHouses({ page: 1, pageSize: 12, search })
+  const { showSuccessNotify, showErrorNotify } = useNotification()
+
   const detail = useQuery(['house-detail', editingHouseId], () => fetchHouseDetail(editingHouseId ?? ''), {
     enabled: Boolean(editingHouseId),
     retry: 1,
   })
   const saveEdit = useMutation(updateHouse, {
-    onSuccess: () => {
+    onSuccess: (response) => {
+      if (!response.success) {
+        showErrorNotify(response.message || 'Không thể cập nhật nhà trọ')
+        return
+      }
       queryClient.invalidateQueries('houses')
       queryClient.invalidateQueries(['house-detail', editingHouseId])
       setEditingHouseId(null)
       editForm.resetFields()
+      showSuccessNotify('Cập nhật nhà trọ thành công')
     },
+    onError: (error: any) => {
+      showErrorNotify(error?.message || 'Không thể cập nhật nhà trọ')
+    }
   })
 
   const handleSelectHouse = (id: string) => {

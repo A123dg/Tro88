@@ -1,6 +1,6 @@
 import { Input, InputNumber, Button, Modal, Table, Select, Row, Col, Card, Space, Spin } from 'antd'
 import { useState, useEffect, useMemo } from 'react'
-import { DataPage } from '../../../components/shared/DataPage'
+import { DataPage } from '../../../shared/components/DataPage'
 import { useUrlListFilters } from '../../../hooks/useUrlListFilters'
 import { useUtilityReadings } from './hooks'
 import { useColumn } from './hooks/useColumn'
@@ -17,9 +17,9 @@ import { ThunderboltOutlined, InfoCircleOutlined } from '@ant-design/icons'
 export const UtilityReadingsPage = () => {
   const currentYear = new Date().getFullYear()
   const [filters, setFilters] = useUrlListFilters<ListFilters>({ page: 1, pageSize: 10, year: currentYear })
-  
+
   const [selectedHouseId, setSelectedHouseId] = useState<string>(localStorage.getItem('selectedHouseId') || '')
-  
+
   // Fetch list of houses for the owner
   const housesQuery = useQuery('owner-houses-list', () => fetchHouses({ page: 1, pageSize: 100 }))
   const housesList = housesQuery.data?.items ?? []

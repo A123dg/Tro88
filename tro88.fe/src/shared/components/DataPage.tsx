@@ -1,7 +1,8 @@
+// Component: Tenant/ServiceFees/ServiceFeesPage, Owner/Notifications/NotificationsPage, Owner/Tenants/TenantsPage, Owner/UtilityReadings/UtilityReadingsPage, Owner/ServiceFees/ServiceFeesPage, Owner/Maintenance/MaintenancePage, Owner/Invoices/InvoicesPage, Owner/Contracts/ContractsPage, Admin/Users/UsersPage, Admin/AuditLogs/AuditLogsPage
 import type { ReactNode } from 'react'
 import type { TableProps } from 'antd'
 import { MetaData } from '../../types/room.types'
-import TableWithPagination from '../../shared/components/table-pagination'
+import TableWithPagination from './table-pagination'
 
 export interface DataColumn<T> {
   key: string
@@ -90,8 +91,7 @@ export function DataPage<T extends { id: string }>({
 
       {isError ? (
         <section className="room-error">
-          <strong>Khong the tai du lieu</strong>
-          <p>Vui long kiem tra dang nhap, quyen truy cap hoac API.</p>
+          <strong>Không thể tải dữ liệu</strong>
           <button type="button" className="button button--primary" onClick={onRetry}>Thu lai</button>
         </section>
       ) : null}
@@ -110,7 +110,7 @@ export function DataPage<T extends { id: string }>({
               total: meta?.total ?? items.length,
               onChange: onPageChange,
             }}
-            locale={{ emptyText: 'Khong co ban ghi phu hop voi bo loc hien tai.' }}
+            locale={{ emptyText: 'Không có dữ liệu' }}
           />
         </section>
       ) : null}

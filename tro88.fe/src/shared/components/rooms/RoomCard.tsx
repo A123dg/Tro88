@@ -1,7 +1,8 @@
-import { EmptyRoomIllustration } from '../../illustrations/EmptyRoomIllustration'
-import { MaintenanceIllustration } from '../../illustrations/MaintenanceIllustration'
-import { TenantIllustration } from '../../illustrations/TenantIllustration'
-import { RoomDto, RoomStatus } from '../../types/room.types'
+// Component: RoomGrid, Owner/Rooms/RoomsPage
+import { EmptyRoomIllustration } from '../../../illustrations/EmptyRoomIllustration'
+import { MaintenanceIllustration } from '../../../illustrations/MaintenanceIllustration'
+import { TenantIllustration } from '../../../illustrations/TenantIllustration'
+import { RoomDto, RoomStatus } from '../../../types/room.types'
 import { RoomStatusBadge, statusLabels } from './RoomStatusBadge'
 
 interface RoomCardProps {

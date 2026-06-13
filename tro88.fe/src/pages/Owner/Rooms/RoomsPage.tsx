@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
-import { RoomFilterBar } from '../../../components/rooms/RoomFilterBar'
-import { RoomGrid } from '../../../components/rooms/RoomGrid'
-import { RoomStatsSummary } from '../../../components/rooms/RoomStatsSummary'
+import { RoomFilterBar } from '../../../shared/components/rooms/RoomFilterBar'
+import { RoomGrid } from '../../../shared/components/rooms/RoomGrid'
+import { RoomStatsSummary } from '../../../shared/components/rooms/RoomStatsSummary'
 import { useChangeRoomStatus, useRooms, useRoomStats } from './hooks'
 import { RoomDto, RoomFilters, RoomStatus } from './service/types'
 

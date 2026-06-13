@@ -11,6 +11,8 @@ import {
   RoomStatus,
 } from '../types/room.types'
 
+import { useNotification } from './useNotification'
+
 const defaultMeta: MetaData = {
   page: 1,
   pageSize: 10,
@@ -35,15 +37,22 @@ export function useRooms(houseId: string, filters?: RoomFilters) {
 
 export function useChangeRoomStatus() {
   const queryClient = useQueryClient()
+  const { showSuccessNotify, showErrorNotify } = useNotification()
 
   return useMutation(
     (payload: { id: string; status: RoomStatus }) => changeRoomStatus(payload.id, payload.status),
     {
-      onSuccess: () => {
+      onSuccess: (response) => {
+        if (!response.success) {
+          showErrorNotify(response.message || 'Không thể cập nhật trạng thái phòng')
+          return
+        }
         queryClient.invalidateQueries('rooms')
+        showSuccessNotify('Cập nhật trạng thái phòng thành công')
       },
-      onError: (error) => {
+      onError: (error: any) => {
         console.error('Change status failed:', error)
+        showErrorNotify(error?.message || 'Không thể cập nhật trạng thái phòng')
       },
     },
   )
@@ -51,33 +60,60 @@ export function useChangeRoomStatus() {
 
 export function useCreateRoom(houseId: string) {
   const queryClient = useQueryClient()
+  const { showSuccessNotify, showErrorNotify } = useNotification()
 
   return useMutation((payload: RoomPayload) => createRoom(houseId, payload), {
-    onSuccess: () => {
+    onSuccess: (response) => {
+      if (!response.success) {
+        showErrorNotify(response.message || 'Không thể thêm phòng mới')
+        return
+      }
       queryClient.invalidateQueries('rooms')
       queryClient.invalidateQueries('houses')
+      showSuccessNotify('Thêm phòng mới thành công')
+    },
+    onError: (error: any) => {
+      showErrorNotify(error?.message || 'Không thể thêm phòng mới')
     },
   })
 }
 
 export function useUpdateRoom() {
   const queryClient = useQueryClient()
+  const { showSuccessNotify, showErrorNotify } = useNotification()
 
   return useMutation((payload: { id: string; data: RoomPayload }) => updateRoom(payload.id, payload.data), {
-    onSuccess: () => {
+    onSuccess: (response) => {
+      if (!response.success) {
+        showErrorNotify(response.message || 'Không thể cập nhật thông tin phòng')
+        return
+      }
       queryClient.invalidateQueries('rooms')
       queryClient.invalidateQueries('houses')
+      showSuccessNotify('Cập nhật thông tin phòng thành công')
+    },
+    onError: (error: any) => {
+      showErrorNotify(error?.message || 'Không thể cập nhật thông tin phòng')
     },
   })
 }
 
 export function useDeleteRoom() {
   const queryClient = useQueryClient()
+  const { showSuccessNotify, showErrorNotify } = useNotification()
 
   return useMutation((id: string) => deleteRoom(id), {
-    onSuccess: () => {
+    onSuccess: (response) => {
+      if (!response.success) {
+        showErrorNotify(response.message || 'Không thể xóa phòng')
+        return
+      }
       queryClient.invalidateQueries('rooms')
       queryClient.invalidateQueries('houses')
+      showSuccessNotify('Xóa phòng thành công')
+    },
+    onError: (error: any) => {
+      showErrorNotify(error?.message || 'Không thể xóa phòng')
     },
   })
 }
