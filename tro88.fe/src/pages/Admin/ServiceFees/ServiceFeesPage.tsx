@@ -91,8 +91,6 @@ export function AdminServiceFeesPage() {
         render: (_, service) => (
           <Switch
             checked={service.isActive}
-            checkedChildren="Hoạt động"
-            unCheckedChildren="Tạm dừng"
             loading={toggleServiceMut.isLoading}
             onChange={() => toggleServiceMut.mutate(service.id)}
           />

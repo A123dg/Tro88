@@ -41,6 +41,7 @@ public static class DependencyInjection
         services.AddScoped<IAppDbContext>(p =>
             p.GetRequiredService<AppDbContext>());
         services.AddScoped<AuditableEntityInterceptor>();
+        services.AddScoped<AuditLogInterceptor>();
         services.AddScoped<DomainEventDispatchInterceptor>();
         services.AddSingleton(TimeProvider.System);
         services.AddHttpContextAccessor();

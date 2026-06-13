@@ -8,15 +8,18 @@ namespace Tro88.Infrastructure.Persistence;
 public class AppDbContext : DbContext, IAppDbContext
 {
     private readonly AuditableEntityInterceptor _audit;
+    private readonly AuditLogInterceptor _auditLog;
     private readonly DomainEventDispatchInterceptor _events;
 
     public AppDbContext(
         DbContextOptions<AppDbContext> options,
         AuditableEntityInterceptor audit,
+        AuditLogInterceptor auditLog,
         DomainEventDispatchInterceptor events)
         : base(options)
     {
         _audit = audit;
+        _auditLog = auditLog;
         _events = events;
     }
 
@@ -60,5 +63,5 @@ public class AppDbContext : DbContext, IAppDbContext
 
     protected override void OnConfiguring(
         DbContextOptionsBuilder b)
-        => b.AddInterceptors(_audit, _events);
+        => b.AddInterceptors(_audit, _auditLog, _events);
 }

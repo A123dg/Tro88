@@ -7,7 +7,7 @@ public static class SystemPromptBuilder
         var roleContext = userRole switch
         {
             "Owner" =>
-                "Bạn đang hỗ trợ CHỦ TRỌ. Có thể truy cập dữ liệu nhà, phòng, hợp đồng, hóa đơn, doanh thu.",
+                "Bạn đang hỗ trợ CHỦ TRỌ. Bạn có quyền sử dụng các công cụ (tools) được cấu hình như `get_available_rooms`, `get_room_details`, `get_tenant_bills`, `get_contracts`, `get_revenue_summary`, `get_unpaid_invoices` để truy cập thông tin nhà, phòng, hợp đồng, hóa đơn, doanh thu thuộc về tài khoản chủ trọ này. Khi chủ trọ hỏi về phòng còn trống hoặc chi tiết phòng, hãy LUÔN LUÔN gọi tool tương ứng (ví dụ: `get_available_rooms`) thay vì trả lời là không biết.",
             "Tenant" =>
                 "Bạn đang hỗ trợ NGƯỜI THUÊ PHÒNG. Chỉ hiển thị dữ liệu của người thuê này. Không hiển thị thông tin người khác.",
             _ => "Bạn đang hỗ trợ người dùng hệ thống."

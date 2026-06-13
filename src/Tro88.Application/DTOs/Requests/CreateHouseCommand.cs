@@ -25,13 +25,16 @@ public sealed class Handler
 {
     private readonly IAppDbContext _db;
     private readonly ICurrentUserService _currentUser;
+    private readonly INotificationService _notificationService;
 
     public Handler(
         IAppDbContext db,
-        ICurrentUserService currentUser)
+        ICurrentUserService currentUser,
+        INotificationService notificationService)
     {
         _db = db;
         _currentUser = currentUser;
+        _notificationService = notificationService;
     }
 
     public async Task<HouseDto> Handle(
@@ -68,6 +71,23 @@ public sealed class Handler
         }
 
         await _db.SaveChangesAsync(ct);
+
+        // Gửi thông báo đến Admin
+        var adminUserIds = await _db.Users
+            .Where(u => u.Role == UserRole.Admin)
+            .Select(u => u.Id)
+            .ToListAsync(ct);
+
+        if (adminUserIds.Any())
+        {
+            await _notificationService.SendToMultipleAsync(
+                adminUserIds,
+                "Có trọ mới cần duyệt",
+                $"Nhà trọ '{house.Name}' vừa được tạo mới và cần được duyệt.",
+                "System",
+                house.Id,
+                ct);
+        }
 
         return HouseDto.FromEntity(house);
     }

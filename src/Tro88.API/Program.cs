@@ -18,18 +18,10 @@ builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(
         Path.Combine(builder.Environment.ContentRootPath, "App_Data", "DataProtectionKeys")));
 
-// Serilog - log vào Console + SQL Server
+// Serilog - log vào Console
 builder.Host.UseSerilog((ctx, lc) => lc
     .ReadFrom.Configuration(ctx.Configuration)
-    .WriteTo.Console()
-    .WriteTo.MSSqlServer(
-        ctx.Configuration.GetConnectionString("DefaultConnection"),
-        new MSSqlServerSinkOptions
-        {
-            TableName = "AppLogs",
-            SchemaName = "dbo",
-            AutoCreateSqlTable = true
-        }));
+    .WriteTo.Console());
 
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);

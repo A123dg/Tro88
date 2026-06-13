@@ -27,6 +27,9 @@ public class AppDbContextFactory
             new AuditableEntityInterceptor(
                 new DesignTimeCurrentUserService(),
                 TimeProvider.System),
+            new AuditLogInterceptor(
+                new DesignTimeCurrentUserService(),
+                new Microsoft.AspNetCore.Http.HttpContextAccessor()),
             new DomainEventDispatchInterceptor());
     }
 

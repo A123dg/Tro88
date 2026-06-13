@@ -12,6 +12,7 @@ import { MaintenancePage } from './pages/Owner/Maintenance/MaintenancePage'
 import { NotificationsPage } from './pages/Owner/Notifications/NotificationsPage'
 import { ProfilePage } from './pages/Owner/Profile/ProfilePage'
 import { ServiceFeesPage } from './pages/Owner/ServiceFees/ServiceFeesPage'
+import { AdminServiceFeesPage } from './pages/Admin/ServiceFees/ServiceFeesPage'
 import { UtilityReadingsPage } from './pages/Owner/UtilityReadings/UtilityReadingsPage'
 import { TenantRoomsPage } from './pages/Tenant/Rooms/RoomsPage'
 import { TenantServiceFeesPage } from './pages/Tenant/ServiceFees/ServiceFeesPage'
@@ -105,7 +106,7 @@ const adminLayoutRoute = createRoute({
 
 const adminIndexRoute = createRoute({ getParentRoute: () => adminLayoutRoute, path: '/admin', component: SystemAdminPage })
 const adminUsersRoute = createRoute({ getParentRoute: () => adminLayoutRoute, path: '/admin/users', component: AdminUsersPage })
-const adminServiceFeesRoute = createRoute({ getParentRoute: () => adminLayoutRoute, path: '/admin/service-fees', component: ServiceFeesPage })
+const adminServiceFeesRoute = createRoute({ getParentRoute: () => adminLayoutRoute, path: '/admin/service-fees', component: AdminServiceFeesPage })
 const adminAuditLogsRoute = createRoute({ getParentRoute: () => adminLayoutRoute, path: '/audit-logs', component: AuditLogsPage })
 
 // 4. TENANT LAYOUT & ROUTES

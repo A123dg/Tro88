@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Form, Input, Select, Checkbox, Button, Upload, Flex, Card, Typography, Alert, InputNumber } from 'antd'
+import { Form, Input, Select, Checkbox, Button, Upload, Flex, Card, Typography, Alert, InputNumber, message } from 'antd'
 import { UploadOutlined, ArrowLeftOutlined, SaveOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from '@tanstack/react-router'
 import { useProvincesQuery, useWardsQuery, useHouseDetailQuery } from '../services/query'
@@ -134,7 +134,12 @@ export function HouseFormPage() {
                   setWardValue(undefined)
                   form.setFieldValue('district', undefined)
                 }}
-                options={(provinces.data ?? []).map((p) => ({ value: p.value, label: p.label }))}
+                options={(provinces.data ?? [])
+                  .filter((p) => {
+                    const lower = p.label.trim().toLowerCase()
+                    return lower.startsWith('tỉnh') || lower.startsWith('thành phố')
+                  })
+                  .map((p) => ({ value: p.value, label: p.label }))}
               />
             </Form.Item>
 
@@ -152,7 +157,12 @@ export function HouseFormPage() {
                 loading={wards.isLoading}
                 disabled={!provinceValue || wards.isLoading}
                 onChange={(val) => setWardValue(val)}
-                options={(wards.data ?? []).map((w) => ({ value: w.value, label: w.label }))}
+                options={(wards.data ?? [])
+                  .filter((w) => {
+                    const lower = w.label.trim().toLowerCase()
+                    return lower.startsWith('xã') || lower.startsWith('phường') || lower.startsWith('quận')
+                  })
+                  .map((w) => ({ value: w.value, label: w.label }))}
               />
             </Form.Item>
           </Flex>
@@ -176,7 +186,14 @@ export function HouseFormPage() {
 
           <Form.Item label="Hình ảnh nhà trọ">
             <Upload
+              accept=".jpg,.jpeg,.png,.jfif"
               beforeUpload={(file) => {
+                const ext = file.name.split('.').pop()?.toLowerCase();
+                const isValid = ext === 'jpg' || ext === 'jpeg' || ext === 'png' || ext === 'jfif';
+                if (!isValid) {
+                  message.error(`File ${file.name} không đúng định dạng. Chỉ hỗ trợ .jpg, .jpeg, .png, .jfif`);
+                  return Upload.LIST_IGNORE;
+                }
                 setSelectedFiles((current) => [...current, file])
                 return false
               }}

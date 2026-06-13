@@ -1,8 +1,9 @@
-import { FormEvent, useState } from 'react'
+import { useState } from 'react'
 import { ROUTE_PATHS } from '../../../constant/routes'
 import { useLogin } from './hooks'
 import { LoginRole } from './service/types'
 import loginIllustration from '../../../assets/login-illustration.png'
+import { Form, Input, Button } from 'antd'
 
 interface LoginPageProps {
   role: LoginRole
@@ -71,8 +72,7 @@ function LoginForm({ role, title, subtitle, redirectTo, mode }: LoginPageProps) 
     window.location.href = getRedirectTarget()
   }
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  const handleSubmit = () => {
     setRoleError('')
 
     if (mode === 'google') {
@@ -109,32 +109,28 @@ function LoginForm({ role, title, subtitle, redirectTo, mode }: LoginPageProps) 
           <p>{subtitle}</p>
         </header>
 
-        <form className="login-form" onSubmit={handleSubmit}>
+        <Form className="login-form" layout="vertical" onFinish={handleSubmit}>
           {mode === 'password' ? (
             <>
-              <label>
-                Username
-                <input
-                  type="text"
+              <Form.Item label="Tên đăng nhập" required>
+                <Input
                   value={username}
                   onChange={(event) => setUsername(event.target.value)}
-                  placeholder="admin hoặc email admin"
+                  placeholder="Nhập tên đăng nhập"
                   autoComplete="username"
-                  required
+                  size="large"
                 />
-              </label>
+              </Form.Item>
 
-              <label>
-                Mật khẩu
-                <input
-                  type="password"
+              <Form.Item label="Mật khẩu" required>
+                <Input.Password
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   placeholder="Nhập mật khẩu"
                   autoComplete="current-password"
-                  required
+                  size="large"
                 />
-              </label>
+              </Form.Item>
             </>
           ) : (
             <div className="google-login-box">
@@ -158,12 +154,19 @@ function LoginForm({ role, title, subtitle, redirectTo, mode }: LoginPageProps) 
           {login.isError ? <p className="login-error">{getLoginErrorMessage(login.error)}</p> : null}
           {roleError ? <p className="login-error">{roleError}</p> : null}
 
-          <button type="submit" className="app-button app-button--primary app-button--full" disabled={login.isLoading}>
-            {login.isLoading ? 'Đang đăng nhập...' : mode === 'google' ? 'Đăng nhập bằng Google' : 'Đăng nhập'}
-          </button>
-        </form>
+          <Button
+            type="primary"
+            htmlType="submit"
+            className="app-button app-button--primary app-button--full"
+            style={{ height: 'auto' }}
+            loading={login.isLoading}
+            disabled={login.isLoading}
+          >
+            {mode === 'google' ? 'Đăng nhập bằng Google' : 'Đăng nhập'}
+          </Button>
+        </Form>
 
-        <a className="login-home-link" href="/">Về trang giới thiệu</a>
+        {role !== 'Admin' && <a className="login-home-link" href="/">Về trang giới thiệu</a>}
       </section>
     </main>
   )

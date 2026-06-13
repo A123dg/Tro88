@@ -13,10 +13,10 @@ interface Message {
 }
 
 const suggestedPrompts = [
-  'Phong nao dang trong?',
-  'Thang nay ai chua dong tien?',
-  'Doanh thu 6 thang gan nhat',
-  'Hop dong sap het han',
+  'Phòng nào đang trống?',
+  'Tháng này ai chưa đóng tiền?',
+  'Doanh thu 6 tháng gần nhất',
+  'Hợp đồng sắp hết hạn',
 ]
 
 export function AIChatWidget() {
@@ -26,7 +26,7 @@ export function AIChatWidget() {
   const [conversationId, setConversationId] = useState<string | null>(null)
   const [conversations, setConversations] = useState<AiConversationDto[]>([])
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', content: 'Xin chao! Toi la Tro ly Tro88 AI. Ban can ho tro gi?' },
+    { role: 'assistant', content: 'Xin chào! Tôi là Trợ lý Tro88 AI. Bạn cần hỗ trợ gì?' },
   ])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -58,7 +58,7 @@ export function AIChatWidget() {
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: 'Khong tai duoc lich su chat. Vui long thu lai sau.' },
+        { role: 'assistant', content: 'Không tải được lịch sử chat. Vui lòng thử lại sau.' },
       ])
     } finally {
       setIsHistoryLoading(false)
@@ -77,13 +77,13 @@ export function AIChatWidget() {
 
       setConversationId(id)
       setMessages(history.length ? history : [
-        { role: 'assistant', content: 'Cuoc tro chuyen nay chua co tin nhan.' },
+        { role: 'assistant', content: 'Cuộc trò chuyện này chưa có tin nhắn.' },
       ])
       setShowHistory(false)
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: 'Khong mo duoc cuoc tro chuyen nay.' },
+        { role: 'assistant', content: 'Không mở được cuộc trò chuyện này.' },
       ])
     } finally {
       setIsHistoryLoading(false)
@@ -94,7 +94,7 @@ export function AIChatWidget() {
     setConversationId(null)
     setShowHistory(false)
     setMessages([
-      { role: 'assistant', content: 'Da bat dau cuoc tro chuyen moi. Ban can ho tro gi?' },
+      { role: 'assistant', content: 'Đã bắt đầu cuộc trò chuyện mới. Bạn cần hỗ trợ gì?' },
     ])
   }
 
@@ -111,7 +111,7 @@ export function AIChatWidget() {
       const assistantMessage = await sendAiMessage(id, userMessage)
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: assistantMessage.content || 'Toi da ghi nhan yeu cau cua ban.' },
+        { role: 'assistant', content: assistantMessage.content || 'Tôi đã ghi nhận yêu cầu của bạn.' },
       ])
       if (showHistory) {
         const result = await fetchAiConversations()
@@ -122,7 +122,7 @@ export function AIChatWidget() {
         ...prev,
         {
           role: 'assistant',
-          content: 'Chua ket noi duoc AI Agent. Vui long kiem tra dang nhap, backend hoac cau hinh Gemini.',
+          content: 'Chưa kết nối được AI Agent. Vui lòng kiểm tra đăng nhập, backend hoặc cấu hình Gemini.',
         },
       ])
     } finally {
@@ -155,7 +155,7 @@ export function AIChatWidget() {
       <div className="ai-chat-header" onClick={() => setIsMinimized(!isMinimized)}>
         <div className="ai-chat-header-left">
           <span className="ai-chat-icon">AI</span>
-          <span>Tro ly Tro88 AI</span>
+          <span>Trợ lý Tro88 AI</span>
         </div>
         <div className="ai-chat-header-actions">
           <button
@@ -164,8 +164,8 @@ export function AIChatWidget() {
               event.stopPropagation()
               loadHistory()
             }}
-            aria-label="Xem lich su chat"
-            title="Lich su chat"
+            aria-label="Xem lịch sử chat"
+            title="Lịch sử chat"
           >
             H
           </button>
@@ -175,8 +175,8 @@ export function AIChatWidget() {
               event.stopPropagation()
               startNewConversation()
             }}
-            aria-label="Chat moi"
-            title="Chat moi"
+            aria-label="Chat mới"
+            title="Chat mới"
           >
             +
           </button>
@@ -186,7 +186,7 @@ export function AIChatWidget() {
               event.stopPropagation()
               setIsMinimized(!isMinimized)
             }}
-            aria-label={isMinimized ? 'Mo rong' : 'Thu gon'}
+            aria-label={isMinimized ? 'Mở rộng' : 'Thu gọn'}
           >
             {isMinimized ? '+' : '-'}
           </button>
@@ -196,7 +196,7 @@ export function AIChatWidget() {
               event.stopPropagation()
               setIsOpen(false)
             }}
-            aria-label="Dong"
+            aria-label="Đóng"
           >
             x
           </button>
@@ -208,11 +208,11 @@ export function AIChatWidget() {
           {showHistory && (
             <div className="ai-chat-history-panel">
               <div className="ai-chat-history-title">
-                <strong>Lich su chat</strong>
-                {isHistoryLoading ? <span>Dang tai...</span> : null}
+                <strong>Lịch sử chat</strong>
+                {isHistoryLoading ? <span>Đang tải...</span> : null}
               </div>
               {!isHistoryLoading && conversations.length === 0 ? (
-                <p>Chua co cuoc tro chuyen nao.</p>
+                <p>Chưa có cuộc trò chuyện nào.</p>
               ) : null}
               {conversations.map((conversation) => (
                 <button
@@ -221,7 +221,7 @@ export function AIChatWidget() {
                   onClick={() => openConversation(conversation.id)}
                 >
                   <strong>{conversation.title || 'Tro88 AI Chat'}</strong>
-                  <span>{conversation.messageCount} tin nhan</span>
+                  <span>{conversation.messageCount} tin nhắn</span>
                 </button>
               ))}
             </div>
@@ -263,14 +263,14 @@ export function AIChatWidget() {
               value={input}
               onChange={(event) => setInput(event.target.value)}
               onKeyDown={handleKeyPress}
-              placeholder="Nhap tin nhan..."
+              placeholder="Nhập tin nhắn..."
               rows={1}
             />
             <button
               className="ai-chat-send"
               onClick={handleSend}
               disabled={!input.trim() || isLoading}
-              aria-label="Gui"
+              aria-label="Gửi"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="m22 2-7 20-4-9-9-4 20-7Z" />

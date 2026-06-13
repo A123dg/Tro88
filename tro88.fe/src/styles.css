@@ -1411,6 +1411,18 @@ input,
   gap: 14px;
 }
 
+.login-form .ant-input,
+.login-form .ant-input-affix-wrapper {
+  padding: 12px 14px !important;
+  border-radius: 12px !important;
+  height: 48px;
+}
+
+.login-form .ant-input-affix-wrapper .ant-input {
+  padding: 0 !important;
+  height: auto;
+}
+
 .login-form label {
   display: grid;
   gap: 8px;

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Select, Form, InputNumber, Button } from 'antd'
 import { useQuery, useMutation } from 'react-query'
 import { queryClient } from '../../../queryClient'
@@ -11,11 +11,25 @@ import { ListFilters, ServiceFeeDto } from './service/types'
 import ModalForm from '../../../shared/components/modal-form/ModalForm'
 import { createServiceFee, updateServiceFee } from '../../../services/managementService'
 import { useNotification } from '../../../hooks/useNotification'
+import { fetchHouses } from '../../../services/houseService'
 
 export function ServiceFeesPage() {
   const [filters, setFilters] = useUrlListFilters<ListFilters>({ page: 1, pageSize: 10 })
   const houseId = filters.houseId || localStorage.getItem('selectedHouseId') || ''
   
+  // Fetch list of houses for the owner
+  const housesQuery = useQuery('owner-houses-list', () => fetchHouses({ page: 1, pageSize: 100 }))
+  const housesList = housesQuery.data?.items ?? []
+
+  // Auto-select first house if none is active
+  useEffect(() => {
+    if (!houseId && housesList.length > 0) {
+      const firstHouseId = housesList[0].id
+      localStorage.setItem('selectedHouseId', firstHouseId)
+      setFilters((current) => ({ ...current, houseId: firstHouseId }))
+    }
+  }, [housesList, houseId, setFilters])
+
   // Set houseId in filters for the query
   const queryFilters = useMemo(() => ({ ...filters, houseId: houseId || undefined }), [filters, houseId])
   const query = useServiceFees(queryFilters)
@@ -97,6 +111,16 @@ export function ServiceFeesPage() {
         onPageChange={(page, pageSize) => setFilters((current) => ({ ...current, page, pageSize: pageSize ?? current.pageSize }))}
         actions={
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <Select
+              placeholder="Chọn nhà trọ"
+              value={houseId || undefined}
+              onChange={(value) => {
+                localStorage.setItem('selectedHouseId', value)
+                setFilters({ ...filters, houseId: value, page: 1 })
+              }}
+              options={housesList.map((h) => ({ value: h.id, label: h.name }))}
+              style={{ width: '180px' }}
+            />
             <Select
               value={filters.isActive === undefined ? '' : String(filters.isActive)}
               onChange={(value) => setFilters({ ...filters, isActive: value ? value === 'true' : undefined, page: 1 })}
