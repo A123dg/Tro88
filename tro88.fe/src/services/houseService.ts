@@ -9,6 +9,7 @@ export interface HouseFilters {
   keyword?: string
   minPrice?: number
   maxPrice?: number
+  ownerId?: string
 }
 
 export interface CreateHousePayload {
@@ -50,6 +51,9 @@ export const fetchHouses = async (filters?: HouseFilters): Promise<PagedData<Hou
   }
   if (filters?.maxPrice !== undefined) {
     params.append('maxPrice', String(filters.maxPrice))
+  }
+  if (filters?.ownerId) {
+    params.append('ownerId', filters.ownerId)
   }
 
   const query = params.toString()

@@ -56,15 +56,15 @@ function CompleteProfilePageInner() {
   }
 
   return (
-    <Card 
+    <Card
       className="complete-profile-card"
       style={{ width: '100%', maxWidth: '480px', borderRadius: '16px', boxShadow: '0 4px 24px rgba(0,0,0,0.08)' }}
     >
       <div className="login-panel__brand" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
-        <span style={{ fontSize: '28px', fontWeight: 'bold', color: '#f4845f' }}>88</span>
+        <span style={{ fontSize: '28px', fontWeight: 'bold', color: '#ffffff' }}>88</span>
         <div>
           <Title level={4} style={{ margin: 0, color: '#f4845f' }}>Tro88</Title>
-          <Text type="secondary"><small>Hoàn thiện hồ sơ</small></Text>
+          <small style={{ display: 'block', color: '#8c8c8c' }}>Hoàn thiện hồ sơ</small>
         </div>
       </div>
       <header style={{ marginBottom: '24px' }}>
@@ -81,7 +81,6 @@ function CompleteProfilePageInner() {
           form={form}
           layout="vertical"
           onFinish={onFinish}
-          requiredMark="optional"
         >
           <Form.Item
             label="Họ tên"
@@ -110,10 +109,10 @@ function CompleteProfilePageInner() {
             label="Ngày sinh"
             name="dateOfBirth"
           >
-            <CustomDatePicker 
+            <CustomDatePicker
               style={{ width: '100%' }}
               size="large"
-              placeholder="Chọn ngày sinh" 
+              placeholder="Chọn ngày sinh"
               disabledDate={(current) => current && current > dayjs().endOf('day')}
             />
           </Form.Item>
@@ -123,11 +122,11 @@ function CompleteProfilePageInner() {
           )}
 
           <Form.Item style={{ marginBottom: 0 }}>
-            <Button 
-              type="primary" 
-              htmlType="submit" 
-              loading={saving} 
-              block 
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={saving}
+              block
               size="large"
               style={{ background: '#f4845f', borderColor: '#f4845f' }}
             >

@@ -44,6 +44,7 @@ export function HousesPage() {
     minPrice: debouncedMinPrice,
     maxPrice: debouncedMaxPrice,
     keyword: debouncedSearch || undefined,
+    ownerId: ownerId ?? undefined,
   })
 
   const handleMinPriceChange = (val: number | null) => {

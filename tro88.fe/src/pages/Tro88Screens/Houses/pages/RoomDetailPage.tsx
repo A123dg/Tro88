@@ -69,14 +69,14 @@ export function RoomDetailPage() {
           },
         ]
       : []),
-    {
-      key: 'billing',
-      label: (
-        <span>
-          <HistoryOutlined /> Lịch sử điện nước
-        </span>
-      ),
-    },
+    // {
+    //   key: 'billing',
+    //   label: (
+    //     <span>
+    //       <HistoryOutlined /> Lịch sử điện nước
+    //     </span>
+    //   ),
+    // },
   ]
 
   return (
@@ -194,11 +194,11 @@ export function RoomDetailPage() {
         </Card>
       )}
 
-      {activeTab === 'billing' && (
+      {/* {activeTab === 'billing' && (
         <Card title="Lịch sử điện nước" style={{ borderRadius: '12px' }}>
           <AreaChartLite />
         </Card>
-      )}
+      )} */}
     </div>
   )
 }
