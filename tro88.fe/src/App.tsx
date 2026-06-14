@@ -5,6 +5,7 @@ import { Bell, Building2, ChartBar, CreditCard, FileText, Home, LogOut, Receipt,
 import { clearAuth, logout } from './services/authService'
 import { NotificationDropdown } from './shared/components/NotificationDropdown'
 import { AIChatWidget } from './shared/components/AIChatWidget'
+import { UserOutlined } from '@ant-design/icons'
 
 const ownerNav = [
   { to: '/dashboard', label: 'Tổng quan', icon: Home },
@@ -15,7 +16,6 @@ const ownerNav = [
   { to: '/utility-readings', label: 'Điện nước', icon: Zap },
   { to: '/maintenance', label: 'Báo cáo bảo trì', icon: Wrench },
   { to: '/service-fees', label: 'Dịch vụ', icon: Settings },
-  { to: '/statistics', label: 'Thống kê', icon: ChartBar },
 ]
 
 const adminNav = [
@@ -101,7 +101,9 @@ export const OwnerLayout = () => {
           </div>
           <div className="topbar-actions">
             <NotificationDropdown />
-            <Link to="/profile" className="avatar-link">AT</Link>
+            <Link to={role === 'Admin' ? '/admin' : '/profile'} className="avatar-link">
+              <UserOutlined />
+            </Link>
             <button className="icon-button" type="button" onClick={handleLogout} aria-label="Đăng xuất">
               <LogOut />
             </button>

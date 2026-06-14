@@ -391,7 +391,7 @@ export function AreaChartLite() {
 
 
 export function MaintenanceCard({ item }: { item: Maintenance }) {
-  return <Card className="maintenance-card"><div className="card-heading"><Badge variant="info">Phòng {item.room}</Badge><Badge variant={item.priority === 'Urgent' ? 'danger' : item.priority === 'Soon' ? 'warning' : 'success'}>{item.priority}</Badge></div><h3>{item.title}</h3><p>{item.tenant} • {item.time}</p><Select defaultValue="Kỹ thuật A" options={[{ value: 'Kỹ thuật A', label: 'Kỹ thuật A' }, { value: 'Kỹ thuật B', label: 'Kỹ thuật B' }]} /><Link to={`/maintenance/${item.id}`}>Xem chi tiết</Link></Card>
+  return <Card className="maintenance-card"><div className="card-heading"><Badge variant="info">Phòng {item.room}</Badge><Badge variant={item.priority === 'Urgent' ? 'danger' : item.priority === 'Soon' ? 'warning' : 'success'}>{item.priority}</Badge></div><h3>{item.title}</h3><p>{item.tenant} • {item.time}</p><Link to={`/maintenance/${item.id}`}>Xem chi tiết</Link></Card>
 }
 
 export function NotificationList({ limit, muted = false }: { limit: number; muted?: boolean }) {

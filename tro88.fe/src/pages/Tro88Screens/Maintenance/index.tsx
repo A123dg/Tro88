@@ -251,15 +251,6 @@ function MaintenanceCard({ item }: { item: Maintenance }) {
       </div>
       <h3>{item.title}</h3>
       <p>{item.tenant} • {item.time}</p>
-      {!isTenant && (
-        <Select
-          defaultValue="Kỹ thuật A"
-          options={[
-            { value: 'Kỹ thuật A', label: 'Kỹ thuật A' },
-            { value: 'Kỹ thuật B', label: 'Kỹ thuật B' }
-          ]}
-        />
-      )}
       <Link to={isTenant ? `/my/maintenance/${item.id}` : `/maintenance/${item.id}`}>
         Xem chi tiết
       </Link>

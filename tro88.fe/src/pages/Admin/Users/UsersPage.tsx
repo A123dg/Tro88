@@ -67,21 +67,6 @@ export function AdminUsersPage() {
     setModalOpen(true)
   }
 
-  const openEdit = (user: UserDto) => {
-    setEditingUser(user)
-    form.setFieldsValue({
-      id: user.id,
-      fullName: user.fullName,
-      email: user.email,
-      phoneNumber: user.phoneNumber,
-      role: user.role as SaveUserPayload['role'],
-      nationalId: user.nationalId ?? undefined,
-      dateOfBirth: user.dateOfBirth ? dayjs(user.dateOfBirth) : undefined,
-      isActive: user.isActive,
-      password: '',
-    })
-    setModalOpen(true)
-  }
 
   const columns = useMemo<Array<DataColumn<UserDto>>>(
     () => [
@@ -96,9 +81,6 @@ export function AdminUsersPage() {
         title: 'Thao tác',
         render: (item) => (
           <div className="row-actions">
-            <Button type="text" onClick={() => openEdit(item)}>
-              Sửa
-            </Button>
             <Button
               type="text"
               danger
