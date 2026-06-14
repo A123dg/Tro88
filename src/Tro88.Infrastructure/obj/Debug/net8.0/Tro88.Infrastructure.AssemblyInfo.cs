@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Tro88.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9b7c0422cbc5d1aa7c3d025592ed31733b0424d1")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+27e155895b9a738b0a557b86c9819bdda5e38783")]
 [assembly: System.Reflection.AssemblyProductAttribute("Tro88.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Tro88.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
